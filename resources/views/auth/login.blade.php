@@ -1,9 +1,27 @@
 <!DOCTYPE html>
-<html lang="id" class="dark h-full">
+<html lang="id" class="h-full">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Masuk — SAANS Assessment SPMB Anak Saleh</title>
+        
+        <!-- Theme Initialization Script (Prevents FOUT) -->
+        <script>
+            (function () {
+                const theme = localStorage.getItem('saans-theme') || 'amber';
+                const mode = localStorage.getItem('saans-mode') || 'dark';
+                const fontScale = localStorage.getItem('saans-font-scale') || '106.25%';
+                const radius = localStorage.getItem('saans-radius') || '0.875rem';
+                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.style.fontSize = fontScale;
+                document.documentElement.style.setProperty('--radius', radius);
+                if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            })();
+        </script>
         
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -60,8 +78,13 @@
             </div>
 
             <!-- Right Side: Login Form (Clean Shadcn Card) -->
-            <div class="flex items-center justify-center p-6 sm:p-10">
-                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[380px]">
+            <div class="relative flex items-center justify-center p-6 sm:p-10">
+                <!-- Theme Settings Trigger -->
+                <div class="absolute top-6 right-6">
+                    <x-theme-settings />
+                </div>
+
+                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[420px]">
                     
                     <!-- Mobile Brand Logo -->
                     <div class="flex lg:hidden items-center gap-2.5 justify-center mb-2">
@@ -81,16 +104,21 @@
                         </p>
                     </div>
 
-                    <!-- Shadcn Segmented Tab Controller with Lucide Icons -->
-                    <div class="grid w-full grid-cols-2 rounded-lg border border-zinc-800 bg-zinc-900/70 p-1 text-xs">
-                        <button type="button" id="tab-guru" class="inline-flex items-center justify-center gap-2 rounded-md bg-zinc-800 px-3 py-1.5 font-medium text-zinc-100 shadow-sm transition-all">
-                            <i data-lucide="user-check" class="h-3.5 w-3.5"></i>
-                            <span>Guru Pengamat</span>
-                        </button>
-                        <button type="button" id="tab-admin" class="inline-flex items-center justify-center gap-2 rounded-md px-3 py-1.5 font-medium text-zinc-400 hover:text-zinc-200 transition-all">
-                            <i data-lucide="shield-check" class="h-3.5 w-3.5"></i>
-                            <span>Admin SPMB</span>
-                        </button>
+                    <!-- Shadcn 2-Way Role Selector Tabs -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-medium leading-none text-zinc-300">
+                            Pilih Peran Masuk
+                        </label>
+                        <div class="grid grid-cols-2 gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/70 p-1 text-xs">
+                            <button type="button" id="tab-guru" class="inline-flex items-center justify-center gap-1.5 rounded-md bg-zinc-800 px-2.5 py-1.5 font-medium text-zinc-100 shadow-sm transition-all border border-zinc-700/80">
+                                <i data-lucide="user-check" class="h-3.5 w-3.5 text-emerald-400"></i>
+                                <span>Guru Pengamat</span>
+                            </button>
+                            <button type="button" id="tab-admin" class="inline-flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 font-medium text-zinc-400 hover:text-zinc-200 transition-all border border-transparent">
+                                <i data-lucide="shield-check" class="h-3.5 w-3.5 text-zinc-400"></i>
+                                <span>Admin</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Flash Notification -->
@@ -156,28 +184,6 @@
                         </button>
                     </form>
 
-                    <!-- Divider -->
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <span class="w-full border-t border-zinc-800"></span>
-                        </div>
-                        <div class="relative flex justify-center text-[11px] uppercase">
-                            <span class="bg-zinc-950 px-2 text-zinc-500">Akses Cepat Pengujian</span>
-                        </div>
-                    </div>
-
-                    <!-- Direct Fast Access Buttons (Shadcn Outline Buttons with Lucide Icons) -->
-                    <div class="grid grid-cols-2 gap-2">
-                        <a href="{{ route('guru.observasi') }}" class="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/50 px-3 text-xs font-medium text-zinc-300 shadow-sm hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
-                            <i data-lucide="clipboard-pen-line" class="h-3.5 w-3.5 text-emerald-400"></i>
-                            <span>Observasi Guru</span>
-                        </a>
-                        <a href="{{ route('admin.dashboard') }}" class="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/50 px-3 text-xs font-medium text-zinc-300 shadow-sm hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
-                            <i data-lucide="layout-dashboard" class="h-3.5 w-3.5 text-indigo-400"></i>
-                            <span>Dashboard Admin</span>
-                        </a>
-                    </div>
-
                     <p class="px-4 text-center text-[11px] text-zinc-500 leading-normal">
                         Perguruan Anak Saleh &bull; Sistem Asesmen Siswa Baru Terpadu
                     </p>
@@ -187,42 +193,60 @@
 
         </div>
 
-        <!-- Role Toggle Script -->
+        <!-- 2-Role Toggle Script -->
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const tabGuru = document.getElementById('tab-guru');
                 const tabAdmin = document.getElementById('tab-admin');
+
                 const inputRole = document.getElementById('input-role');
                 const inputEmail = document.getElementById('input-email');
                 const inputPass = document.getElementById('input-password');
                 const roleHint = document.getElementById('role-hint');
                 const btnSubmitLabel = document.getElementById('btn-submit-label');
 
-                tabGuru?.addEventListener('click', () => {
-                    inputRole.value = 'guru';
-                    inputEmail.value = 'guru@anaksaleh.sch.id';
-                    inputPass.value = 'guru123';
-                    roleHint.textContent = 'Mengarahkan langsung ke Halaman Observasi Siswa Baru.';
-                    btnSubmitLabel.textContent = 'Masuk ke Halaman Observasi';
+                const tabs = [
+                    {
+                        btn: tabGuru,
+                        role: 'guru',
+                        email: 'guru@anaksaleh.sch.id',
+                        pass: 'guru123',
+                        hint: 'Mengarahkan langsung ke Halaman Observasi Siswa Baru.',
+                        label: 'Masuk ke Halaman Observasi'
+                    },
+                    {
+                        btn: tabAdmin,
+                        role: 'admin',
+                        email: 'admin.sd@anaksaleh.sch.id',
+                        pass: 'admin123',
+                        hint: 'Gunakan email unit Anda: admin.tk / admin.sd / admin.smp@anaksaleh.sch.id',
+                        label: 'Masuk ke Dashboard Admin'
+                    },
+                ];
 
-                    tabGuru.classList.add('bg-zinc-800', 'text-zinc-100', 'shadow-sm');
-                    tabGuru.classList.remove('text-zinc-400');
-                    tabAdmin.classList.remove('bg-zinc-800', 'text-zinc-100', 'shadow-sm');
-                    tabAdmin.classList.add('text-zinc-400');
-                });
+                function activateTab(role) {
+                    tabs.forEach(t => {
+                        const isActive = t.role === role;
+                        t.btn?.classList.toggle('bg-zinc-800', isActive);
+                        t.btn?.classList.toggle('text-zinc-100', isActive);
+                        t.btn?.classList.toggle('shadow-sm', isActive);
+                        t.btn?.classList.toggle('border-zinc-700/80', isActive);
+                        t.btn?.classList.toggle('text-zinc-400', !isActive);
+                        t.btn?.classList.toggle('border-transparent', !isActive);
 
-                tabAdmin?.addEventListener('click', () => {
-                    inputRole.value = 'admin';
-                    inputEmail.value = 'admin@anaksaleh.sch.id';
-                    inputPass.value = 'admin123';
-                    roleHint.textContent = 'Mengarahkan langsung ke Dashboard Rekapitulasi SPMB.';
-                    btnSubmitLabel.textContent = 'Masuk ke Dashboard Admin';
+                        if (isActive) {
+                            inputRole.value = t.role;
+                            inputEmail.value = t.email;
+                            inputPass.value = t.pass;
+                            roleHint.textContent = t.hint;
+                            btnSubmitLabel.textContent = t.label;
+                        }
+                    });
+                    if (window.refreshLucideIcons) window.refreshLucideIcons();
+                }
 
-                    tabAdmin.classList.add('bg-zinc-800', 'text-zinc-100', 'shadow-sm');
-                    tabAdmin.classList.remove('text-zinc-400');
-                    tabGuru.classList.remove('bg-zinc-800', 'text-zinc-100', 'shadow-sm');
-                    tabGuru.classList.add('text-zinc-400');
-                });
+                tabGuru?.addEventListener('click', () => activateTab('guru'));
+                tabAdmin?.addEventListener('click', () => activateTab('admin'));
             });
         </script>
 

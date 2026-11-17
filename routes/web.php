@@ -12,6 +12,9 @@ Route::get('/observasi', [SPMBController::class, 'observasi'])->name('guru.obser
 
 // Dashboard Observasi untuk Admin SPMB
 Route::get('/admin/dashboard', [SPMBController::class, 'dashboard'])->name('admin.dashboard');
+Route::get('/admin/guru', [SPMBController::class, 'guruList'])->name('admin.guru');
+Route::get('/admin/siswa', [SPMBController::class, 'siswaList'])->name('admin.siswa');
+Route::get('/admin/indikator', [SPMBController::class, 'indikatorList'])->name('admin.indikator');
 
 // Logout
 Route::match(['get', 'post'], '/logout', [SPMBController::class, 'logout'])->name('logout');

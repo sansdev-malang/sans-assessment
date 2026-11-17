@@ -1,9 +1,27 @@
 <!DOCTYPE html>
-<html lang="id" class="dark h-full">
+<html lang="id" class="h-full">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Observasi Siswa Baru — SAANS Assessment Anak Saleh</title>
+        
+        <!-- Theme Initialization Script (Prevents FOUT) -->
+        <script>
+            (function () {
+                const theme = localStorage.getItem('saans-theme') || 'amber';
+                const mode = localStorage.getItem('saans-mode') || 'dark';
+                const fontScale = localStorage.getItem('saans-font-scale') || '106.25%';
+                const radius = localStorage.getItem('saans-radius') || '0.875rem';
+                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.style.fontSize = fontScale;
+                document.documentElement.style.setProperty('--radius', radius);
+                if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            })();
+        </script>
         
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -53,6 +71,8 @@
                         <i data-lucide="layout-dashboard" class="h-3.5 w-3.5"></i>
                         <span>Dashboard Admin</span>
                     </a>
+
+                    <x-theme-settings />
 
                     <a href="{{ route('logout') }}" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-zinc-800 bg-transparent px-2.5 text-xs font-medium text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 transition-colors">
                         <i data-lucide="log-out" class="h-3.5 w-3.5"></i>
