@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Indikator Observasi — {{ $user['unit'] ?? 'SAANS' }}</title>
+        <title>Pedoman Rubrik Penilaian — {{ $user['unit'] ?? 'SAANS' }}</title>
         
         <!-- Theme Initialization Script (Prevents FOUT) -->
         <script>
@@ -91,20 +91,20 @@
             <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-zinc-800/80">
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="text-xl font-semibold tracking-tight text-zinc-100">Indikator Observasi & Skoring</h1>
+                        <h1 class="text-xl font-semibold tracking-tight text-zinc-100">Pedoman Rubrik & Instrumen Penilaian SPMB</h1>
                         <span class="rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] text-zinc-400 font-mono">
                             {{ $user['unit'] ?? '-' }}
                         </span>
                     </div>
                     <p class="text-xs text-zinc-400 mt-0.5">
-                        Kelola instrumen penilaian, rubrik skoring (1–4), dan bobot tiap aspek observasi
+                        Acuan rubrik, panduan penilaian, dan bobot tiap aspek asesmen SPMB — hanya untuk referensi
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="openModal()" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-zinc-100 px-3 text-xs font-semibold text-zinc-900 shadow hover:bg-zinc-200 transition-colors">
-                        <i data-lucide="plus" class="h-3.5 w-3.5"></i>
-                        <span>Tambah Indikator</span>
-                    </button>
+                    <span class="inline-flex h-8 items-center gap-1.5 rounded-md border border-zinc-700 bg-zinc-800/60 px-3 text-xs font-medium text-zinc-400">
+                        <i data-lucide="book-open" class="h-3.5 w-3.5"></i>
+                        <span>Pedoman Saja</span>
+                    </span>
                 </div>
             </div>
 
@@ -148,14 +148,14 @@
                 </div>
             </div>
 
-            <!-- Indikator Groups -->
+            <!-- Indikator Groups (4 Kelompok SPMB) -->
             <div class="space-y-4">
                 @php
                     $aspekMeta = [
-                        'Kelompok Keagamaan'                      => ['icon' => 'book-open',       'color' => 'emerald', 'ring' => 'border-emerald-800/60 bg-emerald-950/20', 'text' => 'text-emerald-400', 'dot' => 'bg-emerald-900/60'],
-                        'Kelompok Akademik'                       => ['icon' => 'flask-conical',    'color' => 'indigo',  'ring' => 'border-indigo-800/60 bg-indigo-950/20',   'text' => 'text-indigo-400',  'dot' => 'bg-indigo-900/60'],
-                        'Kelompok Potensi Bakat Minat'                   => ['icon' => 'wrench',           'color' => 'amber',   'ring' => 'border-amber-800/60 bg-amber-950/20',     'text' => 'text-amber-400',   'dot' => 'bg-amber-900/60'],
-                        'Kelompok Perkembangan Pribadi & Sosial'  => ['icon' => 'heart-handshake',  'color' => 'purple',  'ring' => 'border-purple-800/60 bg-purple-950/20',   'text' => 'text-purple-400',  'dot' => 'bg-purple-900/60'],
+                        'Kelompok Keagamaan'                                                     => ['icon' => 'book-open',       'color' => 'emerald', 'ring' => 'border-emerald-800/60 bg-emerald-950/20', 'text' => 'text-emerald-400', 'dot' => 'bg-emerald-900/60'],
+                        'Kelompok Akademik (Numerasi, Literasi, Science, and English)'           => ['icon' => 'laptop',          'color' => 'indigo',  'ring' => 'border-indigo-800/60 bg-indigo-950/20',   'text' => 'text-indigo-400',  'dot' => 'bg-indigo-900/60'],
+                        'Kelompok Potensi Bakat dan Minat'                                       => ['icon' => 'sparkles',        'color' => 'amber',   'ring' => 'border-amber-800/60 bg-amber-950/20',     'text' => 'text-amber-400',   'dot' => 'bg-amber-900/60'],
+                        'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)'  => ['icon' => 'heart-handshake', 'color' => 'rose',    'ring' => 'border-rose-800/60 bg-rose-950/20',       'text' => 'text-rose-400',    'dot' => 'bg-rose-900/60'],
                     ];
                 @endphp
 
@@ -204,7 +204,7 @@
                                                     <span class="rounded bg-emerald-900/60 border border-emerald-700/60 text-emerald-300 text-[10px] font-mono px-1.5 py-0.5">4 Pos &bull; Skala 1–4</span>
                                                 </h3>
                                                 <p class="text-xs text-zinc-400 mt-0.5">
-                                                    Didalam kelompok keagamaan terdapat 4 Pos. Setiap Pos memiliki 5 aspek dengan skala nilai 1–4 (Skor maksimal 20 per Pos).
+                                                    Pos 1 (7 Aspek, maks 28), Pos 2 (7 Aspek, maks 28), Pos 3 (6 Aspek, maks 24), Pos 4 (7 Aspek, maks 28). Skala nilai 1–4.
                                                 </p>
                                             </div>
                                         </div>
@@ -220,8 +220,12 @@
                                             </p>
                                             <div class="space-y-1.5 text-xs text-zinc-300">
                                                 <div class="flex items-center justify-between bg-zinc-800/80 border border-zinc-700/50 rounded px-2.5 py-1.5 font-mono">
-                                                    <span class="text-zinc-400">Nilai Akhir per Pos</span>
-                                                    <span class="text-emerald-400 font-semibold">(Total Skor / 20) × 100</span>
+                                                    <span class="text-zinc-400">Nilai Pos 1, 2, 4 (maks 28)</span>
+                                                    <span class="text-emerald-400 font-semibold">(Total Skor / 28) × 100</span>
+                                                </div>
+                                                <div class="flex items-center justify-between bg-zinc-800/80 border border-zinc-700/50 rounded px-2.5 py-1.5 font-mono">
+                                                    <span class="text-zinc-400">Nilai Pos 3 (maks 24)</span>
+                                                    <span class="text-emerald-400 font-semibold">(Total Skor / 24) × 100</span>
                                                 </div>
                                                 <div class="flex items-center justify-between bg-zinc-800/80 border border-zinc-700/50 rounded px-2.5 py-1.5 font-mono">
                                                     <span class="text-zinc-400">Nilai Akhir Keagamaan</span>
@@ -268,31 +272,439 @@
                                         </div>
                                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                             <div>
-                                                <label class="text-[10px] text-zinc-400 block mb-1">Skor Pos 1 (Sholat /20)</label>
-                                                <input type="number" id="sim-pos-1" min="0" max="20" value="18" oninput="hitungSimulasiKeagamaan()" class="w-full h-8 rounded border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500" />
+                                                <label class="text-[10px] text-zinc-400 block mb-1">Skor Pos 1 (Sholat /28)</label>
+                                                <input type="number" id="sim-pos-1" min="0" max="28" value="26" oninput="hitungSimulasiKeagamaan()" class="w-full h-8 rounded border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500" />
                                             </div>
                                             <div>
-                                                <label class="text-[10px] text-zinc-400 block mb-1">Skor Pos 2 (Mengaji /20)</label>
-                                                <input type="number" id="sim-pos-2" min="0" max="20" value="16" oninput="hitungSimulasiKeagamaan()" class="w-full h-8 rounded border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500" />
+                                                <label class="text-[10px] text-zinc-400 block mb-1">Skor Pos 2 (Mengaji /28)</label>
+                                                <input type="number" id="sim-pos-2" min="0" max="28" value="25" oninput="hitungSimulasiKeagamaan()" class="w-full h-8 rounded border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500" />
                                             </div>
                                             <div>
-                                                <label class="text-[10px] text-zinc-400 block mb-1">Skor Pos 3 (Doa /20)</label>
-                                                <input type="number" id="sim-pos-3" min="0" max="20" value="17" oninput="hitungSimulasiKeagamaan()" class="w-full h-8 rounded border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500" />
+                                                <label class="text-[10px] text-zinc-400 block mb-1">Skor Pos 3 (Doa /24)</label>
+                                                <input type="number" id="sim-pos-3" min="0" max="24" value="22" oninput="hitungSimulasiKeagamaan()" class="w-full h-8 rounded border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500" />
                                             </div>
                                             <div>
-                                                <label class="text-[10px] text-zinc-400 block mb-1">Skor Pos 4 (Surat /20)</label>
-                                                <input type="number" id="sim-pos-4" min="0" max="20" value="19" oninput="hitungSimulasiKeagamaan()" class="w-full h-8 rounded border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500" />
+                                                <label class="text-[10px] text-zinc-400 block mb-1">Skor Pos 4 (Surat /28)</label>
+                                                <input type="number" id="sim-pos-4" min="0" max="28" value="26" oninput="hitungSimulasiKeagamaan()" class="w-full h-8 rounded border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-100 font-mono focus:outline-none focus:border-emerald-500" />
                                             </div>
                                         </div>
                                         <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-emerald-900/40 text-xs">
                                             <div class="flex items-center gap-3">
-                                                <span class="text-zinc-400">Rata-rata Nilai: <strong id="sim-hasil-nilai" class="text-emerald-300 font-mono text-sm font-bold">87.5</strong></span>
+                                                <span class="text-zinc-400">Rata-rata Nilai: <strong id="sim-hasil-nilai" class="text-emerald-300 font-mono text-sm font-bold">92.6</strong></span>
                                                 <span class="text-zinc-400">Kategori: <span id="sim-hasil-kategori" class="font-semibold text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-900/60 border border-emerald-700/60">Sangat Baik</span></span>
                                             </div>
                                             <div class="text-zinc-300 text-[11px]">
                                                 Rekomendasi: <span id="sim-hasil-rekomendasi" class="font-medium text-emerald-300">Kelas Pengayaan / Tilawah Mandiri</span>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($aspek === 'Kelompok Akademik (Numerasi, Literasi, Science, and English)' || $aspek === 'Kelompok Akademik (Numerasi, Literasi, Science and English)')
+                                <!-- Banner Pedoman Kelompok Akademik CBT -->
+                                <div class="p-5 bg-gradient-to-r from-purple-950/40 via-zinc-900 to-zinc-900 border-b border-zinc-800 space-y-5">
+                                    
+                                    <!-- Header Rumus & Penjelasan Modul -->
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                        <div class="flex items-start gap-3">
+                                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-purple-800 bg-purple-950/80 text-purple-400">
+                                                <i data-lucide="brain-circuit" class="h-4 w-4"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+                                                    Pedoman Asesmen Kelompok Akademik — Pos 5 (CBT Numerasi, Literasi, Science &amp; English)
+                                                    <span class="rounded bg-purple-900/60 border border-purple-700/60 text-purple-300 text-[10px] font-mono px-1.5 py-0.5">CBT 4 Mapel</span>
+                                                </h3>
+                                                <p class="text-xs text-zinc-400 mt-0.5">
+                                                    Mencakup Pos 5 (Akademik Dasar CBT 0-100) untuk 4 Mata Pelajaran: Bahasa Indonesia, Matematika, IPAS, dan Bahasa Inggris.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Grid 2 Kolom: Rumus & Skema Rekomendasi Akademik -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <!-- Box 1: Rumus Akademik & Keterampilan -->
+                                        <div class="rounded-lg border border-zinc-700/80 bg-zinc-900/90 p-3.5 space-y-2">
+                                            <p class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                                                <i data-lucide="sigma" class="h-3.5 w-3.5 text-purple-400"></i>
+                                                Rumus Perhitungan Nilai:
+                                            </p>
+                                            <div class="space-y-1.5 text-xs text-zinc-300 font-mono">
+                                                <div class="flex items-center justify-between bg-zinc-800/80 border border-zinc-700/50 rounded px-2.5 py-1.5 text-[11px]">
+                                                    <span class="text-zinc-400 font-sans">Nilai Akhir Pos 5 (CBT)</span>
+                                                    <span class="text-purple-400 font-semibold">(B.Indo + MTK + IPAS + Inggris) / 4</span>
+                                                </div>
+                                                <div class="flex items-center justify-between bg-purple-950/40 border border-purple-800/50 rounded px-2.5 py-1.5 text-[11px]">
+                                                    <span class="text-purple-300 font-sans font-semibold">Nilai Akhir Kelompok Akademik</span>
+                                                    <span class="text-purple-300 font-bold">= Nilai Pos 5 (rata-rata 4 mapel)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Box 2: Kategori & Rekomendasi Hasil -->
+                                        <div class="rounded-lg border border-zinc-700/80 bg-zinc-900/90 p-3.5 space-y-2">
+                                            <p class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                                                <i data-lucide="award" class="h-3.5 w-3.5 text-amber-400"></i>
+                                                Kategori Hasil Otomatis (Per Pos &amp; Nilai Akhir):
+                                            </p>
+                                            <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+                                                <div class="p-2 rounded border border-emerald-900/60 bg-emerald-950/30">
+                                                    <span class="font-bold text-emerald-300">86 – 100 (Sangat Baik)</span>
+                                                    <p class="text-zinc-400 text-[10px] mt-0.5">Program Pengayaan / Kelas Unggulan</p>
+                                                </div>
+                                                <div class="p-2 rounded border border-blue-900/60 bg-blue-950/30">
+                                                    <span class="font-bold text-blue-300">76 – 85 (Baik)</span>
+                                                    <p class="text-zinc-400 text-[10px] mt-0.5">Pembelajaran Reguler</p>
+                                                </div>
+                                                <div class="p-2 rounded border border-amber-900/60 bg-amber-950/30">
+                                                    <span class="font-bold text-amber-300">60 – 75 (Berkembang)</span>
+                                                    <p class="text-zinc-400 text-[10px] mt-0.5">Pendampingan Belajar</p>
+                                                </div>
+                                                <div class="p-2 rounded border border-red-900/60 bg-red-950/30">
+                                                    <span class="font-bold text-red-300">&lt; 60 (Perlu Pendampingan)</span>
+                                                    <p class="text-zinc-400 text-[10px] mt-0.5">Kelas Matrikulasi Akademik/Keterampilan</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Daftar 4 Mata Pelajaran CBT (Pedoman) -->
+                                    <div class="rounded-lg border border-purple-800/60 bg-purple-950/20 p-3.5 space-y-2">
+                                        <p class="text-xs font-semibold text-purple-300 flex items-center gap-1.5">
+                                            <i data-lucide="book-marked" class="h-3.5 w-3.5"></i>
+                                            Komponen Mata Pelajaran CBT (Skala Nilai 0–100):
+                                        </p>
+                                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+                                            <div class="p-2.5 rounded bg-zinc-900/80 border border-zinc-800 space-y-1">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="font-semibold text-zinc-100">1. Bahasa Indonesia</span>
+                                                    <span class="text-[10px] font-mono text-purple-400">0–100</span>
+                                                </div>
+                                                <p class="text-[11px] text-zinc-400">Literasi teks, pemahaman wacana, dan tata bahasa dasar.</p>
+                                            </div>
+                                            <div class="p-2.5 rounded bg-zinc-900/80 border border-zinc-800 space-y-1">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="font-semibold text-zinc-100">2. Matematika</span>
+                                                    <span class="text-[10px] font-mono text-purple-400">0–100</span>
+                                                </div>
+                                                <p class="text-[11px] text-zinc-400">Numerasi, pemecahan masalah logika, dan operasi hitung.</p>
+                                            </div>
+                                            <div class="p-2.5 rounded bg-zinc-900/80 border border-zinc-800 space-y-1">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="font-semibold text-zinc-100">3. IPAS</span>
+                                                    <span class="text-[10px] font-mono text-purple-400">0–100</span>
+                                                </div>
+                                                <p class="text-[11px] text-zinc-400">Sains dasar, metode observasi alam, dan penalaran sosial.</p>
+                                            </div>
+                                            <div class="p-2.5 rounded bg-zinc-900/80 border border-zinc-800 space-y-1">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="font-semibold text-zinc-100">4. Bahasa Inggris</span>
+                                                    <span class="text-[10px] font-mono text-purple-400">0–100</span>
+                                                </div>
+                                                <p class="text-[11px] text-zinc-400">Reading comprehension, basic vocabulary, dan functional text.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            @endif
+
+                            @if($aspek === 'Kelompok Potensi Bakat dan Minat' || $aspek === 'Kelompok Potensi Bakat Minat')
+                                <!-- Banner Pedoman Kelompok Potensi Bakat Minat (Pos 6 & Pos 7) -->
+                                <div class="p-5 bg-gradient-to-r from-blue-950/40 via-zinc-900 to-zinc-900 border-b border-zinc-800 space-y-5">
+
+                                    <!-- Header -->
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-blue-800 bg-blue-950/80 text-blue-400">
+                                            <i data-lucide="sparkles" class="h-4 w-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+                                                Pedoman Asesmen Potensi Bakat &amp; Minat
+                                                <span class="rounded bg-blue-900/60 border border-blue-700/60 text-blue-300 text-[10px] font-mono px-1.5 py-0.5">Pos 6 &amp; Pos 7</span>
+                                            </h3>
+                                            <p class="text-xs text-zinc-400 mt-0.5">Pos 6: Motorik Halus &amp; Kreativitas (7 Indikator /28) · Pos 7: Kreativitas &amp; Inovasi (6 Aspek /24)</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Rumus -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div class="rounded-lg border border-zinc-700/80 bg-zinc-900/90 p-3.5 space-y-2">
+                                            <p class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                                                <i data-lucide="sigma" class="h-3.5 w-3.5 text-blue-400"></i>
+                                                Rumus Perhitungan Nilai:
+                                            </p>
+                                            <div class="space-y-1.5 text-xs font-mono">
+                                                <div class="flex items-center justify-between bg-zinc-800/80 border border-zinc-700/50 rounded px-2.5 py-1.5 text-[11px]">
+                                                    <span class="text-zinc-400 font-sans">Nilai Pos 6 (Motorik Halus)</span>
+                                                    <span class="text-blue-400 font-semibold">(Total Skor / 28) × 100</span>
+                                                </div>
+                                                <div class="flex items-center justify-between bg-zinc-800/80 border border-zinc-700/50 rounded px-2.5 py-1.5 text-[11px]">
+                                                    <span class="text-zinc-400 font-sans">Nilai Pos 7 (Kreativitas)</span>
+                                                    <span class="text-blue-400 font-semibold">(Total Skor / 24) × 100</span>
+                                                </div>
+                                                <div class="flex items-center justify-between bg-blue-950/40 border border-blue-800/50 rounded px-2.5 py-1.5 text-[11px]">
+                                                    <span class="text-blue-300 font-sans font-semibold">Nilai Akhir Kelompok</span>
+                                                    <span class="text-blue-300 font-bold">(Pos 6 + Pos 7) / 2</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="rounded-lg border border-zinc-700/80 bg-zinc-900/90 p-3.5 space-y-2">
+                                            <p class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                                                <i data-lucide="award" class="h-3.5 w-3.5 text-amber-400"></i>
+                                                Kategori Hasil Otomatis:
+                                            </p>
+                                            <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+                                                <div class="p-2 rounded border border-emerald-900/60 bg-emerald-950/30">
+                                                    <span class="font-bold text-emerald-300">86 – 100 (Sangat Baik)</span>
+                                                    <p class="text-zinc-400 text-[10px] mt-0.5">Program Pengayaan / Kelas Unggulan</p>
+                                                </div>
+                                                <div class="p-2 rounded border border-blue-900/60 bg-blue-950/30">
+                                                    <span class="font-bold text-blue-300">76 – 85 (Baik)</span>
+                                                    <p class="text-zinc-400 text-[10px] mt-0.5">Pembelajaran Reguler</p>
+                                                </div>
+                                                <div class="p-2 rounded border border-amber-900/60 bg-amber-950/30">
+                                                    <span class="font-bold text-amber-300">60 – 75 (Berkembang)</span>
+                                                    <p class="text-zinc-400 text-[10px] mt-0.5">Pendampingan Belajar</p>
+                                                </div>
+                                                <div class="p-2 rounded border border-red-900/60 bg-red-950/30">
+                                                    <span class="font-bold text-red-300">&lt; 60 (Perlu Pendampingan)</span>
+                                                    <p class="text-zinc-400 text-[10px] mt-0.5">Kelas Matrikulasi</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ringkasan Pos Bakat & Minat (Pedoman) -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div class="rounded-lg border border-blue-900/60 bg-blue-950/20 p-3.5 space-y-2">
+                                            <p class="text-xs font-semibold text-blue-300 flex items-center gap-1.5">
+                                                <i data-lucide="scissors" class="h-3.5 w-3.5"></i>
+                                                Pos 6: Motorik Halus &amp; Kreativitas (7 Indikator)
+                                            </p>
+                                            <p class="text-[11px] text-zinc-400">
+                                                Skala 1–4, Skor Maksimal 28. Menilai koordinasi mata-tangan, ketepatan bentuk, kontrol gerakan tangan, ketelitian mengikuti instruksi, pemahaman ruang &amp; bentuk, kemampuan menyusun objek, dan kerapian karya.
+                                            </p>
+                                        </div>
+                                        <div class="rounded-lg border border-blue-900/60 bg-blue-950/20 p-3.5 space-y-2">
+                                            <p class="text-xs font-semibold text-blue-300 flex items-center gap-1.5">
+                                                <i data-lucide="lightbulb" class="h-3.5 w-3.5"></i>
+                                                Pos 7: Kreativitas &amp; Inovasi (6 Aspek)
+                                            </p>
+                                            <p class="text-[11px] text-zinc-400">
+                                                Skala 1–4, Skor Maksimal 24. Menilai 6 aspek Torrance: Fluency (kelancaran gagasan), Flexibility (keberagaman sudut pandang), Originality (kebaruan gagasan), Elaboration (elaborasi detail), Problem solving, dan Communication.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($aspek === 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)' || $aspek === 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation)' || $aspek === 'Kelompok Perkembangan Pribadi & Sosial (Asesmen Psikologi)')
+                                <!-- Banner Pedoman Perkembangan Pribadi & Sosial -->
+                                <div class="p-5 bg-gradient-to-r from-rose-950/40 via-zinc-900 to-zinc-900 border-b border-zinc-800 space-y-5">
+
+                                    <!-- Header -->
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-800 bg-rose-950/80 text-rose-400">
+                                            <i data-lucide="heart-handshake" class="h-4 w-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+                                                Pedoman Asesmen Perkembangan Pribadi &amp; Sosial (Daily Conversation &amp; Kelompok)
+                                                <span class="rounded bg-rose-900/60 border border-rose-700/60 text-rose-300 text-[10px] font-mono px-1.5 py-0.5">6 Aspek &bull; Skor Maks 24</span>
+                                            </h3>
+                                            <p class="text-xs text-zinc-400 mt-0.5">Digunakan sebagai acuan penilaian pada sesi wawancara individual (daily conversation) maupun observasi aktivitas diskusi kelompok, yang dilengkapi dengan angket refleksi diri calon murid.</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tab Navigation (Pedoman Instrumen) -->
+                                    <div class="rounded-xl border border-zinc-700/80 bg-zinc-950/70 p-4 space-y-4">
+                                        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                                            <div class="inline-flex flex-wrap items-center gap-1.5 p-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs">
+                                                <button type="button" id="psi-tab-btn-rubrik" onclick="switchPsiTab('rubrik')"
+                                                    class="psi-tab-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-all bg-rose-600 text-white shadow-sm">
+                                                    <i data-lucide="check-square" class="h-3.5 w-3.5"></i>
+                                                    <span>Rubrik Penilaian (6 Aspek)</span>
+                                                </button>
+                                                <button type="button" id="psi-tab-btn-angket" onclick="switchPsiTab('angket')"
+                                                    class="psi-tab-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium text-zinc-400 hover:text-zinc-200 transition-all">
+                                                    <i data-lucide="clipboard-list" class="h-3.5 w-3.5"></i>
+                                                    <span>Angket Refleksi Diri (10 Item)</span>
+                                                </button>
+                                                <button type="button" id="psi-tab-btn-wawancara" onclick="switchPsiTab('wawancara')"
+                                                    class="psi-tab-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium text-zinc-400 hover:text-zinc-200 transition-all">
+                                                    <i data-lucide="mic" class="h-3.5 w-3.5"></i>
+                                                    <span>Panduan Wawancara (8 Topik)</span>
+                                                </button>
+                                            </div>
+                                            <span class="text-xs text-zinc-400 font-medium">Acuan Instrumen &amp; Rubrik</span>
+                                        </div>
+
+                                        <!-- PSI TAB 1: Rubrik Penilaian Observasi & Wawancara (6 Aspek, Skala 1-4, Skor Maks = 24) -->
+                                        <div id="psi-panel-rubrik" class="psi-panel space-y-4">
+                                            <div class="p-3 rounded-lg border border-zinc-700 bg-zinc-900 space-y-1">
+                                                <h4 class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                                                    <i data-lucide="check-square" class="h-3.5 w-3.5 text-rose-400"></i>
+                                                    <span>Rubrik Observasi &amp; Percakapan Individual (6 Aspek &bull; Skor Maks = 24)</span>
+                                                </h4>
+                                                <p class="text-[11px] text-zinc-400">Digunakan penguji untuk menilai perkembangan pribadi &amp; sosial melalui wawancara individual santai (daily conversation) dan observasi interaksi kelompok.</p>
+                                            </div>
+
+                                            <div class="space-y-2.5">
+                                                @php
+                                                    $rubrikPsiItems = [
+                                                        1 => ['nama' => 'Kemandirian', 'bobot' => '2.7%', 'deskripsi' => 'Kemampuan melakukan tugas dan aktivitas secara mandiri tanpa banyak bergantung pada orang lain.', 'rubrik' => [4 => 'Melakukan tugas secara mandiri', 3 => 'Sedikit arahan', 2 => 'Beberapa kali memerlukan bantuan', 1 => 'Memerlukan pendampingan intensif']],
+                                                        2 => ['nama' => 'Komunikasi', 'bobot' => '2.7%', 'deskripsi' => 'Kemampuan menyampaikan gagasan, menyimak lawan bicara, dan merespons dengan santun dan jelas.', 'rubrik' => [4 => 'Menyampaikan gagasan dengan jelas', 3 => 'Cukup jelas', 2 => 'Masih terbatas', 1 => 'Belum menunjukkan respons yang memadai']],
+                                                        3 => ['nama' => 'Kerja sama', 'bobot' => '2.7%', 'deskripsi' => 'Kemampuan berkolaborasi secara aktif, saling menghargai anggota lain, dan menyelesaikan tugas bersama.', 'rubrik' => [4 => 'Aktif dan menghargai anggota lain', 3 => 'Bekerja sama dengan baik', 2 => 'Terlibat setelah diarahkan', 1 => 'Belum terlibat secara konsisten']],
+                                                        4 => ['nama' => 'Regulasi emosi', 'bobot' => '2.7%', 'deskripsi' => 'Kemampuan mengenali dan mengelola respons emosi secara wajar saat menghadapi tekanan atau interaksi sosial.', 'rubrik' => [4 => 'Mampu mengenali dan mengelola respons', 3 => 'Umumnya mampu', 2 => 'Masih memerlukan arahan', 1 => 'Membutuhkan pendampingan lebih lanjut']],
+                                                        5 => ['nama' => 'Tanggung jawab', 'bobot' => '2.6%', 'deskripsi' => 'Konsistensi menyelesaikan tugas dan tanggung jawab yang diberikan secara tuntas.', 'rubrik' => [4 => 'Konsisten menyelesaikan tugas', 3 => 'Sebagian besar selesai', 2 => 'Memerlukan pengingat', 1 => 'Belum menunjukkan penyelesaian tugas']],
+                                                        6 => ['nama' => 'Empati', 'bobot' => '2.6%', 'deskripsi' => 'Menunjukkan kepedulian secara aktif dan peka terhadap perasaan serta kebutuhan orang lain di sekitarnya.', 'rubrik' => [4 => 'Menunjukkan kepedulian secara aktif', 3 => 'Menunjukkan kepedulian', 2 => 'Memerlukan pengingat', 1 => 'Belum tampak dalam situasi pengamatan']],
+                                                    ];
+                                                @endphp
+                                                @foreach($rubrikPsiItems as $rIdx => $r)
+                                                    <div class="p-3 rounded-lg border border-zinc-800 bg-zinc-900/60 space-y-2">
+                                                        <div class="flex items-center justify-between">
+                                                            <div class="flex items-center gap-2">
+                                                                <span class="flex h-5 w-5 items-center justify-center rounded bg-zinc-800 border border-zinc-700 text-xs font-mono text-zinc-400 shrink-0">{{ $rIdx }}</span>
+                                                                <div>
+                                                                    <div class="flex items-center gap-1.5">
+                                                                        <p class="text-xs font-semibold text-zinc-100">{{ $r['nama'] }}</p>
+                                                                        <span class="rounded bg-rose-950 border border-rose-800 text-rose-300 text-[10px] font-mono px-1">Bobot: {{ $r['bobot'] }}</span>
+                                                                    </div>
+                                                                    <p class="text-[11px] text-zinc-400">{{ $r['deskripsi'] }}</p>
+                                                                </div>
+                                                            </div>
+                                                            <span class="text-[10px] font-mono text-rose-400 bg-rose-950/60 border border-rose-800/60 rounded px-1.5 py-0.5">Skala 1–4</span>
+                                                        </div>
+                                                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-1.5 pt-1">
+                                                            @foreach($r['rubrik'] as $rSkor => $rText)
+                                                                <div class="p-2 rounded border border-zinc-800/80 bg-zinc-950/60 text-[10px] space-y-0.5">
+                                                                    <span class="font-bold font-mono text-rose-400">Skor {{ $rSkor }}</span>
+                                                                    <p class="text-zinc-300 leading-snug">{{ $rText }}</p>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            <!-- Pemetaan Layanan BK -->
+                                            <div class="rounded-lg border border-zinc-800 bg-zinc-900/80 p-3 space-y-2">
+                                                <p class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                                                    <i data-lucide="compass" class="h-3.5 w-3.5 text-rose-400"></i>
+                                                    Pemetaan Kesiapan Transisi &amp; Layanan Bimbingan Konseling (BK):
+                                                </p>
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                                                    <div class="p-2 rounded border border-emerald-900/60 bg-emerald-950/30">
+                                                        <span class="font-bold text-emerald-300">86 – 100 &rarr; Sangat Baik</span>
+                                                        <p class="text-zinc-400 text-[10px] mt-0.5">Sangat siap beradaptasi mandiri, memiliki potensi peer-leader dan inisiatif tinggi.</p>
+                                                    </div>
+                                                    <div class="p-2 rounded border border-blue-900/60 bg-blue-950/30">
+                                                        <span class="font-bold text-blue-300">76 – 85 &rarr; Baik</span>
+                                                        <p class="text-zinc-400 text-[10px] mt-0.5">Adaptasi baik, pembiasaan reguler bersama wali kelas dalam lingkungan SMP.</p>
+                                                    </div>
+                                                    <div class="p-2 rounded border border-amber-900/60 bg-amber-950/30">
+                                                        <span class="font-bold text-amber-300">60 – 75 &rarr; Berkembang</span>
+                                                        <p class="text-zinc-400 text-[10px] mt-0.5">Pemantauan berkala, penguatan motivasi dan sosial oleh guru BK.</p>
+                                                    </div>
+                                                    <div class="p-2 rounded border border-red-900/60 bg-red-950/30">
+                                                        <span class="font-bold text-red-300">&lt; 60 &rarr; Perlu Pendampingan</span>
+                                                        <p class="text-zinc-400 text-[10px] mt-0.5">Prioritas pendampingan intensif BK &amp; koordinasi dengan orang tua/wali.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- PSI TAB 2: Pos 8-A Angket Refleksi Diri (10 pernyataan, skala 1-4) -->
+                                        <div id="psi-panel-angket" class="psi-panel hidden space-y-4">
+                                            <div class="p-3 rounded-lg border border-zinc-700 bg-zinc-900 space-y-1.5">
+                                                <h4 class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                                                    <i data-lucide="clipboard-list" class="h-3.5 w-3.5 text-rose-400"></i>
+                                                    <span>Sub-Instrumen A: Angket Refleksi Diri Calon Murid (10 Pernyataan &bull; Skor Maks = 40)</span>
+                                                </h4>
+                                                <div class="p-2.5 rounded bg-zinc-800/70 border border-zinc-700/60 text-[11px] text-zinc-300">
+                                                    <span class="font-semibold text-zinc-200 block mb-1">Pedoman Skala Respon Angket:</span>
+                                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px] text-zinc-400">
+                                                        <div><strong class="text-emerald-400">4:</strong> Sangat Sesuai</div>
+                                                        <div><strong class="text-blue-400">3:</strong> Sesuai</div>
+                                                        <div><strong class="text-amber-400">2:</strong> Kadang-kadang</div>
+                                                        <div><strong class="text-red-400">1:</strong> Belum Sesuai</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-2">
+                                                @php
+                                                    $angketItems = [
+                                                        1  => 'Saya mengetahui hal yang menjadi kelebihan saya',
+                                                        2  => 'Saya berusaha menyelesaikan tugas yang diberikan',
+                                                        3  => 'Saya berani bertanya ketika belum memahami pelajaran',
+                                                        4  => 'Saya dapat menerima masukan dari orang lain',
+                                                        5  => 'Saya berusaha mengelola waktu belajar',
+                                                        6  => 'Saya menghargai perbedaan pendapat',
+                                                        7  => 'Saya bersedia membantu teman yang membutuhkan',
+                                                        8  => 'Saya berusaha bertanggung jawab atas kesalahan saya',
+                                                        9  => 'Saya bersedia mencoba kegiatan baru',
+                                                        10 => 'Saya menggunakan perangkat digital dengan memperhatikan tujuan penggunaannya',
+                                                    ];
+                                                @endphp
+                                                @foreach($angketItems as $aIdx => $aText)
+                                                    <div class="p-3 rounded-lg border border-zinc-800 bg-zinc-900/60 flex items-center justify-between gap-2">
+                                                        <div class="flex items-start gap-2.5">
+                                                            <span class="flex h-5 w-5 items-center justify-center rounded bg-zinc-800 border border-zinc-700 text-xs font-mono text-zinc-400 shrink-0 mt-0.5">{{ $aIdx }}</span>
+                                                            <p class="text-xs text-zinc-200">{{ $aText }}</p>
+                                                        </div>
+                                                        <span class="text-[10px] font-mono text-zinc-400 bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5 shrink-0">Skor 1–4</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <!-- PSI TAB 3: Pos 8-B Wawancara Individual -->
+                                        <div id="psi-panel-wawancara" class="psi-panel hidden space-y-4">
+                                            <div class="p-3 rounded-lg border border-zinc-700 bg-zinc-900 space-y-1.5">
+                                                <h4 class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                                                    <i data-lucide="mic" class="h-3.5 w-3.5 text-rose-400"></i>
+                                                    <span>Sub-Instrumen B: Wawancara Individual &amp; Percakapan Orang Tua (Catatan Kualitatif)</span>
+                                                </h4>
+                                                <p class="text-[11px] text-zinc-400">Panduan pertanyaan 8 topik untuk wawancara calon murid dan obrolan dengan orang tua/wali. Data ini bersifat kualitatif dan tidak mempengaruhi skor akumulasi.</p>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                @php
+                                                    $wawancaraTopik = [
+                                                        1 => ['judul' => 'Kesadaran Diri', 'pertanyaan' => ['Apa yang kamu sukai dari dirimu sendiri?', 'Apa yang ingin kamu tingkatkan?', 'Bagaimana kamu tahu kamu sudah berhasil?']],
+                                                        2 => ['judul' => 'Regulasi Emosi', 'pertanyaan' => ['Apa yang kamu lakukan ketika merasa marah atau sedih?', 'Pernah merasa tidak ingin sekolah? Mengapa?']],
+                                                        3 => ['judul' => 'Kepercayaan Diri', 'pertanyaan' => ['Apakah kamu berani bertanya kepada guru?', 'Bagaimana perasaanmu saat tampil di depan kelas?']],
+                                                        4 => ['judul' => 'Kemandirian', 'pertanyaan' => ['Siapa yang biasanya mengingatkan kamu belajar?', 'Apakah kamu bisa mengatur waktu sendiri?']],
+                                                        5 => ['judul' => 'Interaksi Sosial', 'pertanyaan' => ['Bagaimana cara kamu berkenalan dengan teman baru?', 'Pernah ada konflik dengan teman? Bagaimana kamu menyelesaikannya?']],
+                                                        6 => ['judul' => 'Empati & Tanggung Jawab', 'pertanyaan' => ['Pernah membantu teman yang kesulitan? Ceritakan!', 'Apa yang kamu lakukan jika melakukan kesalahan?']],
+                                                        7 => ['judul' => 'Motivasi & Adaptasi', 'pertanyaan' => ['Apa impian atau cita-citamu?', 'Bagaimana perasaanmu jika harus pindah ke lingkungan baru?']],
+                                                        8 => ['judul' => 'Literasi Digital', 'pertanyaan' => ['Apa yang kamu lakukan dengan gadget atau HP?', 'Apakah kamu tahu apa itu jejak digital?']],
+                                                    ];
+                                                @endphp
+                                                @foreach($wawancaraTopik as $wIdx => $w)
+                                                    <div class="rounded-lg border border-zinc-800 bg-zinc-900/60 overflow-hidden">
+                                                        <div class="px-3 py-2 bg-zinc-800/60 flex items-center gap-2">
+                                                            <span class="flex h-5 w-5 items-center justify-center rounded bg-zinc-700 border border-zinc-600 text-xs font-mono text-zinc-300 shrink-0">{{ $wIdx }}</span>
+                                                            <h5 class="text-xs font-semibold text-zinc-100">{{ $w['judul'] }}</h5>
+                                                        </div>
+                                                        <div class="p-3">
+                                                            <ul class="space-y-1">
+                                                                @foreach($w['pertanyaan'] as $q)
+                                                                    <li class="text-[11px] text-zinc-400 flex items-start gap-1.5">
+                                                                        <span class="text-rose-500 mt-0.5">›</span>{{ $q }}
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             @endif
@@ -306,7 +718,7 @@
                                 <div class="px-5 py-2.5 bg-zinc-900/60 border-b border-zinc-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
                                     <span class="text-zinc-400 font-medium flex items-center gap-1.5">
                                         <i data-lucide="layers" class="h-3.5 w-3.5 text-emerald-400"></i>
-                                        Daftar 4 Pos Observasi (Klik pada Pos untuk buka / tutup aspek)
+                                        Daftar {{ $posGroups->count() }} Pos Observasi (Klik pada Pos untuk buka / tutup aspek)
                                     </span>
                                     <div class="flex items-center gap-1.5">
                                         <button type="button" onclick="expandAllPos()" class="inline-flex items-center gap-1 text-[11px] text-zinc-300 hover:text-emerald-400 bg-zinc-800 hover:bg-zinc-700/80 border border-zinc-700 px-2.5 py-1 rounded-md transition-colors cursor-pointer">
@@ -322,7 +734,9 @@
 
                                 @foreach($posGroups as $posTitle => $posItems)
                                     @php
-                                        $posKey = 'pos-group-' . $loop->index;
+                                        $posKey = $groupId . '-pos-' . $loop->index;
+                                        $isCbt = ($posItems->first()['tipe'] ?? '') === 'cbt_score';
+                                        $posMaxScore = $isCbt ? 100 : ($posItems->count() * 4);
                                     @endphp
                                     <div class="bg-zinc-900/40 border-b border-zinc-800 last:border-b-0">
                                         <!-- Pos Sub-Header Collapsible Button -->
@@ -332,20 +746,30 @@
                                             class="w-full px-5 py-3.5 bg-zinc-900/80 hover:bg-zinc-800/60 border-b border-zinc-800/80 flex flex-wrap items-center justify-between gap-3 text-left transition-colors cursor-pointer"
                                         >
                                             <div class="flex items-center gap-3">
-                                                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-400 text-xs font-bold font-mono shrink-0">
+                                                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-950 border border-purple-800 text-purple-400 text-xs font-bold font-mono shrink-0">
                                                     {{ substr($posTitle, 4, 1) }}
                                                 </span>
                                                 <div>
                                                     <h4 class="text-sm font-semibold text-zinc-100 flex items-center gap-2">
                                                         {{ $posTitle }}
-                                                        <span class="rounded bg-zinc-800 border border-zinc-700 px-2 py-0.5 text-[10px] font-mono font-normal text-zinc-300">5 Aspek</span>
+                                                        <span class="rounded bg-zinc-800 border border-zinc-700 px-2 py-0.5 text-[10px] font-mono font-normal text-zinc-300">{{ $posItems->count() }} Aspek</span>
                                                     </h4>
-                                                    <p class="text-[11px] text-zinc-400 mt-0.5">Skala Nilai 1–4 &bull; Skor Maksimal 20 &bull; Bobot Pos: {{ $posItems->sum('bobot') }}% &bull; Rumus: (Skor / 20) × 100</p>
+                                                    <p class="text-[11px] text-zinc-400 mt-0.5">
+                                                        @if($isCbt)
+                                                            Skala Nilai 0–100 per Mapel &bull; Bobot: {{ $posItems->sum('bobot') }}% &bull; Rumus Pos: Rata-rata 4 Mapel
+                                                        @else
+                                                            Skala Nilai 1–4 &bull; Skor Maksimal {{ $posMaxScore }} &bull; Bobot Pos: {{ $posItems->sum('bobot') }}% &bull; Rumus: (Skor / {{ $posMaxScore }}) × 100
+                                                        @endif
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-2.5">
                                                 <span class="rounded bg-zinc-800 border border-zinc-700 px-2 py-0.5 text-[11px] font-mono text-zinc-300 hidden sm:inline">
-                                                    Rumus: (Skor / 20) × 100
+                                                    @if($isCbt)
+                                                        Rumus: Rata-rata 4 Mapel
+                                                    @else
+                                                        Rumus: (Skor / {{ $posMaxScore }}) × 100
+                                                    @endif
                                                 </span>
                                                 <i data-lucide="chevron-down" class="h-4 w-4 text-zinc-400 transition-transform duration-200" id="{{ $posKey }}-chevron"></i>
                                             </div>
@@ -379,10 +803,6 @@
                                                                 <i data-lucide="circle-dot" class="h-3 w-3"></i>
                                                                 Aktif
                                                             </span>
-                                                            <button onclick="openModal('{{ $ind['id'] }}')" class="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-700 bg-zinc-800 px-2.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors">
-                                                                <i data-lucide="pencil" class="h-3 w-3"></i>
-                                                                Edit
-                                                            </button>
                                                         </div>
                                                     </div>
 
@@ -456,13 +876,6 @@
                                                         Draft
                                                     </span>
                                                 @endif
-                                                <button onclick="openModal('{{ $ind['id'] }}')" class="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-700 bg-zinc-800 px-2.5 text-[11px] font-medium text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100 transition-colors">
-                                                    <i data-lucide="pencil" class="h-3 w-3"></i>
-                                                    Edit
-                                                </button>
-                                                <button onclick="confirmDelete('{{ $ind['id'] }}', '{{ addslashes($ind['nama']) }}')" class="inline-flex h-7 items-center gap-1 rounded-md border border-red-900/60 bg-red-950/30 px-2.5 text-[11px] font-medium text-red-400 hover:bg-red-950/60 hover:text-red-300 transition-colors">
-                                                    <i data-lucide="trash-2" class="h-3 w-3"></i>
-                                                </button>
                                             </div>
                                         </div>
 
@@ -517,123 +930,72 @@
             SAANS Assessment &bull; Perguruan Anak Saleh &bull; Manajemen Instrumen Observasi SPMB
         </footer>
 
-        <!-- Modal Tambah / Edit Indikator -->
-        <div id="modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <div class="w-full max-w-2xl rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl" role="dialog" aria-modal="true">
-
-                <!-- Modal Header -->
-                <div class="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
-                    <div>
-                        <h2 id="modal-title" class="text-sm font-semibold text-zinc-100">Tambah Indikator Observasi</h2>
-                        <p class="text-xs text-zinc-400 mt-0.5">Isi detail indikator dan rubrik skoring 1–4</p>
-                    </div>
-                    <button onclick="closeModal()" class="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-zinc-100 transition-colors">
-                        <i data-lucide="x" class="h-4 w-4"></i>
-                    </button>
-                </div>
-
-                <!-- Modal Form -->
-                <div class="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
-
-                    <!-- Row 1: ID + Aspek -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="space-y-1.5">
-                            <label class="text-xs font-medium text-zinc-300">Kode Indikator</label>
-                            <input id="f-id" type="text" placeholder="misal: SD-IND-07" class="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors" />
-                        </div>
-                        <div class="space-y-1.5">
-                            <label class="text-xs font-medium text-zinc-300">Aspek / Domain</label>
-                            <input id="f-aspek" type="text" placeholder="misal: Kesiapan Literasi" class="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors" />
-                        </div>
-                    </div>
-
-                    <!-- Nama Indikator -->
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-medium text-zinc-300">Nama / Pernyataan Indikator</label>
-                        <input id="f-nama" type="text" placeholder="misal: Mengenal dan menyebutkan huruf abjad" class="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors" />
-                    </div>
-
-                    <!-- Deskripsi -->
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-medium text-zinc-300">Deskripsi Instruksi Pengamat</label>
-                        <textarea id="f-deskripsi" rows="2" placeholder="Jelaskan bagaimana guru mengamati dan menilai indikator ini..." class="flex w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors resize-none"></textarea>
-                    </div>
-
-                    <!-- Row: Bobot + Status -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="space-y-1.5">
-                            <label class="text-xs font-medium text-zinc-300">Bobot (%)</label>
-                            <input id="f-bobot" type="number" min="1" max="100" placeholder="misal: 20" class="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-3 text-xs text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors" />
-                        </div>
-                        <div class="space-y-1.5">
-                            <label class="text-xs font-medium text-zinc-300">Status</label>
-                            <select id="f-status" class="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-3 text-xs text-zinc-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors">
-                                <option value="Aktif">Aktif</option>
-                                <option value="Draft">Draft</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Rubrik Skoring -->
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
-                            <i data-lucide="sliders-horizontal" class="h-3.5 w-3.5 text-zinc-500"></i>
-                            Rubrik Deskriptor Skoring
-                        </label>
-                        <div class="space-y-2">
-                            @foreach([1 => ['Perlu Bimbingan', 'border-red-900/50 bg-red-950/20', 'text-red-400', 'border-red-800/50'], 2 => ['Berkembang', 'border-amber-900/50 bg-amber-950/20', 'text-amber-400', 'border-amber-800/50'], 3 => ['Baik', 'border-indigo-900/50 bg-indigo-950/20', 'text-indigo-400', 'border-indigo-800/50'], 4 => ['Sangat Baik', 'border-emerald-900/50 bg-emerald-950/20', 'text-emerald-400', 'border-emerald-800/50']] as $skor => $cfg)
-                                <div class="flex gap-2.5 rounded-lg border {{ $cfg[0] }} p-3">
-                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold font-mono {{ $cfg[1] }} {{ $cfg[3] }} border {{ $cfg[2] }}">{{ $skor }}</span>
-                                    <div class="flex-1 space-y-1">
-                                        <span class="text-[10px] font-medium {{ $cfg[2] }}">Skor {{ $skor }} — {{ $cfg[0] }}</span>
-                                        <textarea id="f-rubrik-{{ $skor }}" rows="2" placeholder="Deskripsikan perilaku siswa yang menunjukkan skor {{ $skor }}..." class="flex w-full rounded-md border border-zinc-800 bg-zinc-900/50 px-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors resize-none"></textarea>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Modal Footer -->
-                <div class="flex items-center justify-between border-t border-zinc-800 px-5 py-4">
-                    <button onclick="closeModal()" class="inline-flex h-8 items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900 px-3 text-xs font-medium text-zinc-400 hover:text-zinc-100 transition-colors">
-                        Batal
-                    </button>
-                    <div class="flex items-center gap-2">
-                        <button onclick="saveDraft()" class="inline-flex h-8 items-center gap-1.5 rounded-md border border-zinc-700 bg-zinc-800 px-3 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors">
-                            <i data-lucide="file" class="h-3.5 w-3.5"></i>
-                            Simpan Draft
-                        </button>
-                        <button onclick="saveIndikator()" class="inline-flex h-8 items-center gap-1.5 rounded-md bg-zinc-100 px-3 text-xs font-semibold text-zinc-900 shadow hover:bg-zinc-200 transition-colors">
-                            <i data-lucide="save" class="h-3.5 w-3.5"></i>
-                            Simpan & Aktifkan
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
         <script>
-            const overlay = document.getElementById('modal-overlay');
+            // Helper: Klasifikasi Kategori & Rekomendasi
+            function getKategoriRekomendasi(score) {
+                const s = Math.round(score * 10) / 10;
+                if (s >= 86) {
+                    return {
+                        kategori: 'Sangat Baik',
+                        rekomendasi: 'Program Pengayaan / Kelas Unggulan',
+                        badge: 'bg-emerald-950 text-emerald-400 border-emerald-800'
+                    };
+                } else if (s >= 76) {
+                    return {
+                        kategori: 'Baik',
+                        rekomendasi: 'Pembelajaran Reguler',
+                        badge: 'bg-blue-950 text-blue-400 border-blue-800'
+                    };
+                } else if (s >= 60) {
+                    return {
+                        kategori: 'Berkembang',
+                        rekomendasi: 'Pendampingan Belajar',
+                        badge: 'bg-amber-950 text-amber-400 border-amber-800'
+                    };
+                } else {
+                    return {
+                        kategori: 'Perlu Pendampingan',
+                        rekomendasi: 'Kelas Matrikulasi Akademik/Keterampilan',
+                        badge: 'bg-red-950 text-red-400 border-red-800'
+                    };
+                }
+            }
+
+            // ── Switch Tab Modul Perkembangan Pribadi & Sosial (Pedoman) ─────
+            function switchPsiTab(tab) {
+                ['rubrik', 'angket', 'wawancara'].forEach(t => {
+                    const btn = document.getElementById('psi-tab-btn-' + t);
+                    const panel = document.getElementById('psi-panel-' + t);
+                    if (btn && panel) {
+                        if (t === tab) {
+                            btn.className = 'psi-tab-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-all bg-rose-600 text-white shadow-sm';
+                            panel.classList.remove('hidden');
+                        } else {
+                            btn.className = 'psi-tab-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium text-zinc-400 hover:text-zinc-200 transition-all';
+                            panel.classList.add('hidden');
+                        }
+                    }
+                });
+                if (window.refreshLucideIcons) window.refreshLucideIcons();
+            }
 
             // ── Collapse / Expand ──────────────────────────────────────────
             function toggleGroup(id) {
                 const body    = document.getElementById(id);
                 const chevron = document.getElementById(id + '-chevron');
+                if (!body) return;
                 const isOpen  = !body.classList.contains('hidden');
 
                 if (isOpen) {
                     body.classList.add('hidden');
-                    chevron.style.transform = 'rotate(-90deg)';
+                    if (chevron) chevron.style.transform = 'rotate(-90deg)';
                 } else {
                     body.classList.remove('hidden');
-                    chevron.style.transform = 'rotate(0deg)';
+                    if (chevron) chevron.style.transform = 'rotate(0deg)';
                 }
             }
 
-            // Start all groups and pos collapsed
+            // Start all groups and pos collapsed by default
             document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('[id^="group-"]').forEach(el => {
                     if (!el.id.endsWith('-chevron')) {
@@ -643,7 +1005,7 @@
                     }
                 });
 
-                document.querySelectorAll('[id^="pos-group-"]').forEach(el => {
+                document.querySelectorAll('[id*="-pos-"]').forEach(el => {
                     if (!el.id.endsWith('-chevron')) {
                         el.classList.add('hidden');
                         const chevron = document.getElementById(el.id + '-chevron');
@@ -653,7 +1015,7 @@
             });
 
             function expandAllPos() {
-                document.querySelectorAll('[id^="pos-group-"]').forEach(el => {
+                document.querySelectorAll('[id*="-pos-"]').forEach(el => {
                     if (!el.id.endsWith('-chevron')) {
                         el.classList.remove('hidden');
                         const chevron = document.getElementById(el.id + '-chevron');
@@ -663,7 +1025,7 @@
             }
 
             function collapseAllPos() {
-                document.querySelectorAll('[id^="pos-group-"]').forEach(el => {
+                document.querySelectorAll('[id*="-pos-"]').forEach(el => {
                     if (!el.id.endsWith('-chevron')) {
                         el.classList.add('hidden');
                         const chevron = document.getElementById(el.id + '-chevron');
@@ -672,84 +1034,21 @@
                 });
             }
 
-            function openModal(id = null) {
-                overlay.classList.remove('hidden');
-                overlay.classList.add('flex');
-                document.getElementById('modal-title').textContent = id
-                    ? 'Edit Indikator: ' + id
-                    : 'Tambah Indikator Observasi';
-                if (id) document.getElementById('f-id').value = id;
-                if (window.refreshLucideIcons) window.refreshLucideIcons();
-            }
-
-            function closeModal() {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-                // Reset fields
-                ['f-id','f-aspek','f-nama','f-deskripsi','f-bobot','f-rubrik-1','f-rubrik-2','f-rubrik-3','f-rubrik-4']
-                    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-                document.getElementById('f-status').value = 'Aktif';
-            }
-
-            function saveIndikator() {
-                const nama = document.getElementById('f-nama').value.trim();
-                if (!nama) { alert('Nama indikator wajib diisi.'); return; }
-                alert('Indikator "' + nama + '" berhasil disimpan dan diaktifkan.\n\n(Integrasi database akan menyimpan data ini secara permanen.)');
-                closeModal();
-            }
-
-            function saveDraft() {
-                const nama = document.getElementById('f-nama').value.trim();
-                if (!nama) { alert('Nama indikator wajib diisi.'); return; }
-                alert('Indikator "' + nama + '" disimpan sebagai Draft.');
-                closeModal();
-            }
-
-            function confirmDelete(id, nama) {
-                if (confirm('Hapus indikator "' + nama + '" (' + id + ')?\n\nTindakan ini tidak dapat dibatalkan.')) {
-                    alert('Indikator ' + id + ' telah dihapus.\n\n(Integrasi database akan menghapus secara permanen.)');
-                }
-            }
-
-            // Close on overlay click
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-
-            // ── Kalkulator Simulasi Kelompok Keagamaan ───────────────────────
+            // ── Kalkulator Simulasi Kelompok Keagamaan (Skor Maks 28, 28, 24, 28) ───
             function hitungSimulasiKeagamaan() {
-                const p1 = Math.min(20, Math.max(0, parseFloat(document.getElementById('sim-pos-1')?.value || 0)));
-                const p2 = Math.min(20, Math.max(0, parseFloat(document.getElementById('sim-pos-2')?.value || 0)));
-                const p3 = Math.min(20, Math.max(0, parseFloat(document.getElementById('sim-pos-3')?.value || 0)));
-                const p4 = Math.min(20, Math.max(0, parseFloat(document.getElementById('sim-pos-4')?.value || 0)));
+                const p1 = Math.min(28, Math.max(0, parseFloat(document.getElementById('sim-pos-1')?.value || 0)));
+                const p2 = Math.min(28, Math.max(0, parseFloat(document.getElementById('sim-pos-2')?.value || 0)));
+                const p3 = Math.min(24, Math.max(0, parseFloat(document.getElementById('sim-pos-3')?.value || 0)));
+                const p4 = Math.min(28, Math.max(0, parseFloat(document.getElementById('sim-pos-4')?.value || 0)));
 
-                const n1 = (p1 / 20) * 100;
-                const n2 = (p2 / 20) * 100;
-                const n3 = (p3 / 20) * 100;
-                const n4 = (p4 / 20) * 100;
+                const n1 = (p1 / 28) * 100;
+                const n2 = (p2 / 28) * 100;
+                const n3 = (p3 / 24) * 100;
+                const n4 = (p4 / 28) * 100;
 
                 const rata = (n1 + n2 + n3 + n4) / 4;
                 const roundRata = Math.round(rata * 10) / 10;
-
-                let kategori = '';
-                let rekomendasi = '';
-                let badgeClass = '';
-
-                if (roundRata >= 86) {
-                    kategori = 'Sangat Baik';
-                    rekomendasi = 'Kelas Pengayaan / Tilawah Mandiri';
-                    badgeClass = 'font-semibold text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-800';
-                } else if (roundRata >= 76) {
-                    kategori = 'Baik';
-                    rekomendasi = 'Kelas Reguler / Pembiasaan';
-                    badgeClass = 'font-semibold text-blue-400 px-1.5 py-0.5 rounded bg-blue-950 border border-blue-800';
-                } else if (roundRata >= 60) {
-                    kategori = 'Berkembang';
-                    rekomendasi = 'Pendampingan / Tahsin Lanjutan';
-                    badgeClass = 'font-semibold text-amber-400 px-1.5 py-0.5 rounded bg-amber-950 border border-amber-800';
-                } else {
-                    kategori = 'Perlu Pendampingan';
-                    rekomendasi = 'Kelas Matrikulasi / Tahsin Dasar';
-                    badgeClass = 'font-semibold text-red-400 px-1.5 py-0.5 rounded bg-red-950 border border-red-800';
-                }
+                const info = getKategoriRekomendasi(roundRata);
 
                 const valEl = document.getElementById('sim-hasil-nilai');
                 const katEl = document.getElementById('sim-hasil-kategori');
@@ -757,10 +1056,10 @@
 
                 if (valEl) valEl.textContent = roundRata;
                 if (katEl) {
-                    katEl.textContent = kategori;
-                    katEl.className = badgeClass;
+                    katEl.textContent = info.kategori;
+                    katEl.className = 'font-semibold text-xs px-1.5 py-0.5 rounded border ' + info.badge;
                 }
-                if (rekEl) rekEl.textContent = rekomendasi;
+                if (rekEl) rekEl.textContent = info.rekomendasi;
             }
         </script>
 

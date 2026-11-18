@@ -76,7 +76,103 @@ class SPMBController extends Controller
                 ->with('status', 'Selamat datang di Dashboard Observasi SPMB SD Anak Saleh!');
         }
 
-        // Default: Guru / Pengamat
+        // Guru Pengamat SMP (Hadi Susanto, Imarotul, Mutaahirotul, Davies)
+        if (str_contains($email, 'hadi') || str_contains($email, 'keagamaan') || $request->input('nip') === 'GSMP-2026-01') {
+            session([
+                'auth_user' => [
+                    'name' => 'Hadi Susanto, S.Hum.',
+                    'nip' => 'GSMP-2026-01',
+                    'email' => 'hadi@anaksaleh.sch.id',
+                    'role' => 'guru',
+                    'jenjang' => 'smp',
+                    'unit' => 'SMP Alam Anak Saleh',
+                    'role_label' => 'Guru Pengamat Kelompok Keagamaan',
+                    'kelompok' => 'Kelompok Keagamaan',
+                    'ruang' => 'Ruang Kelompok Keagamaan (Pos 1–4)',
+                ],
+            ]);
+
+            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-01'])
+                ->with('status', 'Selamat bertugas, Ustadz Hadi Susanto (Kelompok Keagamaan)!');
+        }
+
+        if (str_contains($email, 'imarotul') || str_contains($email, 'akademik') || $request->input('nip') === 'GSMP-2026-02') {
+            session([
+                'auth_user' => [
+                    'name' => 'Imarotul Muhibbah, S.Si., M.Pd. Gr.',
+                    'nip' => 'GSMP-2026-02',
+                    'email' => 'imarotul@anaksaleh.sch.id',
+                    'role' => 'guru',
+                    'jenjang' => 'smp',
+                    'unit' => 'SMP Alam Anak Saleh',
+                    'role_label' => 'Guru Pengamat Kelompok Akademik',
+                    'kelompok' => 'Kelompok Akademik (Numerasi, Literasi, Science, and English)',
+                    'ruang' => 'Ruang Kelompok Akademik (Pos 5 CBT)',
+                ],
+            ]);
+
+            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-02'])
+                ->with('status', 'Selamat bertugas, Ustadzah Imarotul Muhibbah (Kelompok Akademik CBT)!');
+        }
+
+        if (str_contains($email, 'mutaahirotul') || str_contains($email, 'bakat') || $request->input('nip') === 'GSMP-2026-03') {
+            session([
+                'auth_user' => [
+                    'name' => 'Mutaahirotul Hidayati,S.Pd., S.Pd.',
+                    'nip' => 'GSMP-2026-03',
+                    'email' => 'mutaahirotul@anaksaleh.sch.id',
+                    'role' => 'guru',
+                    'jenjang' => 'smp',
+                    'unit' => 'SMP Alam Anak Saleh',
+                    'role_label' => 'Guru Pengamat Kelompok Potensi Bakat & Minat',
+                    'kelompok' => 'Kelompok Potensi Bakat dan Minat',
+                    'ruang' => 'Ruang Kelompok Potensi Bakat & Minat (Pos 6–7)',
+                ],
+            ]);
+
+            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-03'])
+                ->with('status', 'Selamat bertugas, Ustadzah Mutaahirotul Hidayati (Kelompok Potensi Bakat & Minat)!');
+        }
+
+        if (str_contains($email, 'davies') || str_contains($email, 'pribadi') || str_contains($email, 'sosial') || $request->input('nip') === 'GSMP-2026-04') {
+            session([
+                'auth_user' => [
+                    'name' => 'Davies Yudisno, S.S.Gr., S.Pd.',
+                    'nip' => 'GSMP-2026-04',
+                    'email' => 'davies@anaksaleh.sch.id',
+                    'role' => 'guru',
+                    'jenjang' => 'smp',
+                    'unit' => 'SMP Alam Anak Saleh',
+                    'role_label' => 'Guru Pengamat Perkembangan Pribadi & Sosial',
+                    'kelompok' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'ruang' => 'Ruang Kelompok Pribadi & Sosial',
+                ],
+            ]);
+
+            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-04'])
+                ->with('status', 'Selamat bertugas, Ustadz Davies Yudisno (Kelompok Pribadi & Sosial / BK)!');
+        }
+
+        if (str_contains($email, 'guru.smp')) {
+            session([
+                'auth_user' => [
+                    'name' => 'Hadi Susanto, S.Hum.',
+                    'nip' => 'GSMP-2026-01',
+                    'email' => 'hadi@anaksaleh.sch.id',
+                    'role' => 'guru',
+                    'jenjang' => 'smp',
+                    'unit' => 'SMP Alam Anak Saleh',
+                    'role_label' => 'Guru Pengamat Kelompok Keagamaan',
+                    'kelompok' => 'Kelompok Keagamaan',
+                    'ruang' => 'Ruang Kelompok Keagamaan (Pos 1–4)',
+                ],
+            ]);
+
+            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-01'])
+                ->with('status', 'Selamat datang di Halaman Observasi Guru Pengamat SMP!');
+        }
+
+        // Default: Guru / Pengamat SD/TK
         session([
             'auth_user' => [
                 'name' => 'Ustadzah Fatimah Azzahra, S.Pd.',
@@ -93,20 +189,190 @@ class SPMBController extends Controller
     }
 
     /**
-     * Halaman Observasi Siswa Baru untuk Guru.
+     * Halaman Observasi Siswa Baru untuk Guru (Termasuk 4 Guru Pengamat SMP).
      */
-    public function observasi(): View
+    public function observasi(Request $request): View
     {
-        $user = session('auth_user', [
-            'name' => 'Ustadzah Fatimah Azzahra, S.Pd.',
-            'email' => 'guru@anaksaleh.sch.id',
-            'role' => 'guru',
-            'jenjang' => 'all',
-            'unit' => 'Perguruan Anak Saleh',
-            'role_label' => 'Tim Pengamat & Psikolog Anak',
-        ]);
+        $allGuruSMP = [
+            'GSMP-2026-01' => [
+                'nip' => 'GSMP-2026-01',
+                'name' => 'Hadi Susanto, S.Hum.',
+                'kelompok_key' => 'keagamaan',
+                'kelompok' => 'Kelompok Keagamaan',
+                'kelompok_short' => 'Keagamaan',
+                'pos_desc' => 'Pos 1–4 (Sholat, Mengaji, Doa-doa Harian, Surat Pendek)',
+                'ruang' => 'Ruang Kelompok Keagamaan (Pos 1–4)',
+                'unit' => 'SMP Alam Anak Saleh',
+                'avatar' => 'HS',
+                'email' => 'hadi@anaksaleh.sch.id',
+                'color' => 'emerald',
+                'icon' => 'book-open',
+            ],
+            'GSMP-2026-02' => [
+                'nip' => 'GSMP-2026-02',
+                'name' => 'Imarotul Muhibbah, S.Si., M.Pd. Gr.',
+                'kelompok_key' => 'akademik',
+                'kelompok' => 'Kelompok Akademik (Numerasi, Literasi, Science, and English)',
+                'kelompok_short' => 'Akademik CBT',
+                'pos_desc' => 'Pos 5 CBT (B. Indonesia, Matematika, IPAS, B. Inggris)',
+                'ruang' => 'Ruang Kelompok Akademik (Pos 5 CBT)',
+                'unit' => 'SMP Alam Anak Saleh',
+                'avatar' => 'IM',
+                'email' => 'imarotul@anaksaleh.sch.id',
+                'color' => 'blue',
+                'icon' => 'calculator',
+            ],
+            'GSMP-2026-03' => [
+                'nip' => 'GSMP-2026-03',
+                'name' => 'Mutaahirotul Hidayati,S.Pd., S.Pd.',
+                'kelompok_key' => 'bakat_minat',
+                'kelompok' => 'Kelompok Potensi Bakat dan Minat',
+                'kelompok_short' => 'Potensi Bakat Minat',
+                'pos_desc' => 'Pos 6 & 7 (Motorik Halus & Kreativitas Inovasi)',
+                'ruang' => 'Ruang Kelompok Potensi Bakat & Minat (Pos 6–7)',
+                'unit' => 'SMP Alam Anak Saleh',
+                'avatar' => 'MH',
+                'email' => 'mutaahirotul@anaksaleh.sch.id',
+                'color' => 'purple',
+                'icon' => 'palette',
+            ],
+            'GSMP-2026-04' => [
+                'nip' => 'GSMP-2026-04',
+                'name' => 'Davies Yudisno, S.S.Gr., S.Pd.',
+                'kelompok_key' => 'pribadi_sosial',
+                'kelompok' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                'kelompok_short' => 'Pribadi & Sosial',
+                'pos_desc' => 'Pos 8 (Kesiapan Psikososial Transisi SMP & Layanan BK)',
+                'ruang' => 'Ruang Kelompok Pribadi & Sosial',
+                'unit' => 'SMP Alam Anak Saleh',
+                'avatar' => 'DY',
+                'email' => 'davies@anaksaleh.sch.id',
+                'color' => 'amber',
+                'icon' => 'heart-handshake',
+            ],
+        ];
 
-        return view('guru.observasi', compact('user'));
+        // Tentukan guru aktif
+        $requestedNip = $request->query('guru_nip', session('auth_user.nip', 'GSMP-2026-01'));
+        if (! isset($allGuruSMP[$requestedNip])) {
+            $requestedNip = 'GSMP-2026-01';
+        }
+        $activeGuru = $allGuruSMP[$requestedNip];
+
+        // Sinkronisasi sesi guru aktif
+        $user = session('auth_user', []);
+        $user['name'] = $activeGuru['name'];
+        $user['nip'] = $activeGuru['nip'];
+        $user['email'] = $activeGuru['email'];
+        $user['role'] = 'guru';
+        $user['jenjang'] = 'smp';
+        $user['unit'] = 'SMP Alam Anak Saleh';
+        $user['role_label'] = 'Guru Pengamat '.$activeGuru['kelompok_short'];
+        $user['kelompok'] = $activeGuru['kelompok'];
+        $user['ruang'] = $activeGuru['ruang'];
+        session(['auth_user' => $user]);
+
+        // Daftar Calon Murid SMP (Rotasi Terbuka / Tanpa Antrean Kaku)
+        // Siswa bebas masuk kelompok mana pun yang tersedia, urutan fleksibel, wajib terpenuhi 4/4 kelompok
+        $siswaSMP = [
+            [
+                'no' => 'SPMB-2026-SMP01',
+                'name' => 'Bilal Ramadhan Putra',
+                'usia' => '12 Thn 3 Bln',
+                'kelas_target' => 'Kelas 7 Bilingual',
+                'asal_sekolah' => 'SD Karakter Anak Saleh',
+                'wali' => 'Bpk. Andi Ramadhan',
+                'kontak' => '0821-2222-0001',
+                'mulai_dari' => 'Kelompok Keagamaan',
+                'posisi_sekarang' => 'Semua Ruang Tuntas',
+                'keagamaan' => ['pos1' => 26, 'pos2' => 25, 'pos3' => 23, 'pos4' => 26, 'total_skor' => 100, 'nilai' => 92.6, 'status' => 'Selesai'],
+                'akademik' => ['cbt' => ['indo' => 92, 'mtk' => 95, 'ipas' => 90, 'inggris' => 95], 'pos5' => 93.0, 'nilai' => 93.0, 'status' => 'Selesai'],
+                'bakat_minat' => ['pos6_skor' => 26, 'pos6' => 92.9, 'pos7_skor' => 22, 'pos7' => 91.7, 'nilai' => 92.3, 'status' => 'Selesai'],
+                'pribadi_sosial' => ['angket_skor' => 37, 'angket_nilai' => 92.5, 'observasi_skor' => 22, 'observasi_nilai' => 91.7, 'nilai' => 92.1, 'status' => 'Selesai', 'kategori_bk' => 'Sangat Siap'],
+            ],
+            [
+                'no' => 'SPMB-2026-SMP02',
+                'name' => 'Salma Hanifah',
+                'usia' => '12 Thn 1 Bln',
+                'kelas_target' => 'Kelas 7 Tahfidz',
+                'asal_sekolah' => 'SD Karakter Anak Saleh',
+                'wali' => 'Ibu Lina Hanifah',
+                'kontak' => '0821-2222-0002',
+                'mulai_dari' => 'Kelompok Pribadi & Sosial',
+                'posisi_sekarang' => 'Semua Ruang Tuntas',
+                'keagamaan' => ['pos1' => 27, 'pos2' => 28, 'pos3' => 24, 'pos4' => 27, 'total_skor' => 106, 'nilai' => 98.1, 'status' => 'Selesai'],
+                'akademik' => ['cbt' => ['indo' => 94, 'mtk' => 88, 'ipas' => 90, 'inggris' => 92], 'pos5' => 91.0, 'nilai' => 91.0, 'status' => 'Selesai'],
+                'bakat_minat' => ['pos6_skor' => 25, 'pos6' => 89.3, 'pos7_skor' => 23, 'pos7' => 95.8, 'nilai' => 92.6, 'status' => 'Selesai'],
+                'pribadi_sosial' => ['angket_skor' => 38, 'angket_nilai' => 95.0, 'observasi_skor' => 23, 'observasi_nilai' => 95.8, 'nilai' => 95.4, 'status' => 'Selesai', 'kategori_bk' => 'Sangat Siap'],
+            ],
+            [
+                'no' => 'SPMB-2026-SMP03',
+                'name' => 'Umar Al-Faruq',
+                'usia' => '12 Thn 6 Bln',
+                'kelas_target' => 'Kelas 7 Bilingual',
+                'asal_sekolah' => 'SD Plus Insan Mandiri',
+                'wali' => 'Bpk. Zainal Al-Faruq',
+                'kontak' => '0821-2222-0003',
+                'mulai_dari' => 'Kelompok Akademik CBT',
+                'posisi_sekarang' => 'Semua Ruang Tuntas',
+                'keagamaan' => ['pos1' => 23, 'pos2' => 22, 'pos3' => 20, 'pos4' => 23, 'total_skor' => 88, 'nilai' => 81.5, 'status' => 'Selesai'],
+                'akademik' => ['cbt' => ['indo' => 85, 'mtk' => 90, 'ipas' => 86, 'inggris' => 83], 'pos5' => 86.0, 'nilai' => 86.0, 'status' => 'Selesai'],
+                'bakat_minat' => ['pos6_skor' => 23, 'pos6' => 82.1, 'pos7_skor' => 20, 'pos7' => 83.3, 'nilai' => 82.7, 'status' => 'Selesai'],
+                'pribadi_sosial' => ['angket_skor' => 31, 'angket_nilai' => 77.5, 'observasi_skor' => 19, 'observasi_nilai' => 79.2, 'nilai' => 78.4, 'status' => 'Selesai', 'kategori_bk' => 'Siap'],
+            ],
+            [
+                'no' => 'SPMB-2026-SMP04',
+                'name' => 'Jasmine Alya Zahra',
+                'usia' => '12 Thn 0 Bln',
+                'kelas_target' => 'Kelas 7 Reguler',
+                'asal_sekolah' => 'SD Negeri Percobaan 1',
+                'wali' => 'Ibu Zahra Alya',
+                'kontak' => '0821-2222-0004',
+                'mulai_dari' => 'Kelompok Potensi Bakat & Minat',
+                'posisi_sekarang' => 'Sedang di Ruang Akademik',
+                'keagamaan' => ['pos1' => null, 'pos2' => null, 'pos3' => null, 'pos4' => null, 'total_skor' => null, 'nilai' => null, 'status' => 'Belum Diuji'],
+                'akademik' => ['cbt' => ['indo' => 75, 'mtk' => 70, 'ipas' => 72, 'inggris' => 75], 'pos5' => 73.0, 'nilai' => 73.0, 'status' => 'Sedang Diobservasi'],
+                'bakat_minat' => ['pos6_skor' => 20, 'pos6' => 71.4, 'pos7_skor' => 18, 'pos7' => 75.0, 'nilai' => 73.2, 'status' => 'Selesai'],
+                'pribadi_sosial' => ['angket_skor' => 28, 'angket_nilai' => 70.0, 'observasi_skor' => 17, 'observasi_nilai' => 70.8, 'nilai' => 70.4, 'status' => 'Selesai', 'kategori_bk' => 'Cukup Siap'],
+            ],
+            [
+                'no' => 'SPMB-2026-SMP05',
+                'name' => 'Hafizh Mubarok',
+                'usia' => '12 Thn 9 Bln',
+                'kelas_target' => 'Kelas 7 Tahfidz',
+                'asal_sekolah' => 'SDIT Al-Hikmah',
+                'wali' => 'Bpk. Mubarok Hafizh',
+                'kontak' => '0821-2222-0005',
+                'mulai_dari' => 'Kelompok Pribadi & Sosial',
+                'posisi_sekarang' => 'Sedang di Ruang Keagamaan',
+                'keagamaan' => ['pos1' => 22, 'pos2' => 21, 'pos3' => 18, 'pos4' => 21, 'total_skor' => 82, 'nilai' => 75.9, 'status' => 'Sedang Diobservasi'],
+                'akademik' => ['cbt' => null, 'pos5' => null, 'nilai' => null, 'status' => 'Belum Diuji'],
+                'bakat_minat' => ['pos6_skor' => null, 'pos6' => null, 'pos7_skor' => null, 'pos7' => null, 'nilai' => null, 'status' => 'Belum Diuji'],
+                'pribadi_sosial' => ['angket_skor' => 25, 'angket_nilai' => 62.5, 'observasi_skor' => 15, 'observasi_nilai' => 62.5, 'nilai' => 62.5, 'status' => 'Selesai', 'kategori_bk' => 'Butuh Pendampingan Khusus'],
+            ],
+        ];
+
+        // Hitung kelengkapan 4 kelompok untuk setiap siswa
+        $kelompokKeys = ['keagamaan', 'akademik', 'bakat_minat', 'pribadi_sosial'];
+        foreach ($siswaSMP as &$s) {
+            $selesai = 0;
+            foreach ($kelompokKeys as $kk) {
+                if (($s[$kk]['status'] ?? '') === 'Selesai') {
+                    $selesai++;
+                }
+            }
+            $s['selesai_count'] = $selesai;
+            $s['is_lengkap'] = ($selesai === 4);
+        }
+        unset($s);
+
+        // Murid aktif yang dipilih
+        $studentNo = $request->query('siswa_no', 'SPMB-2026-SMP01');
+        $activeSiswa = collect($siswaSMP)->firstWhere('no', $studentNo) ?? $siswaSMP[0];
+
+        return view('guru.observasi', compact('user', 'allGuruSMP', 'activeGuru', 'siswaSMP', 'activeSiswa'));
+
+        return view('guru.observasi', compact('user', 'allGuruSMP', 'activeGuru', 'siswaSMP', 'activeSiswa'));
     }
 
     /**
@@ -256,10 +522,10 @@ class SPMBController extends Controller
                 ['nip' => 'GSD-2026-04', 'name' => 'Ustadz Bilal Ramadhan, S.Pd.', 'kelompok' => 'Kelompok Halaqah Tilawati Al-Qur\'an', 'ruang' => 'Ruang Tilawati (Pos 4)', 'jumlah_observasi' => 4, 'status' => 'Cuti'],
             ],
             'smp' => [
-                ['nip' => 'GSMP-2026-01', 'name' => 'Ustadz Hasan Al-Banna, M.Pd.', 'kelompok' => 'Kelompok Keagamaan (Tahfidz, Tilawah, Ibadah, Adab)', 'ruang' => 'Ruang Kelompok Keagamaan', 'jumlah_observasi' => 22, 'status' => 'Aktif'],
-                ['nip' => 'GSMP-2026-02', 'name' => 'Ustadz Ridwan Al-Hafidz, M.Si.', 'kelompok' => 'Kelompok Akademik (Numerasi, Literasi, Science, English)', 'ruang' => 'Ruang Kelompok Akademik', 'jumlah_observasi' => 16, 'status' => 'Aktif'],
-                ['nip' => 'GSMP-2026-03', 'name' => 'Ustadzah Fatimah Az-Zahra, S.Pd.', 'kelompok' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation)', 'ruang' => 'Ruang Kelompok Pribadi & Sosial', 'jumlah_observasi' => 6, 'status' => 'Aktif'],
-                ['nip' => 'GSMP-2026-04', 'name' => 'Ustadz Bilal Ramadhan, S.Pd.', 'kelompok' => 'Kelompok Potensi Bakat Minat (Presentasi, Digital, Seni)', 'ruang' => 'Ruang Kelompok Potensi Bakat Minat', 'jumlah_observasi' => 12, 'status' => 'Aktif'],
+                ['nip' => 'GSMP-2026-01', 'name' => 'Hadi Susanto, S.Hum.', 'kelompok' => 'Kelompok Keagamaan', 'ruang' => 'Ruang Kelompok Keagamaan (Pos 1–4)', 'jumlah_observasi' => 22, 'status' => 'Aktif'],
+                ['nip' => 'GSMP-2026-02', 'name' => 'Imarotul Muhibbah, S.Si., M.Pd. Gr.', 'kelompok' => 'Kelompok Akademik (Numerasi, Literasi, Science, and English)', 'ruang' => 'Ruang Kelompok Akademik (Pos 5 CBT)', 'jumlah_observasi' => 16, 'status' => 'Aktif'],
+                ['nip' => 'GSMP-2026-03', 'name' => 'Mutaahirotul Hidayati,S.Pd., S.Pd.', 'kelompok' => 'Kelompok Potensi Bakat dan Minat', 'ruang' => 'Ruang Kelompok Potensi Bakat & Minat (Pos 6–7)', 'jumlah_observasi' => 12, 'status' => 'Aktif'],
+                ['nip' => 'GSMP-2026-04', 'name' => 'Davies Yudisno, S.S.Gr., S.Pd.', 'kelompok' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)', 'ruang' => 'Ruang Kelompok Pribadi & Sosial', 'jumlah_observasi' => 6, 'status' => 'Aktif'],
             ],
         ];
 
@@ -514,7 +780,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 1',
                     'nama' => 'Wudhu - Praktik',
                     'deskripsi' => 'Observasi tata cara urutan dan pelaksanaan gerakan wudhu secara langsung.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum mampu melakukan urutan dengan benar',
@@ -531,7 +797,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 1',
                     'nama' => 'Wudhu - Ketentuan',
                     'deskripsi' => 'Penguasaan ketentuan, rukun, dan syarat sahnya berwudhu.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum sesuai dengan ketentuan dalam sahnya berwudhu',
@@ -548,7 +814,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 1',
                     'nama' => 'Gerakan sholat',
                     'deskripsi' => 'Kesesuaian dan ketertiban gerakan sholat wajib dari takbiratul ihram hingga salam.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum mampu mengikuti urutan',
@@ -565,7 +831,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 1',
                     'nama' => 'Bacaan sholat',
                     'deskripsi' => 'Kelancaran dan kefasihan lafal bacaan sholat (iftitah, ruku, sujud, tasyahud).',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum mampu melafalkan sebagian besar bacaan',
@@ -582,7 +848,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 1',
                     'nama' => 'Pemahaman',
                     'deskripsi' => 'Pemahaman mengenai makna, syarat, dan rukun ibadah sholat.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum memahami konsep dasar',
@@ -599,7 +865,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 1',
                     'nama' => 'Ketertiban',
                     'deskripsi' => 'Ketertiban, kekhusyukan, dan kemandirian dalam mempraktikkan ibadah sholat.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Memerlukan pendampingan intensif',
@@ -616,7 +882,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 1',
                     'nama' => 'Sholat Wajib',
                     'deskripsi' => 'Kemampuan menjelaskan syarat sah, waktu, dan rukun sholat wajib.',
-                    'bobot' => 1.7,
+                    'bobot' => 1.6,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Tidak menjelaskan syarat sah sholat dengan lengkap',
@@ -635,7 +901,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 2',
                     'nama' => 'Huruf',
                     'deskripsi' => 'Pengenalan dan pengucapan huruf-huruf hijaiyah secara tepat.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum mengenali sebagian besar',
@@ -652,7 +918,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 2',
                     'nama' => 'Harakat',
                     'deskripsi' => 'Ketepatan membaca harakat (fathah, kasrah, dhammah, sukun, tanwin, tasydid).',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum mengenali sebagian besar',
@@ -669,7 +935,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 2',
                     'nama' => 'Huruf Bersambung',
                     'deskripsi' => 'Kemampuan mengidentifikasi dan melafalkan perubahan bentuk huruf hijaiyah saat bersambung.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Memerlukan bimbingan dasar',
@@ -686,7 +952,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 2',
                     'nama' => 'Makharijul huruf',
                     'deskripsi' => 'Ketepatan tempat keluarnya bunyi huruf dari tenggorokan, lidah, atau bibir.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Memerlukan bimbingan dasar',
@@ -703,7 +969,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 2',
                     'nama' => 'Tajwid',
                     'deskripsi' => 'Penerapan hukum tajwid (nun sukun/tanwin, mim sukun, idgham, ikhfa, dll).',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum memahami penerapan',
@@ -720,7 +986,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 2',
                     'nama' => 'Mad',
                     'deskripsi' => 'Ketepatan penerapan panjang pendek bacaan (1 alif, 2 alif, 3 alif).',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum memahami panjang pendek',
@@ -737,7 +1003,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 2',
                     'nama' => 'Kelancaran',
                     'deskripsi' => 'Kelancaran alur tilawah ayat tanpa terbata-bata atau sering berhenti berulang kali.',
-                    'bobot' => 1.7,
+                    'bobot' => 1.6,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum dapat membaca secara berurutan',
@@ -756,7 +1022,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 3',
                     'nama' => 'Hafalan',
                     'deskripsi' => 'Penguasaan materi doa-doa harian yang diujikan.',
-                    'bobot' => 2.1,
+                    'bobot' => 1.7,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Menguasai sedikit',
@@ -773,7 +1039,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 3',
                     'nama' => 'Pelafalan',
                     'deskripsi' => 'Kejelasan lafaz dan artikulasi pengucapan kalimat doa berbahasa Arab.',
-                    'bobot' => 2.1,
+                    'bobot' => 1.7,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum mampu melafalkan dengan tepat',
@@ -790,7 +1056,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 3',
                     'nama' => 'Kelengkapan',
                     'deskripsi' => 'Keutuhan kalimat doa dari awal hingga akhir tanpa ada penggalan yang hilang.',
-                    'bobot' => 2.1,
+                    'bobot' => 1.7,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Sebagian besar belum dikuasai',
@@ -807,7 +1073,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 3',
                     'nama' => 'Kelancaran',
                     'deskripsi' => 'Kelancaran penyampaian doa tanpa jeda panjang atau bantuan pengingat.',
-                    'bobot' => 2.1,
+                    'bobot' => 1.7,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Memerlukan bantuan intensif',
@@ -824,7 +1090,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 3',
                     'nama' => 'Pemahaman',
                     'deskripsi' => 'Pemahaman terhadap arti, makna, dan konteks penggunaan doa dalam keseharian.',
-                    'bobot' => 2.1,
+                    'bobot' => 1.6,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum memahami makna dasar',
@@ -841,7 +1107,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 3',
                     'nama' => 'Pengetahuan',
                     'deskripsi' => 'Pengetahuan mengenai ketepatan waktu pengamalan dan adab berdoa.',
-                    'bobot' => 2.0,
+                    'bobot' => 1.6,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Tidak mengetahui dengan tepat waktu dan doanya',
@@ -860,7 +1126,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 4',
                     'nama' => 'Kelancaran',
                     'deskripsi' => 'Kelancaran hafalan surat-surat Al-Qur\'an Juz 30 tanpa terhenti berulang kali.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum mampu menyelesaikan',
@@ -877,7 +1143,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 4',
                     'nama' => 'Ketepatan ayat',
                     'deskripsi' => 'Ketepatan urutan ayat, kalimat, dan harakat surat yang dilafalkan secara mutqin.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum menguasai urutan',
@@ -894,7 +1160,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 4',
                     'nama' => 'Hafalan',
                     'deskripsi' => 'Kekuatan hafalan keseluruhan ayat pada surat yang diujikan.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum hafal ayat dan urutannya',
@@ -911,7 +1177,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 4',
                     'nama' => 'Pelafalan',
                     'deskripsi' => 'Kejelasan artikulasi dan fashahah lafadz ayat Al-Qur\'an.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Pelafalan tidak tepat dan kurang jelas',
@@ -928,7 +1194,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 4',
                     'nama' => 'Tajwid',
                     'deskripsi' => 'Penerapan kaidah tajwid secara konsisten pada saat melafalkan hafalan surat.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Memerlukan penguatan dasar',
@@ -945,7 +1211,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 4',
                     'nama' => 'Sambung ayat',
                     'deskripsi' => 'Kemampuan merespons dan melanjutkan potongan ayat yang dibacakan oleh pengamat.',
-                    'bobot' => 1.8,
+                    'bobot' => 1.4,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Belum mampu melanjutkan',
@@ -962,7 +1228,7 @@ class SPMBController extends Controller
                     'pos_label' => 'Pos 4',
                     'nama' => 'Kemandirian',
                     'deskripsi' => 'Kemandirian dan kepercayaan diri saat menyetorkan hafalan di hadapan pengamat.',
-                    'bobot' => 1.7,
+                    'bobot' => 1.6,
                     'status' => 'Aktif',
                     'rubrik' => [
                         1 => 'Membutuhkan pendampingan',
@@ -972,163 +1238,546 @@ class SPMBController extends Controller
                     ],
                 ],
 
-                // ── Kelompok Akademik ───────────────────────────────────────
+                // ── Kelompok Akademik (Numerasi, Literasi, Science, and English) ─────────────
+                // Pos 5: Asesmen Akademik Dasar - CBT (4 Mata Pelajaran, Skala 0–100)
                 [
-                    'id' => 'SMP-AKD-01',
-                    'aspek' => 'Kelompok Akademik',
-                    'nama' => 'Numerasi — Penalaran matematika kontekstual',
-                    'deskripsi' => 'Kemampuan menyelesaikan soal matematika setara kelas 6 SD termasuk pecahan, rasio, dan aljabar dasar.',
-                    'bobot' => 10,
+                    'id' => 'SMP-AKD-P5-01',
+                    'aspek' => 'Kelompok Akademik (Numerasi, Literasi, Science, and English)',
+                    'pos' => 'Pos 5: Asesmen Akademik Dasar - CBT',
+                    'pos_id' => 'pos-5',
+                    'pos_label' => 'Pos 5',
+                    'tipe' => 'cbt_score',
+                    'nama' => 'Literasi (Bahasa Indonesia)',
+                    'deskripsi' => 'Membaca pemahaman, menemukan ide pokok, menyimpulkan teks, memahami informasi tersurat dan tersirat, menyusun kalimat dan paragraf.',
+                    'bobot' => 7.0,
+                    'skor_maks' => 100,
                     'status' => 'Aktif',
                     'rubrik' => [
-                        1 => 'Tidak dapat mengerjakan soal setara kelas 4 SD.',
-                        2 => 'Mengerjakan soal kelas 5 SD dengan banyak kesalahan.',
-                        3 => 'Mengerjakan soal kelas 6 SD dengan benar >60%, sistematis.',
-                        4 => 'Mengerjakan soal kelas 6 SD dengan benar >90%, efisien.',
+                        1 => 'Skor CBT 0 – 59 (Perlu Pendampingan Khusus)',
+                        2 => 'Skor CBT 60 – 75 (Kategori Berkembang / Cukup)',
+                        3 => 'Skor CBT 76 – 85 (Kategori Baik / Tuntas)',
+                        4 => 'Skor CBT 86 – 100 (Kategori Sangat Baik / Mahir)',
                     ],
                 ],
                 [
-                    'id' => 'SMP-AKD-02',
-                    'aspek' => 'Kelompok Akademik',
-                    'nama' => 'Literasi — Pemahaman bacaan & menulis argumen',
-                    'deskripsi' => 'Kemampuan memahami teks 300–400 kata, mengidentifikasi ide pokok, dan menuliskan pendapat dengan alasan.',
-                    'bobot' => 10,
+                    'id' => 'SMP-AKD-P5-02',
+                    'aspek' => 'Kelompok Akademik (Numerasi, Literasi, Science, and English)',
+                    'pos' => 'Pos 5: Asesmen Akademik Dasar - CBT',
+                    'pos_id' => 'pos-5',
+                    'pos_label' => 'Pos 5',
+                    'tipe' => 'cbt_score',
+                    'nama' => 'Numerasi (Matematika)',
+                    'deskripsi' => 'Operasi bilangan bulat, pecahan, desimal, persen, perbandingan, pengukuran, geometri, dan pengolahan data.',
+                    'bobot' => 7.0,
+                    'skor_maks' => 100,
                     'status' => 'Aktif',
                     'rubrik' => [
-                        1 => 'Tidak dapat mengidentifikasi ide pokok teks.',
-                        2 => 'Mengidentifikasi ide pokok dengan panduan pertanyaan.',
-                        3 => 'Merangkum dan memberikan pendapat dengan alasan cukup.',
-                        4 => 'Analisis kritis, argumen terstruktur dengan bukti dari teks.',
+                        1 => 'Skor CBT 0 – 59 (Perlu Pendampingan Khusus)',
+                        2 => 'Skor CBT 60 – 75 (Kategori Berkembang / Cukup)',
+                        3 => 'Skor CBT 76 – 85 (Kategori Baik / Tuntas)',
+                        4 => 'Skor CBT 86 – 100 (Kategori Sangat Baik / Mahir)',
                     ],
                 ],
                 [
-                    'id' => 'SMP-AKD-03',
-                    'aspek' => 'Kelompok Akademik',
-                    'nama' => 'Science — Literasi sains & penalaran ilmiah',
-                    'deskripsi' => 'Kemampuan membaca fenomena alam, menghubungkan konsep IPA sederhana, dan menarik kesimpulan ilmiah.',
-                    'bobot' => 5,
+                    'id' => 'SMP-AKD-P5-03',
+                    'aspek' => 'Kelompok Akademik (Numerasi, Literasi, Science, and English)',
+                    'pos' => 'Pos 5: Asesmen Akademik Dasar - CBT',
+                    'pos_id' => 'pos-5',
+                    'pos_label' => 'Pos 5',
+                    'tipe' => 'cbt_score',
+                    'nama' => 'Science (IPAS)',
+                    'deskripsi' => 'Makhluk hidup, organ tubuh, ekosistem, energi, materi, lingkungan, bumi dan antariksa, serta fenomena sosial.',
+                    'bobot' => 7.0,
+                    'skor_maks' => 100,
                     'status' => 'Aktif',
                     'rubrik' => [
-                        1 => 'Belum bisa menghubungkan fenomena dengan konsep IPA.',
-                        2 => 'Mengenali konsep IPA namun penalaran masih dangkal.',
-                        3 => 'Menghubungkan konsep IPA dengan fenomena, menarik kesimpulan.',
-                        4 => 'Menganalisis secara kritis, mengajukan hipotesis sederhana.',
+                        1 => 'Skor CBT 0 – 59 (Perlu Pendampingan Khusus)',
+                        2 => 'Skor CBT 60 – 75 (Kategori Berkembang / Cukup)',
+                        3 => 'Skor CBT 76 – 85 (Kategori Baik / Tuntas)',
+                        4 => 'Skor CBT 86 – 100 (Kategori Sangat Baik / Mahir)',
                     ],
                 ],
                 [
-                    'id' => 'SMP-AKD-04',
-                    'aspek' => 'Kelompok Akademik',
-                    'nama' => 'English — Daily conversation & reading comprehension',
-                    'deskripsi' => 'Kemampuan berkomunikasi dalam bahasa Inggris sehari-hari dan memahami teks pendek berbahasa Inggris.',
-                    'bobot' => 5,
+                    'id' => 'SMP-AKD-P5-04',
+                    'aspek' => 'Kelompok Akademik (Numerasi, Literasi, Science, and English)',
+                    'pos' => 'Pos 5: Asesmen Akademik Dasar - CBT',
+                    'pos_id' => 'pos-5',
+                    'pos_label' => 'Pos 5',
+                    'tipe' => 'cbt_score',
+                    'nama' => 'English (Bahasa Inggris)',
+                    'deskripsi' => 'Vocabulary, reading comprehension, basic grammar, and sentence construction.',
+                    'bobot' => 7.0,
+                    'skor_maks' => 100,
                     'status' => 'Aktif',
                     'rubrik' => [
-                        1 => 'Belum bisa merespons dalam bahasa Inggris.',
-                        2 => 'Merespons dengan kata atau frasa pendek, banyak jeda.',
-                        3 => 'Berkomunikasi dengan kalimat lengkap, ada kesalahan minor.',
-                        4 => 'Percakapan lancar, kosakata kaya, memahami teks pendek.',
-                    ],
-                ],
-
-                // ── Kelompok Potensi Bakat Minat ───────────────────────────────────
-                [
-                    'id' => 'SMP-SKL-01',
-                    'aspek' => 'Kelompok Potensi Bakat Minat',
-                    'nama' => 'Keterampilan presentasi & public speaking',
-                    'deskripsi' => 'Kemampuan menyampaikan gagasan secara lisan di depan kelompok dengan percaya diri dan terstruktur.',
-                    'bobot' => 5,
-                    'status' => 'Aktif',
-                    'rubrik' => [
-                        1 => 'Tidak berani berbicara di depan kelompok, diam.',
-                        2 => 'Berbicara singkat, suara pelan, kurang terstruktur.',
-                        3 => 'Menyampaikan gagasan dengan cukup jelas dan terstruktur.',
-                        4 => 'Presentasi percaya diri, struktur jelas, menarik perhatian.',
-                    ],
-                ],
-                [
-                    'id' => 'SMP-SKL-02',
-                    'aspek' => 'Kelompok Potensi Bakat Minat',
-                    'nama' => 'Keterampilan digital & literasi teknologi',
-                    'deskripsi' => 'Kemampuan menggunakan perangkat digital untuk belajar, mengetik, dan mencari informasi secara bertanggung jawab.',
-                    'bobot' => 5,
-                    'status' => 'Aktif',
-                    'rubrik' => [
-                        1 => 'Belum terbiasa menggunakan perangkat digital.',
-                        2 => 'Dapat menggunakan perangkat dasar dengan bimbingan.',
-                        3 => 'Mandiri menggunakan perangkat untuk tugas belajar.',
-                        4 => 'Memanfaatkan teknologi secara kreatif dan bertanggung jawab.',
-                    ],
-                ],
-                [
-                    'id' => 'SMP-SKL-03',
-                    'aspek' => 'Kelompok Potensi Bakat Minat',
-                    'nama' => 'Keterampilan seni, olahraga, atau prakarya',
-                    'deskripsi' => 'Minat dan kemampuan dalam salah satu bidang seni (kaligrafi, nasyid), olahraga, atau prakarya islami.',
-                    'bobot' => 5,
-                    'status' => 'Aktif',
-                    'rubrik' => [
-                        1 => 'Belum menunjukkan minat atau kemampuan khusus.',
-                        2 => 'Menunjukkan minat, keterampilan masih berkembang.',
-                        3 => 'Memiliki keterampilan yang baik di salah satu bidang.',
-                        4 => 'Keterampilan menonjol, aktif mengembangkan dan berbagi.',
+                        1 => 'Skor CBT 0 – 59 (Perlu Pendampingan Khusus)',
+                        2 => 'Skor CBT 60 – 75 (Kategori Berkembang / Cukup)',
+                        3 => 'Skor CBT 76 – 85 (Kategori Baik / Tuntas)',
+                        4 => 'Skor CBT 86 – 100 (Kategori Sangat Baik / Mahir)',
                     ],
                 ],
 
-                // ── Kelompok Perkembangan Pribadi & Sosial ──────────────────
+                // ── Kelompok Potensi Bakat dan Minat (Pos 6 & Pos 7) ─────────────────────
+                // Pos 6: Asesmen Motorik Halus dan Kreativitas (7 Indikator, Skor Maksimal = 28)
+                [
+                    'id' => 'SMP-AKD-P6-01',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 6: Asesmen Motorik Halus & Kreativitas',
+                    'pos_id' => 'pos-6',
+                    'pos_label' => 'Pos 6',
+                    'nama' => 'Koordinasi mata dan tangan',
+                    'deskripsi' => 'Sinkronisasi visual dan motorik dalam memanipulasi alat, memotong, atau membentuk benda.',
+                    'bobot' => 1.1,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Membutuhkan pendampingan dalam menyelesaikan sebagian besar tahapan',
+                        2 => 'Mampu menyelesaikan sebagian tugas dengan beberapa arahan',
+                        3 => 'Mampu menyelesaikan tugas dengan sedikit kekeliruan',
+                        4 => 'Mampu menyelesaikan tugas dengan tepat, terkontrol, dan mandiri',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P6-02',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 6: Asesmen Motorik Halus & Kreativitas',
+                    'pos_id' => 'pos-6',
+                    'pos_label' => 'Pos 6',
+                    'nama' => 'Ketepatan membuat bentuk',
+                    'deskripsi' => 'Akurasi dan proporsi dalam membuat wujud atau pola visual sesuai instruksi tugas.',
+                    'bobot' => 1.1,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Membutuhkan pendampingan dalam menyelesaikan sebagian besar tahapan',
+                        2 => 'Mampu menyelesaikan sebagian tugas dengan beberapa arahan',
+                        3 => 'Mampu menyelesaikan tugas dengan sedikit kekeliruan',
+                        4 => 'Mampu menyelesaikan tugas dengan tepat, terkontrol, dan mandiri',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P6-03',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 6: Asesmen Motorik Halus & Kreativitas',
+                    'pos_id' => 'pos-6',
+                    'pos_label' => 'Pos 6',
+                    'nama' => 'Kontrol gerakan tangan',
+                    'deskripsi' => 'Kestabilan, keluwesan jari-jemari, dan regulasi tekanan saat bekerja dengan detail halus.',
+                    'bobot' => 1.1,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Membutuhkan pendampingan dalam menyelesaikan sebagian besar tahapan',
+                        2 => 'Mampu menyelesaikan sebagian tugas dengan beberapa arahan',
+                        3 => 'Mampu menyelesaikan tugas dengan sedikit kekeliruan',
+                        4 => 'Mampu menyelesaikan tugas dengan tepat, terkontrol, dan mandiri',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P6-04',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 6: Asesmen Motorik Halus & Kreativitas',
+                    'pos_id' => 'pos-6',
+                    'pos_label' => 'Pos 6',
+                    'nama' => 'Ketelitian mengikuti instruksi',
+                    'deskripsi' => 'Kepatuhan pada tahapan prosedur teknis dan spesifikasi tugas prakarya/kriya.',
+                    'bobot' => 1.1,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Membutuhkan pendampingan dalam menyelesaikan sebagian besar tahapan',
+                        2 => 'Mampu menyelesaikan sebagian tugas dengan beberapa arahan',
+                        3 => 'Mampu menyelesaikan tugas dengan sedikit kekeliruan',
+                        4 => 'Mampu menyelesaikan tugas dengan tepat, terkontrol, dan mandiri',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P6-05',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 6: Asesmen Motorik Halus & Kreativitas',
+                    'pos_id' => 'pos-6',
+                    'pos_label' => 'Pos 6',
+                    'nama' => 'Kemampuan memahami ruang dan bentuk',
+                    'deskripsi' => 'Spasial visual, kesadaran dimensi (2D/3D), dan penempatan elemen karya secara seimbang.',
+                    'bobot' => 1.1,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Membutuhkan pendampingan dalam menyelesaikan sebagian besar tahapan',
+                        2 => 'Mampu menyelesaikan sebagian tugas dengan beberapa arahan',
+                        3 => 'Mampu menyelesaikan tugas dengan sedikit kekeliruan',
+                        4 => 'Mampu menyelesaikan tugas dengan tepat, terkontrol, dan mandiri',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P6-06',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 6: Asesmen Motorik Halus & Kreativitas',
+                    'pos_id' => 'pos-6',
+                    'pos_label' => 'Pos 6',
+                    'nama' => 'Kemampuan menyusun objek',
+                    'deskripsi' => 'Keterampilan merangkai komponen, menata bagian per bagian hingga menjadi kesatuan utuh.',
+                    'bobot' => 1.1,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Membutuhkan pendampingan dalam menyelesaikan sebagian besar tahapan',
+                        2 => 'Mampu menyelesaikan sebagian tugas dengan beberapa arahan',
+                        3 => 'Mampu menyelesaikan tugas dengan sedikit kekeliruan',
+                        4 => 'Mampu menyelesaikan tugas dengan tepat, terkontrol, dan mandiri',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P6-07',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 6: Asesmen Motorik Halus & Kreativitas',
+                    'pos_id' => 'pos-6',
+                    'pos_label' => 'Pos 6',
+                    'nama' => 'Kerapian dan fungsi hasil karya',
+                    'deskripsi' => 'Finishing touch, kebersihan, kekokohan struktur, dan kesesuaian fungsi dari produk karya.',
+                    'bobot' => 1.4,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Membutuhkan pendampingan dalam menyelesaikan sebagian besar tahapan',
+                        2 => 'Mampu menyelesaikan sebagian tugas dengan beberapa arahan',
+                        3 => 'Mampu menyelesaikan tugas dengan sedikit kekeliruan',
+                        4 => 'Mampu menyelesaikan tugas dengan tepat, terkontrol, dan mandiri',
+                    ],
+                ],
+
+                // Pos 7: Asesmen Kreativitas dan Inovasi (6 Aspek, Skor Maksimal = 24)
+                [
+                    'id' => 'SMP-AKD-P7-01',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 7: Asesmen Kreativitas & Inovasi',
+                    'pos_id' => 'pos-7',
+                    'pos_label' => 'Pos 7',
+                    'nama' => 'Fluency',
+                    'deskripsi' => 'Kelancaran menghasilkan sejumlah alternatif ide dan gagasan yang relevan dengan topik.',
+                    'bobot' => 1.3,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum menghasilkan ide yang relevan',
+                        2 => 'Menghasilkan sedikit ide',
+                        3 => 'Menghasilkan beberapa ide',
+                        4 => 'Menghasilkan banyak ide relevan',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P7-02',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 7: Asesmen Kreativitas & Inovasi',
+                    'pos_id' => 'pos-7',
+                    'pos_label' => 'Pos 7',
+                    'nama' => 'Flexibility',
+                    'deskripsi' => 'Keluwesan sudut pandang, keberagaman pendekatan, dan cara berpikir yang tidak kaku.',
+                    'bobot' => 1.3,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum menunjukkan variasi',
+                        2 => 'Ide masih terbatas pada satu pendekatan',
+                        3 => 'Ide memiliki beberapa variasi',
+                        4 => 'Ide berasal dari beragam pendekatan',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P7-03',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 7: Asesmen Kreativitas & Inovasi',
+                    'pos_id' => 'pos-7',
+                    'pos_label' => 'Pos 7',
+                    'nama' => 'Originality',
+                    'deskripsi' => 'Keaslian gagasan, kebaruan (novelty), dan ide yang tidak klise atau berbeda dari kebiasaan umum.',
+                    'bobot' => 1.3,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum mampu mengembangkan ide',
+                        2 => 'Ide masih umum',
+                        3 => 'Ada pengembangan dari ide umum',
+                        4 => 'Ide menunjukkan unsur kebaruan yang jelas',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P7-04',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 7: Asesmen Kreativitas & Inovasi',
+                    'pos_id' => 'pos-7',
+                    'pos_label' => 'Pos 7',
+                    'nama' => 'Elaboration',
+                    'deskripsi' => 'Kemampuan merinci rancangan, memperkaya detail teknis, dan memperjelas implementasi ide.',
+                    'bobot' => 1.3,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum mengembangkan rancangan',
+                        2 => 'Rancangan masih sederhana',
+                        3 => 'Rancangan cukup terperinci',
+                        4 => 'Rancangan sangat terperinci',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P7-05',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 7: Asesmen Kreativitas & Inovasi',
+                    'pos_id' => 'pos-7',
+                    'pos_label' => 'Pos 7',
+                    'nama' => 'Problem solving',
+                    'deskripsi' => 'Ketepatan solusi yang diajukan terhadap masalah yang dihadapi secara logis dan aplikatif.',
+                    'bobot' => 1.4,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum menemukan solusi yang sesuai',
+                        2 => 'Solusi memerlukan pengembangan',
+                        3 => 'Solusi relevan dan cukup logis',
+                        4 => 'Solusi relevan, logis, dan dapat diterapkan',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-AKD-P7-06',
+                    'aspek' => 'Kelompok Potensi Bakat dan Minat',
+                    'pos' => 'Pos 7: Asesmen Kreativitas & Inovasi',
+                    'pos_id' => 'pos-7',
+                    'pos_label' => 'Pos 7',
+                    'nama' => 'Communication',
+                    'deskripsi' => 'Kemampuan mempresentasikan dan mengomunikasikan gagasan kreatif dengan runut dan persuasif.',
+                    'bobot' => 1.4,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Memerlukan bantuan untuk menjelaskan',
+                        2 => 'Penjelasan masih terbatas',
+                        3 => 'Penjelasan cukup jelas',
+                        4 => 'Menjelaskan ide dengan runtut dan alasan kuat',
+                    ],
+                ],
+
+                // ── Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok) ──
+                // Rubrik Observasi & Wawancara (6 Aspek, Skor Maksimal = 24, Bobot 16%)
                 [
                     'id' => 'SMP-PSI-01',
-                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial',
-                    'nama' => 'Daily conversation — Komunikasi sosial efektif',
-                    'deskripsi' => 'Kemampuan memulai, menjaga, dan mengakhiri percakapan sehari-hari dengan teman sebaya secara natural dan santun.',
-                    'bobot' => 5,
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'nama' => 'Kemandirian',
+                    'deskripsi' => 'Melakukan tugas secara mandiri dan mengelola diri tanpa bergantung berlebihan.',
+                    'bobot' => 2.7,
                     'status' => 'Aktif',
                     'rubrik' => [
-                        1 => 'Sangat pendiam, menghindari interaksi dengan teman baru.',
-                        2 => 'Menjawab bila ditanya, belum menginisiasi percakapan.',
-                        3 => 'Aktif berkomunikasi, percakapan mengalir dengan cukup baik.',
-                        4 => 'Komunikasi hangat dan natural, mudah berteman dengan siapa saja.',
+                        1 => 'Memerlukan pendampingan intensif',
+                        2 => 'Beberapa kali memerlukan bantuan',
+                        3 => 'Sedikit arahan',
+                        4 => 'Melakukan tugas secara mandiri',
                     ],
                 ],
                 [
                     'id' => 'SMP-PSI-02',
-                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial',
-                    'nama' => 'Kepemimpinan & kerja tim',
-                    'deskripsi' => 'Kemampuan berkolaborasi dalam tim, menghargai pendapat orang lain, dan mengambil peran aktif dalam kelompok.',
-                    'bobot' => 5,
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'nama' => 'Komunikasi',
+                    'deskripsi' => 'Menyampaikan gagasan, berpendapat, dan merespons lawan bicara secara efektif.',
+                    'bobot' => 2.7,
                     'status' => 'Aktif',
                     'rubrik' => [
-                        1 => 'Tidak mau bekerja dalam tim, cenderung individualistis.',
-                        2 => 'Mau bekerja dalam tim namun pasif.',
-                        3 => 'Aktif berkontribusi, menghargai pendapat anggota lain.',
-                        4 => 'Memimpin tim secara efektif, mendorong partisipasi semua.',
+                        1 => 'Belum menunjukkan respons yang memadai',
+                        2 => 'Masih terbatas',
+                        3 => 'Cukup jelas',
+                        4 => 'Menyampaikan gagasan dengan jelas',
                     ],
                 ],
                 [
                     'id' => 'SMP-PSI-03',
-                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial',
-                    'nama' => 'Regulasi emosi & manajemen tekanan',
-                    'deskripsi' => 'Kemampuan mengelola emosi saat menghadapi tantangan, kegagalan, atau tekanan dalam situasi observasi.',
-                    'bobot' => 5,
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'nama' => 'Kerja sama',
+                    'deskripsi' => 'Aktif berpartisipasi dan menghargai anggota lain dalam aktivitas kelompok.',
+                    'bobot' => 2.7,
                     'status' => 'Aktif',
                     'rubrik' => [
-                        1 => 'Mudah frustrasi atau menangis saat menemui kesulitan.',
-                        2 => 'Kurang stabil, perlu dorongan verbal dari guru.',
-                        3 => 'Cukup tenang menghadapi tekanan, pemulihan cepat.',
-                        4 => 'Sangat tenang, mampu menghibur teman yang kesulitan.',
+                        1 => 'Belum terlibat secara konsisten',
+                        2 => 'Terlibat setelah diarahkan',
+                        3 => 'Bekerja sama dengan baik',
+                        4 => 'Aktif dan menghargai anggota lain',
                     ],
                 ],
                 [
                     'id' => 'SMP-PSI-04',
-                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial',
-                    'nama' => 'Kemandirian & tanggung jawab pribadi',
-                    'deskripsi' => 'Tingkat kemandirian dalam mengatur diri, menyelesaikan tugas tanpa diingatkan, dan bertanggung jawab atas pilihan.',
-                    'bobot' => 5,
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'nama' => 'Regulasi emosi',
+                    'deskripsi' => 'Mampu mengenali dan mengelola respons emosional dalam berbagai situasi pengamatan.',
+                    'bobot' => 2.7,
                     'status' => 'Aktif',
                     'rubrik' => [
-                        1 => 'Sangat bergantung pada orang lain untuk menyelesaikan tugas.',
-                        2 => 'Menyelesaikan tugas dengan banyak pengingat.',
-                        3 => 'Mandiri dengan pengawasan minimal, tanggung jawab baik.',
-                        4 => 'Sangat mandiri, proaktif, dan dapat dipercaya sepenuhnya.',
+                        1 => 'Membutuhkan pendampingan lebih lanjut',
+                        2 => 'Masih memerlukan arahan',
+                        3 => 'Umumnya mampu',
+                        4 => 'Mampu mengenali dan mengelola respons',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-05',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'nama' => 'Tanggung jawab',
+                    'deskripsi' => 'Konsistensi menyelesaikan tugas yang diberikan hingga tuntas.',
+                    'bobot' => 2.6,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum menunjukkan penyelesaian tugas',
+                        2 => 'Memerlukan pengingat',
+                        3 => 'Sebagian besar selesai',
+                        4 => 'Konsisten menyelesaikan tugas',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-06',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'nama' => 'Empati',
+                    'deskripsi' => 'Menunjukkan kepedulian secara aktif terhadap sesama dan lingkungan sekitar.',
+                    'bobot' => 2.6,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum tampak dalam situasi pengamatan',
+                        2 => 'Memerlukan pengingat',
+                        3 => 'Menunjukkan kepedulian',
+                        4 => 'Menunjukkan kepedulian secara aktif',
+                    ],
+                ],
+                // ── Sub-instrumen Angket Refleksi Diri Calon Murid (10 Pernyataan, Diagnostik) ───
+                [
+                    'id' => 'SMP-PSI-A01',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya mengetahui hal yang menjadi kelebihan saya',
+                    'deskripsi' => 'Kesadaran diri terhadap kekuatan dan potensi yang dimiliki.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-A02',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya berusaha menyelesaikan tugas yang diberikan',
+                    'deskripsi' => 'Komitmen dan ketekunan dalam menuntaskan tanggung jawab akademik.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-A03',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya berani bertanya ketika belum memahami pelajaran',
+                    'deskripsi' => 'Keberanian mengungkapkan ketidakpahaman demi kemajuan belajar.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-A04',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya dapat menerima masukan dari orang lain',
+                    'deskripsi' => 'Keterbukaan menerima kritik dan saran secara positif.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-A05',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya berusaha mengelola waktu belajar',
+                    'deskripsi' => 'Kemampuan merencanakan dan menggunakan waktu belajar secara efektif.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-A06',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya menghargai perbedaan pendapat',
+                    'deskripsi' => 'Sikap toleran terhadap sudut pandang dan pendapat yang berbeda.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-A07',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya bersedia membantu teman yang membutuhkan',
+                    'deskripsi' => 'Kepedulian sosial dan kesiapan memberikan bantuan kepada teman.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-A08',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya berusaha bertanggung jawab atas kesalahan saya',
+                    'deskripsi' => 'Kesediaan mengakui dan memperbaiki kesalahan yang telah dilakukan.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-A09',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya bersedia mencoba kegiatan baru',
+                    'deskripsi' => 'Keterbukaan dan antusiasme dalam menghadapi pengalaman baru.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
+                    ],
+                ],
+                [
+                    'id' => 'SMP-PSI-A10',
+                    'aspek' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
+                    'sub_instrumen' => 'angket',
+                    'nama' => 'Saya menggunakan perangkat digital dengan memperhatikan tujuan penggunaannya',
+                    'deskripsi' => 'Kesadaran dan kedisiplinan dalam pemanfaatan teknologi digital secara bijak.',
+                    'bobot' => 0,
+                    'status' => 'Aktif',
+                    'rubrik' => [
+                        1 => 'Belum Sesuai',
+                        2 => 'Kadang-kadang',
+                        3 => 'Sesuai',
+                        4 => 'Sangat Sesuai',
                     ],
                 ],
             ],
@@ -1139,7 +1788,205 @@ class SPMBController extends Controller
         // Group by aspek
         $grouped = collect($indikator)->groupBy('aspek');
 
-        return view('admin.indikator', compact('user', 'indikator', 'grouped', 'jenjang'));
+        // Database Peserta & Rekapitulasi Terpadu SMP (4 Kelompok)
+        $siswaData = [
+            'smp' => [
+                [
+                    'no' => 'SPMB-2026-SMP01',
+                    'name' => 'Bilal Ramadhan Putra',
+                    'kelas_target' => 'Kelas 7 Bilingual',
+                    'keagamaan' => [
+                        'pos1' => 26,
+                        'pos2' => 25,
+                        'pos3' => 23,
+                        'pos4' => 26,
+                        'nilai' => 92.7,
+                    ],
+                    'akademik' => [
+                        'cbt' => ['indo' => 92, 'mtk' => 95, 'ipas' => 90, 'inggris' => 95],
+                        'pos5' => 93.0,
+                        'nilai' => 93.0,
+                    ],
+                    'bakat_minat' => [
+                        'pos6_skor' => 26,
+                        'pos6' => 92.9,
+                        'pos7_skor' => 22,
+                        'pos7' => 91.7,
+                        'nilai' => 92.3,
+                    ],
+                    'pribadi_sosial' => [
+                        'skor' => 15,
+                        'nilai' => 93.8,
+                    ],
+                    'psikologi' => [
+                        'angket_skor' => 37,
+                        'angket_nilai' => 92.5,
+                        'observasi_skor' => 22,
+                        'observasi_nilai' => 91.7,
+                        'nilai' => 92.1,
+                    ],
+                    'nilai_terpadu' => 93.0,
+                    'kategori' => 'Sangat Baik',
+                    'rekomendasi' => 'Program Pengayaan / Kelas Unggulan',
+                ],
+                [
+                    'no' => 'SPMB-2026-SMP02',
+                    'name' => 'Salma Hanifah',
+                    'kelas_target' => 'Kelas 7 Tahfidz',
+                    'keagamaan' => [
+                        'pos1' => 27,
+                        'pos2' => 28,
+                        'pos3' => 24,
+                        'pos4' => 27,
+                        'nilai' => 97.3,
+                    ],
+                    'akademik' => [
+                        'cbt' => ['indo' => 94, 'mtk' => 88, 'ipas' => 90, 'inggris' => 92],
+                        'pos5' => 91.0,
+                        'nilai' => 91.0,
+                    ],
+                    'bakat_minat' => [
+                        'pos6_skor' => 25,
+                        'pos6' => 89.3,
+                        'pos7_skor' => 23,
+                        'pos7' => 95.8,
+                        'nilai' => 92.6,
+                    ],
+                    'pribadi_sosial' => [
+                        'skor' => 16,
+                        'nilai' => 100.0,
+                    ],
+                    'psikologi' => [
+                        'angket_skor' => 38,
+                        'angket_nilai' => 95.0,
+                        'observasi_skor' => 23,
+                        'observasi_nilai' => 95.8,
+                        'nilai' => 95.4,
+                    ],
+                    'nilai_terpadu' => 95.2,
+                    'kategori' => 'Sangat Baik',
+                    'rekomendasi' => 'Program Pengayaan / Kelas Unggulan',
+                ],
+                [
+                    'no' => 'SPMB-2026-SMP03',
+                    'name' => 'Umar Al-Faruq',
+                    'kelas_target' => 'Kelas 7 Bilingual',
+                    'keagamaan' => [
+                        'pos1' => 23,
+                        'pos2' => 22,
+                        'pos3' => 20,
+                        'pos4' => 23,
+                        'nilai' => 81.1,
+                    ],
+                    'akademik' => [
+                        'cbt' => ['indo' => 85, 'mtk' => 90, 'ipas' => 86, 'inggris' => 83],
+                        'pos5' => 86.0,
+                        'nilai' => 86.0,
+                    ],
+                    'bakat_minat' => [
+                        'pos6_skor' => 23,
+                        'pos6' => 82.1,
+                        'pos7_skor' => 20,
+                        'pos7' => 83.3,
+                        'nilai' => 82.7,
+                    ],
+                    'pribadi_sosial' => [
+                        'skor' => 13,
+                        'nilai' => 81.3,
+                    ],
+                    'psikologi' => [
+                        'angket_skor' => 31,
+                        'angket_nilai' => 77.5,
+                        'observasi_skor' => 19,
+                        'observasi_nilai' => 79.2,
+                        'nilai' => 78.4,
+                    ],
+                    'nilai_terpadu' => 82.8,
+                    'kategori' => 'Baik',
+                    'rekomendasi' => 'Pembelajaran Reguler',
+                ],
+                [
+                    'no' => 'SPMB-2026-SMP04',
+                    'name' => 'Jasmine Alya Zahra',
+                    'kelas_target' => 'Kelas 7',
+                    'keagamaan' => [
+                        'pos1' => 20,
+                        'pos2' => 19,
+                        'pos3' => 17,
+                        'pos4' => 19,
+                        'nilai' => 69.3,
+                    ],
+                    'akademik' => [
+                        'cbt' => ['indo' => 76, 'mtk' => 68, 'ipas' => 72, 'inggris' => 72],
+                        'pos5' => 72.0,
+                        'nilai' => 72.0,
+                    ],
+                    'bakat_minat' => [
+                        'pos6_skor' => 20,
+                        'pos6' => 71.4,
+                        'pos7_skor' => 17,
+                        'pos7' => 70.8,
+                        'nilai' => 71.1,
+                    ],
+                    'pribadi_sosial' => [
+                        'skor' => 11,
+                        'nilai' => 68.8,
+                    ],
+                    'psikologi' => [
+                        'angket_skor' => 27,
+                        'angket_nilai' => 67.5,
+                        'observasi_skor' => 16,
+                        'observasi_nilai' => 66.7,
+                        'nilai' => 67.1,
+                    ],
+                    'nilai_terpadu' => 70.3,
+                    'kategori' => 'Berkembang',
+                    'rekomendasi' => 'Pendampingan Belajar',
+                ],
+                [
+                    'no' => 'SPMB-2026-SMP05',
+                    'name' => 'Hafizh Mubarok',
+                    'kelas_target' => 'Kelas 7 Tahfidz',
+                    'keagamaan' => [
+                        'pos1' => 22,
+                        'pos2' => 21,
+                        'pos3' => 18,
+                        'pos4' => 21,
+                        'nilai' => 76.2,
+                    ],
+                    'akademik' => [
+                        'cbt' => ['indo' => 60, 'mtk' => 52, 'ipas' => 55, 'inggris' => 57],
+                        'pos5' => 56.0,
+                        'nilai' => 56.0,
+                    ],
+                    'bakat_minat' => [
+                        'pos6_skor' => 16,
+                        'pos6' => 57.1,
+                        'pos7_skor' => 14,
+                        'pos7' => 58.3,
+                        'nilai' => 57.7,
+                    ],
+                    'pribadi_sosial' => [
+                        'skor' => 10,
+                        'nilai' => 62.5,
+                    ],
+                    'psikologi' => [
+                        'angket_skor' => 25,
+                        'angket_nilai' => 62.5,
+                        'observasi_skor' => 15,
+                        'observasi_nilai' => 62.5,
+                        'nilai' => 62.5,
+                    ],
+                    'nilai_terpadu' => 63.1,
+                    'kategori' => 'Berkembang',
+                    'rekomendasi' => 'Pendampingan Belajar',
+                ],
+            ],
+        ];
+
+        $siswa = $siswaData[$jenjang] ?? $siswaData['smp'];
+
+        return view('admin.indikator', compact('user', 'indikator', 'grouped', 'jenjang', 'siswa'));
     }
 
     /**
