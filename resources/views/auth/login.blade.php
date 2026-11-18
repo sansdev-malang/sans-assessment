@@ -184,47 +184,6 @@
                         </button>
                     </form>
 
-                    <!-- Quick Demo Guru Pengamat SMP Selector -->
-                    <div class="rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3 space-y-2">
-                        <div class="flex items-center justify-between text-[11px]">
-                            <span class="font-medium text-zinc-300 flex items-center gap-1.5">
-                                <i data-lucide="school" class="h-3.5 w-3.5 text-emerald-400"></i>
-                                <span>Demo Akun Guru Pengamat SMP:</span>
-                            </span>
-                            <span class="text-[10px] text-zinc-500 font-mono">4 Kelompok Pos</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-1.5 text-[10px]">
-                            <a href="{{ route('guru.observasi', ['guru_nip' => 'GSMP-2026-01']) }}" class="flex items-center gap-1.5 p-1.5 rounded border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-800 text-zinc-300 hover:text-zinc-100 transition-colors">
-                                <span class="h-2 w-2 rounded-full bg-emerald-400 shrink-0"></span>
-                                <div class="truncate text-left">
-                                    <div class="font-medium truncate">Ust. Hadi Susanto</div>
-                                    <div class="text-[9px] text-zinc-500 truncate">Kel. Keagamaan (Pos 1–4)</div>
-                                </div>
-                            </a>
-                            <a href="{{ route('guru.observasi', ['guru_nip' => 'GSMP-2026-02']) }}" class="flex items-center gap-1.5 p-1.5 rounded border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-800 text-zinc-300 hover:text-zinc-100 transition-colors">
-                                <span class="h-2 w-2 rounded-full bg-blue-400 shrink-0"></span>
-                                <div class="truncate text-left">
-                                    <div class="font-medium truncate">Ustdz. Imarotul M.</div>
-                                    <div class="text-[9px] text-zinc-500 truncate">Kel. Akademik (Pos 5 CBT)</div>
-                                </div>
-                            </a>
-                            <a href="{{ route('guru.observasi', ['guru_nip' => 'GSMP-2026-03']) }}" class="flex items-center gap-1.5 p-1.5 rounded border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-800 text-zinc-300 hover:text-zinc-100 transition-colors">
-                                <span class="h-2 w-2 rounded-full bg-purple-400 shrink-0"></span>
-                                <div class="truncate text-left">
-                                    <div class="font-medium truncate">Ustdz. Mutaahirotul</div>
-                                    <div class="text-[9px] text-zinc-500 truncate">Bakat &amp; Minat (Pos 6–7)</div>
-                                </div>
-                            </a>
-                            <a href="{{ route('guru.observasi', ['guru_nip' => 'GSMP-2026-04']) }}" class="flex items-center gap-1.5 p-1.5 rounded border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-800 text-zinc-300 hover:text-zinc-100 transition-colors">
-                                <span class="h-2 w-2 rounded-full bg-amber-400 shrink-0"></span>
-                                <div class="truncate text-left">
-                                    <div class="font-medium truncate">Ust. Davies Yudisno</div>
-                                    <div class="text-[9px] text-zinc-500 truncate">Pribadi &amp; Sosial (Pos 8/BK)</div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-
                     <p class="px-4 text-center text-[11px] text-zinc-500 leading-normal">
                         Perguruan Anak Saleh &bull; Sistem Asesmen Siswa Baru Terpadu
                     </p>

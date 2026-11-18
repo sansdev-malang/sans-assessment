@@ -9,6 +9,7 @@ Route::post('/login', [SPMBController::class, 'login'])->name('login.post');
 
 // Halaman Observasi untuk Guru
 Route::get('/observasi', [SPMBController::class, 'observasi'])->name('guru.observasi');
+Route::post('/observasi/simpan', [SPMBController::class, 'simpanObservasi'])->name('guru.observasi.simpan');
 
 // Dashboard Observasi untuk Admin SPMB
 Route::get('/admin/dashboard', [SPMBController::class, 'dashboard'])->name('admin.dashboard');

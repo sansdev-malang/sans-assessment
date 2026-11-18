@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>Observasi Guru Pengamat SMP — SAANS Assessment</title>
         
         <!-- Theme Initialization Script (Prevents FOUT) -->
@@ -114,47 +115,32 @@
             </div>
 
             <!-- ========================================================================= -->
-            <!-- 1. GURU PENGAMAT SWITCHER STRIP (Horizontal Swipe on Smartphones)          -->
+            <!-- 1. IDENTITAS RUANG ASESMEN AKTIF & GURU PENGAMAT                          -->
             <!-- ========================================================================= -->
-            <div class="rounded-xl border border-zinc-800 bg-zinc-900/70 p-2.5 sm:p-3 space-y-2">
-                <div class="flex items-center justify-between text-xs px-1">
-                    <span class="font-semibold text-zinc-200 flex items-center gap-1.5">
-                        <i data-lucide="door-open" class="h-3.5 w-3.5 text-emerald-400"></i>
-                        <span>Pilih Ruang / Guru Pengamat SMP (4 Kelompok):</span>
+            <div class="rounded-xl border border-zinc-800 bg-zinc-900/70 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <span class="h-10 w-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 bg-emerald-500 text-zinc-950 shadow">
+                        {{ $activeGuru['avatar'] ?? 'GP' }}
                     </span>
-                    <span class="text-[10px] text-zinc-500 font-mono hidden sm:inline">Pilih ruang untuk menilai</span>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-bold text-zinc-100 sm:text-sm">{{ $activeGuru['kelompok'] }}</span>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 font-semibold flex items-center gap-1">
+                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span>Ruang Aktif</span>
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-zinc-400 mt-0.5">
+                            Pengamat: <strong class="text-zinc-200">{{ $activeGuru['name'] }}</strong> ({{ $activeGuru['nip'] }}) &bull; {{ $activeGuru['pos_desc'] }}
+                        </p>
+                    </div>
                 </div>
 
-                <!-- Touch-friendly Horizontal Scrolling Pill Row -->
-                <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 pt-0.5">
-                    @foreach ($allGuruSMP as $nip => $guru)
-                        @php
-                            $isActive = ($activeGuru['nip'] === $nip);
-                        @endphp
-                        <a 
-                            href="{{ route('guru.observasi', ['guru_nip' => $nip, 'siswa_no' => $activeSiswa['no']]) }}" 
-                            class="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border text-left transition-all text-xs
-                                {{ $isActive 
-                                    ? 'border-emerald-500 bg-emerald-950/30 text-zinc-100 shadow-sm ring-1 ring-emerald-500/50' 
-                                    : 'border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700' }}"
-                        >
-                            <span class="h-6 w-6 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0
-                                {{ $isActive ? 'bg-emerald-500 text-zinc-950' : 'bg-zinc-800 text-zinc-300' }}">
-                                {{ $guru['avatar'] }}
-                            </span>
-                            <div class="truncate max-w-[150px] sm:max-w-none">
-                                <div class="font-semibold truncate text-[11px] sm:text-xs {{ $isActive ? 'text-zinc-100' : 'text-zinc-300' }}">
-                                    {{ $guru['kelompok_short'] }}
-                                </div>
-                                <div class="text-[10px] text-zinc-500 truncate">
-                                    {{ $guru['name'] }}
-                                </div>
-                            </div>
-                            @if($isActive)
-                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-                            @endif
-                        </a>
-                    @endforeach
+                <div class="flex items-center gap-2 self-start sm:self-auto text-[11px]">
+                    <span class="px-2.5 py-1 rounded-md bg-zinc-800/80 text-zinc-300 font-mono text-[10px] flex items-center gap-1.5 border border-zinc-700/60">
+                        <i data-lucide="database" class="h-3 w-3 text-emerald-400"></i>
+                        <span>MySQL Terhubung</span>
+                    </span>
                 </div>
             </div>
 
@@ -1099,10 +1085,11 @@
                                     <span>Catatan Ringkasan Jawaban Calon Murid</span>
                                 </label>
                                 <textarea 
+                                    id="catatan-wawancara-siswa"
                                     rows="3" 
                                     class="w-full rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-200 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 transition-colors"
                                     placeholder="Tuliskan catatan respon emosi, motivasi, dan kesiapan ananda..."
-                                >Ananda memiliki kemampuan refleksi diri yang baik, antusias menceritakan proyek minat sains, mampu meregulasi emosi saat menghadapi tugas baru, dan terbiasa berkomunikasi terbuka.</textarea>
+                                >{{ $activeSiswa['pribadi_sosial']['catatan_wawancara'] ?? 'Ananda memiliki kemampuan refleksi diri yang baik, antusias menceritakan proyek minat sains, mampu meregulasi emosi saat menghadapi tugas baru, dan terbiasa berkomunikasi terbuka.' }}</textarea>
                             </div>
 
                             <!-- Percakapan Orang Tua -->
@@ -1112,10 +1099,11 @@
                                     <span>Catatan Hasil Percakapan dengan Orang Tua / Wali</span>
                                 </label>
                                 <textarea 
+                                    id="catatan-percakapan-ortu"
                                     rows="3" 
                                     class="w-full rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-200 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 transition-colors"
                                     placeholder="Tuliskan catatan pendampingan orang tua di rumah, screen time, harapan..."
-                                >Orang tua sangat mendukung pembelajaran berbasis karakter dan kurikulum alam. Di rumah telah disepakati batas screen time 1.5 jam/hari dan orang tua siap bersinergi dengan tim BK sekolah.</textarea>
+                                >{{ $activeSiswa['pribadi_sosial']['catatan_ortu'] ?? 'Orang tua sangat mendukung pembelajaran berbasis karakter dan kurikulum alam. Di rumah telah disepakati batas screen time 1.5 jam/hari dan orang tua siap bersinergi dengan tim BK sekolah.' }}</textarea>
                             </div>
                         </div>
 
@@ -1185,33 +1173,30 @@
                         <span>Catatan Kualitatif Pengamat (Anecdotal Record)</span>
                     </label>
                     <textarea 
+                        id="catatan-kualitatif-pengamat"
                         rows="2" 
                         class="w-full rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-200 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors"
                         placeholder="Tuliskan catatan khusus atau rekomendasi pengamat..."
-                    >{{ $activeGuru['kelompok_short'] }}: Ananda sangat kooperatif, percaya diri, dan memiliki kesiapan adab yang baik dalam mengikuti seluruh tahapan observasi.</textarea>
+                    >{{ $activeSiswa[$activeGuru['kelompok_key']]['catatan'] ?? ($activeGuru['kelompok_short'].': Ananda sangat kooperatif, percaya diri, dan memiliki kesiapan adab yang baik dalam mengikuti seluruh tahapan observasi.') }}</textarea>
                 </div>
 
                 <!-- Desktop Bottom Action Buttons (Hidden on mobile sticky bar) -->
                 <div class="hidden sm:flex items-center justify-between pt-4 border-t border-zinc-800">
-                    <button type="button" onclick="alert('Draf penilaian ananda {{ $activeSiswa['name'] }} tersimpan di sesi lokal.');" class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-transparent px-4 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
+                    <button type="button" onclick="saveActiveAssessment(true)" id="btn-save-draft" class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-zinc-800 bg-transparent px-4 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors">
                         <i data-lucide="save" class="h-4 w-4"></i>
                         <span>Simpan Sebagai Draf</span>
                     </button>
                     
                     <div class="flex items-center gap-2">
-                        @php
-                            $currentIndex = collect($siswaSMP)->search(fn($item) => $item['no'] === $activeSiswa['no']);
-                            $nextSiswa = $siswaSMP[($currentIndex + 1) % count($siswaSMP)];
-                        @endphp
                         <a 
                             href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $nextSiswa['no']]) }}" 
                             class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-4 text-xs font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
                         >
-                            <i data-lucide="arrow-right-left" class="h-4 w-4"></i>
-                            <span>Ganti Siswa Lain</span>
+                            <i data-lucide="arrow-right-left" class="h-4 w-4 text-zinc-400"></i>
+                            <span>Siswa Selanjutnya</span>
                         </a>
 
-                        <button type="button" onclick="saveActiveAssessment()" class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-5 text-xs font-bold text-zinc-950 shadow hover:bg-emerald-400 transition-colors">
+                        <button type="button" onclick="saveActiveAssessment(false)" id="btn-save-desktop" class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-5 text-xs font-bold text-zinc-950 shadow hover:bg-emerald-400 transition-colors">
                             <i data-lucide="check-circle-2" class="h-4 w-4"></i>
                             <span>Simpan Nilai {{ $activeGuru['kelompok_short'] }}</span>
                         </button>
@@ -1248,7 +1233,8 @@
 
                     <button 
                         type="button" 
-                        onclick="saveActiveAssessment()" 
+                        onclick="saveActiveAssessment(false)" 
+                        id="btn-save-mobile"
                         class="inline-flex h-9 items-center justify-center gap-1.5 px-3.5 rounded-lg bg-emerald-500 text-zinc-950 text-xs font-bold shadow active:scale-95 transition-transform"
                     >
                         <i data-lucide="check" class="h-4 w-4"></i>
@@ -1398,32 +1384,118 @@
         <!-- JAVASCRIPT: TOUCH-FRIENDLY SCORE & TAB INTERACTIONS                       -->
         <!-- ========================================================================= -->
         <script>
-            // Mobile-first Score Selection with Dynamic Rubric Text Update
+            // State Skor Asesmen Aktif
+            window.currentScores = {};
+            const activeGroupKey = "{{ $activeGuru['kelompok_key'] }}";
+
+            // Mobile-first Score Selection with Dynamic Rubric Text & Live Score Recalculation
             function selectScoreMobile(prefix, score, fullRubricText) {
+                // Record in score state
+                window.currentScores[prefix] = parseInt(score);
+
                 // Update score label
                 const label = document.getElementById('label-val-' + prefix);
                 if (label) label.textContent = 'Skor: ' + score;
 
                 // Update full rubric description box below buttons
-                const descBox = document.getElementById('desc-box-' + prefix);
                 const descTitle = document.getElementById('desc-title-' + prefix);
                 const descText = document.getElementById('desc-text-' + prefix);
-
-                if (descTitle) descTitle.textContent = 'Kriteria Skor ' + score + ':';
+                if (descTitle) {
+                    descTitle.textContent = prefix.startsWith('ang') ? 'Jawaban:' : ('Kriteria Skor ' + score + ':');
+                }
                 if (descText) descText.textContent = fullRubricText;
+
+                // Determine active theme colors for button highlight
+                let activeBtnClass = 'bg-emerald-500 text-zinc-950 border-emerald-400';
+                if (prefix.startsWith('p6') || prefix.startsWith('p7')) {
+                    activeBtnClass = 'bg-purple-500 text-zinc-950 border-purple-400';
+                } else if (prefix.startsWith('ang') || prefix.startsWith('obs')) {
+                    activeBtnClass = 'bg-amber-500 text-zinc-950 border-amber-400';
+                }
 
                 // Highlight active button with high contrast
                 for (let s = 1; s <= 4; s++) {
                     const btn = document.getElementById('btn-' + prefix + '-' + s);
                     if (btn) {
                         if (s === score) {
-                            btn.className = 'h-10 rounded-lg text-xs font-bold border transition-all flex items-center justify-center gap-1 shadow-sm bg-emerald-500 text-zinc-950 border-emerald-400';
+                            btn.className = 'h-10 rounded-lg text-xs font-bold border transition-all flex items-center justify-center gap-1 shadow-sm ' + activeBtnClass;
                         } else {
                             btn.className = 'h-10 rounded-lg text-xs font-bold border transition-all flex items-center justify-center gap-1 shadow-sm bg-zinc-950 border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200';
                         }
                     }
                 }
+
+                // Recalculate Live Score for active station
+                recalculateActiveGroupScore();
             }
+
+            function recalculateActiveGroupScore() {
+                if (activeGroupKey === 'keagamaan') {
+                    let total = 0;
+                    for (let i = 0; i < 7; i++) total += (window.currentScores['p1-' + i] || 4);
+                    for (let i = 0; i < 7; i++) total += (window.currentScores['p2-' + i] || 4);
+                    for (let i = 0; i < 6; i++) total += (window.currentScores['p3-' + i] || 4);
+                    for (let i = 0; i < 7; i++) total += (window.currentScores['p4-' + i] || 4);
+
+                    const percent = ((total / 108) * 100).toFixed(1);
+                    const totalBadge = document.getElementById('keagamaan-total-badge');
+                    if (totalBadge) totalBadge.textContent = total;
+
+                    const headerScore = document.getElementById('header-live-score');
+                    if (headerScore) headerScore.textContent = percent + '%';
+                    const bottomScore = document.getElementById('bottom-score-badge');
+                    if (bottomScore) bottomScore.textContent = percent + '%';
+                } else if (activeGroupKey === 'bakat_minat') {
+                    let p6 = 0;
+                    for (let i = 0; i < 7; i++) p6 += (window.currentScores['p6-' + i] || 4);
+                    let p7 = 0;
+                    for (let i = 0; i < 6; i++) p7 += (window.currentScores['p7-' + i] || 4);
+
+                    const total = p6 + p7;
+                    const percent = ((total / 52) * 100).toFixed(1);
+
+                    const headerScore = document.getElementById('header-live-score');
+                    if (headerScore) headerScore.textContent = percent + '%';
+                    const bottomScore = document.getElementById('bottom-score-badge');
+                    if (bottomScore) bottomScore.textContent = percent + '%';
+                } else if (activeGroupKey === 'pribadi_sosial') {
+                    let ang = 0;
+                    for (let i = 0; i < 10; i++) ang += (window.currentScores['ang-' + i] || 4);
+                    let obs = 0;
+                    for (let i = 0; i < 6; i++) obs += (window.currentScores['obs-' + i] || 4);
+
+                    const angPercent = (ang / 40) * 100;
+                    const obsPercent = (obs / 24) * 100;
+                    const avg = ((angPercent + obsPercent) / 2).toFixed(1);
+
+                    const headerScore = document.getElementById('header-live-score');
+                    if (headerScore) headerScore.textContent = avg + '%';
+                    const bottomScore = document.getElementById('bottom-score-badge');
+                    if (bottomScore) bottomScore.textContent = avg + '%';
+                }
+            }
+
+            // Inisialisasi skor default pada saat halaman selesai dimuat
+            document.addEventListener('DOMContentLoaded', () => {
+                if (activeGroupKey === 'keagamaan') {
+                    for (let i = 0; i < 7; i++) window.currentScores['p1-' + i] = 4;
+                    for (let i = 0; i < 7; i++) window.currentScores['p2-' + i] = 4;
+                    for (let i = 0; i < 6; i++) window.currentScores['p3-' + i] = 4;
+                    for (let i = 0; i < 7; i++) window.currentScores['p4-' + i] = 4;
+                    window.currentScores['p1-3'] = 3; window.currentScores['p1-6'] = 3;
+                    window.currentScores['p2-2'] = 3;
+                    window.currentScores['p3-2'] = 3; window.currentScores['p3-5'] = 3;
+                    window.currentScores['p4-2'] = 3; window.currentScores['p4-6'] = 3;
+                } else if (activeGroupKey === 'bakat_minat') {
+                    for (let i = 0; i < 7; i++) window.currentScores['p6-' + i] = 4;
+                    for (let i = 0; i < 6; i++) window.currentScores['p7-' + i] = 4;
+                } else if (activeGroupKey === 'pribadi_sosial') {
+                    for (let i = 0; i < 10; i++) window.currentScores['ang-' + i] = 4;
+                    for (let i = 0; i < 6; i++) window.currentScores['obs-' + i] = 4;
+                    window.currentScores['obs-2'] = 3;
+                    window.currentScores['obs-5'] = 3;
+                }
+            });
 
             // Sub-Tab Switcher: Pos 1 - 4 Keagamaan
             function switchPosTab(posId) {
@@ -1529,12 +1601,145 @@
             }
             function simulateImportSuccess() {
                 closeCbtImportModal();
-                alert('Berhasil mengimpor 4 nilai CBT untuk {{ $activeSiswa["name"] }}!');
+                showNotificationToast('Berhasil mengimpor nilai CBT dari Google Form!', 'success');
             }
 
-            // Save active assessment
-            function saveActiveAssessment() {
-                alert('Alhamdulillah! Nilai asesmen {{ $activeGuru["kelompok_short"] }} untuk ananda {{ $activeSiswa["name"] }} berhasil disimpan secara permanen.');
+            // Simpan Asesmen ke Database via AJAX
+            function saveActiveAssessment(isDraft = false) {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const btnDesktop = document.getElementById('btn-save-desktop');
+                const btnDraft = document.getElementById('btn-save-draft');
+                const btnMobile = document.getElementById('btn-save-mobile');
+
+                // Loading feedback
+                if (btnDesktop) {
+                    btnDesktop.disabled = true;
+                    btnDesktop.innerHTML = '<span class="inline-block animate-spin mr-1">⟳</span> Menyimpan...';
+                }
+                if (btnDraft) btnDraft.disabled = true;
+                if (btnMobile) {
+                    btnMobile.disabled = true;
+                    btnMobile.innerHTML = '<span class="inline-block animate-spin mr-1">⟳</span> Simpan...';
+                }
+
+                const payload = {
+                    siswa_no: "{{ $activeSiswa['no'] }}",
+                    kelompok_key: "{{ $activeGuru['kelompok_key'] }}",
+                    scores: Object.assign({}, window.currentScores),
+                    detail_nilai: {},
+                    catatan: document.getElementById('catatan-kualitatif-pengamat')?.value || '',
+                    status: isDraft ? 'Sedang Diobservasi' : 'Selesai'
+                };
+
+                if (activeGroupKey === 'akademik') {
+                    const indo = parseFloat(document.getElementById('range-cbt-indo')?.value || 90);
+                    const mtk = parseFloat(document.getElementById('range-cbt-mtk')?.value || 90);
+                    const ipas = parseFloat(document.getElementById('range-cbt-ipas')?.value || 90);
+                    const inggris = parseFloat(document.getElementById('range-cbt-inggris')?.value || 90);
+                    payload.scores = { indo, mtk, ipas, inggris };
+                    payload.detail_nilai = { cbt: { indo, mtk, ipas, inggris } };
+                } else if (activeGroupKey === 'pribadi_sosial') {
+                    payload.catatan_wawancara = document.getElementById('catatan-wawancara-siswa')?.value || '';
+                    payload.catatan_ortu = document.getElementById('catatan-percakapan-ortu')?.value || '';
+                }
+
+                fetch("{{ route('guru.observasi.simpan') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotificationToast(data.message, 'success');
+                        
+                        // Update Score Badges on Screen
+                        const headerScore = document.getElementById('header-live-score');
+                        if (headerScore) headerScore.textContent = data.nilai + '%';
+                        const bottomScore = document.getElementById('bottom-score-badge');
+                        if (bottomScore) bottomScore.textContent = data.nilai + '%';
+
+                        // If student completed all 4 stations, show completion celebration
+                        if (data.is_lengkap) {
+                            setTimeout(() => {
+                                showCompletionModal(data);
+                            }, 400);
+                        }
+                    } else {
+                        showNotificationToast(data.message || 'Gagal menyimpan ke database.', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Save error:', err);
+                    showNotificationToast('Koneksi database bermasalah saat menyimpan.', 'error');
+                })
+                .finally(() => {
+                    if (btnDesktop) {
+                        btnDesktop.disabled = false;
+                        btnDesktop.innerHTML = '<i data-lucide="check-circle-2" class="h-4 w-4"></i><span>Simpan Nilai {{ $activeGuru["kelompok_short"] }}</span>';
+                    }
+                    if (btnDraft) btnDraft.disabled = false;
+                    if (btnMobile) {
+                        btnMobile.disabled = false;
+                        btnMobile.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>Simpan Nilai</span>';
+                    }
+                    if (window.lucide) window.lucide.createIcons();
+                });
+            }
+
+            // Toast Notification Helper
+            function showNotificationToast(msg, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 z-50 max-w-sm rounded-xl p-3.5 shadow-2xl flex items-center gap-2.5 text-xs border transition-all duration-300 transform translate-y-0 ' + 
+                    (type === 'success' ? 'bg-emerald-950/95 border-emerald-700 text-emerald-200' : 'bg-rose-950/95 border-rose-700 text-rose-200');
+                toast.innerHTML = `
+                    <div class="h-2 w-2 rounded-full ${type === 'success' ? 'bg-emerald-400 animate-ping' : 'bg-rose-400'} shrink-0"></div>
+                    <span class="flex-1 font-medium leading-relaxed">${msg}</span>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-zinc-100">&times;</button>
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+            }
+
+            // Completion Modal (All 4 stations completed)
+            function showCompletionModal(data) {
+                const backdrop = document.createElement('div');
+                backdrop.id = 'modal-completion-backdrop';
+                backdrop.className = 'fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in';
+                backdrop.innerHTML = `
+                    <div class="w-full max-w-md rounded-2xl border border-emerald-700/80 bg-zinc-900 p-6 space-y-4 shadow-2xl text-center">
+                        <div class="mx-auto h-12 w-12 rounded-full bg-emerald-950 border border-emerald-700 flex items-center justify-center text-emerald-400">
+                            <i data-lucide="award" class="h-6 w-6"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-zinc-100">Alhamdulillah! 4/4 Kelompok Tuntas</h3>
+                            <p class="text-xs text-zinc-400 mt-1">Ananda <strong class="text-emerald-400">{{ $activeSiswa["name"] }}</strong> telah menyelesaikan seluruh 4 ruang observasi SMP.</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs space-y-1">
+                            <div class="flex justify-between text-zinc-400">
+                                <span>Status Terpadu:</span>
+                                <span class="font-bold text-emerald-400">${data.posisi_sekarang || 'Semua Ruang Tuntas'}</span>
+                            </div>
+                            <div class="flex justify-between text-zinc-400">
+                                <span>Kelengkapan:</span>
+                                <span class="font-bold text-emerald-400">4 / 4 Kelompok (100%)</span>
+                            </div>
+                        </div>
+                        <button type="button" onclick="document.getElementById('modal-completion-backdrop').remove()" class="w-full py-2.5 rounded-lg bg-emerald-500 text-zinc-950 text-xs font-bold hover:bg-emerald-400 shadow">
+                            Tutup &amp; Lanjutkan
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(backdrop);
+                if (window.lucide) window.lucide.createIcons();
             }
         </script>
 

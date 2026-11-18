@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AsesmenKelompok;
+use App\Models\CalonSiswa;
+use App\Models\GuruPengamat;
+use App\Models\IndikatorPenilaian;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,6 +29,7 @@ class SPMBController extends Controller
     {
         $role = $request->input('role', 'guru');
         $email = strtolower($request->input('email', ''));
+        $nip = $request->input('nip');
 
         // Deteksi unit admin berdasarkan email (tab Admin tunggal)
         if ($role === 'admin' || str_contains($email, 'admin')) {
@@ -76,103 +83,50 @@ class SPMBController extends Controller
                 ->with('status', 'Selamat datang di Dashboard Observasi SPMB SD Anak Saleh!');
         }
 
-        // Guru Pengamat SMP (Hadi Susanto, Imarotul, Mutaahirotul, Davies)
-        if (str_contains($email, 'hadi') || str_contains($email, 'keagamaan') || $request->input('nip') === 'GSMP-2026-01') {
+        // Cek akun Guru Pengamat SMP dari Database
+        $guruDb = null;
+        if (! empty($nip)) {
+            $guruDb = GuruPengamat::where('nip', $nip)->first();
+        } elseif (! empty($email)) {
+            $guruDb = GuruPengamat::where('email', $email)->first();
+        }
+
+        if (! $guruDb && ! empty($email)) {
+            if (str_contains($email, 'hadi') || str_contains($email, 'keagamaan')) {
+                $guruDb = GuruPengamat::where('nip', 'GSMP-2026-01')->first();
+            } elseif (str_contains($email, 'imarotul') || str_contains($email, 'akademik')) {
+                $guruDb = GuruPengamat::where('nip', 'GSMP-2026-02')->first();
+            } elseif (str_contains($email, 'mutaahirotul') || str_contains($email, 'bakat')) {
+                $guruDb = GuruPengamat::where('nip', 'GSMP-2026-03')->first();
+            } elseif (str_contains($email, 'davies') || str_contains($email, 'pribadi') || str_contains($email, 'sosial')) {
+                $guruDb = GuruPengamat::where('nip', 'GSMP-2026-04')->first();
+            }
+        }
+
+        if ($guruDb) {
             session([
                 'auth_user' => [
-                    'name' => 'Hadi Susanto, S.Hum.',
-                    'nip' => 'GSMP-2026-01',
-                    'email' => 'hadi@anaksaleh.sch.id',
+                    'id' => $guruDb->id,
+                    'name' => $guruDb->nama,
+                    'nip' => $guruDb->nip,
+                    'email' => $guruDb->email,
                     'role' => 'guru',
-                    'jenjang' => 'smp',
-                    'unit' => 'SMP Alam Anak Saleh',
-                    'role_label' => 'Guru Pengamat Kelompok Keagamaan',
-                    'kelompok' => 'Kelompok Keagamaan',
-                    'ruang' => 'Ruang Kelompok Keagamaan (Pos 1–4)',
+                    'jenjang' => $guruDb->jenjang,
+                    'unit' => $guruDb->unit,
+                    'role_label' => 'Guru Pengamat '.$guruDb->kelompok_short,
+                    'kelompok' => $guruDb->kelompok_nama,
+                    'ruang' => $guruDb->ruang,
+                    'pos_desc' => $guruDb->pos_desc,
+                    'avatar' => $guruDb->avatar,
+                    'color' => $guruDb->color,
                 ],
             ]);
 
-            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-01'])
-                ->with('status', 'Selamat bertugas, Ustadz Hadi Susanto (Kelompok Keagamaan)!');
+            return redirect()->route('guru.observasi', ['guru_nip' => $guruDb->nip])
+                ->with('status', 'Selamat bertugas, '.$guruDb->nama.' ('.$guruDb->kelompok_short.')!');
         }
 
-        if (str_contains($email, 'imarotul') || str_contains($email, 'akademik') || $request->input('nip') === 'GSMP-2026-02') {
-            session([
-                'auth_user' => [
-                    'name' => 'Imarotul Muhibbah, S.Si., M.Pd. Gr.',
-                    'nip' => 'GSMP-2026-02',
-                    'email' => 'imarotul@anaksaleh.sch.id',
-                    'role' => 'guru',
-                    'jenjang' => 'smp',
-                    'unit' => 'SMP Alam Anak Saleh',
-                    'role_label' => 'Guru Pengamat Kelompok Akademik',
-                    'kelompok' => 'Kelompok Akademik (Numerasi, Literasi, Science, and English)',
-                    'ruang' => 'Ruang Kelompok Akademik (Pos 5 CBT)',
-                ],
-            ]);
-
-            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-02'])
-                ->with('status', 'Selamat bertugas, Ustadzah Imarotul Muhibbah (Kelompok Akademik CBT)!');
-        }
-
-        if (str_contains($email, 'mutaahirotul') || str_contains($email, 'bakat') || $request->input('nip') === 'GSMP-2026-03') {
-            session([
-                'auth_user' => [
-                    'name' => 'Mutaahirotul Hidayati,S.Pd., S.Pd.',
-                    'nip' => 'GSMP-2026-03',
-                    'email' => 'mutaahirotul@anaksaleh.sch.id',
-                    'role' => 'guru',
-                    'jenjang' => 'smp',
-                    'unit' => 'SMP Alam Anak Saleh',
-                    'role_label' => 'Guru Pengamat Kelompok Potensi Bakat & Minat',
-                    'kelompok' => 'Kelompok Potensi Bakat dan Minat',
-                    'ruang' => 'Ruang Kelompok Potensi Bakat & Minat (Pos 6–7)',
-                ],
-            ]);
-
-            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-03'])
-                ->with('status', 'Selamat bertugas, Ustadzah Mutaahirotul Hidayati (Kelompok Potensi Bakat & Minat)!');
-        }
-
-        if (str_contains($email, 'davies') || str_contains($email, 'pribadi') || str_contains($email, 'sosial') || $request->input('nip') === 'GSMP-2026-04') {
-            session([
-                'auth_user' => [
-                    'name' => 'Davies Yudisno, S.S.Gr., S.Pd.',
-                    'nip' => 'GSMP-2026-04',
-                    'email' => 'davies@anaksaleh.sch.id',
-                    'role' => 'guru',
-                    'jenjang' => 'smp',
-                    'unit' => 'SMP Alam Anak Saleh',
-                    'role_label' => 'Guru Pengamat Perkembangan Pribadi & Sosial',
-                    'kelompok' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
-                    'ruang' => 'Ruang Kelompok Pribadi & Sosial',
-                ],
-            ]);
-
-            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-04'])
-                ->with('status', 'Selamat bertugas, Ustadz Davies Yudisno (Kelompok Pribadi & Sosial / BK)!');
-        }
-
-        if (str_contains($email, 'guru.smp')) {
-            session([
-                'auth_user' => [
-                    'name' => 'Hadi Susanto, S.Hum.',
-                    'nip' => 'GSMP-2026-01',
-                    'email' => 'hadi@anaksaleh.sch.id',
-                    'role' => 'guru',
-                    'jenjang' => 'smp',
-                    'unit' => 'SMP Alam Anak Saleh',
-                    'role_label' => 'Guru Pengamat Kelompok Keagamaan',
-                    'kelompok' => 'Kelompok Keagamaan',
-                    'ruang' => 'Ruang Kelompok Keagamaan (Pos 1–4)',
-                ],
-            ]);
-
-            return redirect()->route('guru.observasi', ['guru_nip' => 'GSMP-2026-01'])
-                ->with('status', 'Selamat datang di Halaman Observasi Guru Pengamat SMP!');
-        }
-
-        // Default: Guru / Pengamat SD/TK
+        // Fallback default: Guru Pengamat SD/TK
         session([
             'auth_user' => [
                 'name' => 'Ustadzah Fatimah Azzahra, S.Pd.',
@@ -189,73 +143,34 @@ class SPMBController extends Controller
     }
 
     /**
-     * Halaman Observasi Siswa Baru untuk Guru (Termasuk 4 Guru Pengamat SMP).
+     * Halaman Observasi Siswa Baru untuk Guru Pengamat SMP (Terintegrasi Database).
      */
     public function observasi(Request $request): View
     {
-        $allGuruSMP = [
-            'GSMP-2026-01' => [
-                'nip' => 'GSMP-2026-01',
-                'name' => 'Hadi Susanto, S.Hum.',
-                'kelompok_key' => 'keagamaan',
-                'kelompok' => 'Kelompok Keagamaan',
-                'kelompok_short' => 'Keagamaan',
-                'pos_desc' => 'Pos 1–4 (Sholat, Mengaji, Doa-doa Harian, Surat Pendek)',
-                'ruang' => 'Ruang Kelompok Keagamaan (Pos 1–4)',
-                'unit' => 'SMP Alam Anak Saleh',
-                'avatar' => 'HS',
-                'email' => 'hadi@anaksaleh.sch.id',
-                'color' => 'emerald',
-                'icon' => 'book-open',
-            ],
-            'GSMP-2026-02' => [
-                'nip' => 'GSMP-2026-02',
-                'name' => 'Imarotul Muhibbah, S.Si., M.Pd. Gr.',
-                'kelompok_key' => 'akademik',
-                'kelompok' => 'Kelompok Akademik (Numerasi, Literasi, Science, and English)',
-                'kelompok_short' => 'Akademik CBT',
-                'pos_desc' => 'Pos 5 CBT (B. Indonesia, Matematika, IPAS, B. Inggris)',
-                'ruang' => 'Ruang Kelompok Akademik (Pos 5 CBT)',
-                'unit' => 'SMP Alam Anak Saleh',
-                'avatar' => 'IM',
-                'email' => 'imarotul@anaksaleh.sch.id',
-                'color' => 'blue',
-                'icon' => 'calculator',
-            ],
-            'GSMP-2026-03' => [
-                'nip' => 'GSMP-2026-03',
-                'name' => 'Mutaahirotul Hidayati,S.Pd., S.Pd.',
-                'kelompok_key' => 'bakat_minat',
-                'kelompok' => 'Kelompok Potensi Bakat dan Minat',
-                'kelompok_short' => 'Potensi Bakat Minat',
-                'pos_desc' => 'Pos 6 & 7 (Motorik Halus & Kreativitas Inovasi)',
-                'ruang' => 'Ruang Kelompok Potensi Bakat & Minat (Pos 6–7)',
-                'unit' => 'SMP Alam Anak Saleh',
-                'avatar' => 'MH',
-                'email' => 'mutaahirotul@anaksaleh.sch.id',
-                'color' => 'purple',
-                'icon' => 'palette',
-            ],
-            'GSMP-2026-04' => [
-                'nip' => 'GSMP-2026-04',
-                'name' => 'Davies Yudisno, S.S.Gr., S.Pd.',
-                'kelompok_key' => 'pribadi_sosial',
-                'kelompok' => 'Kelompok Perkembangan Pribadi & Sosial (Daily Conversation & Kelompok)',
-                'kelompok_short' => 'Pribadi & Sosial',
-                'pos_desc' => 'Pos 8 (Kesiapan Psikososial Transisi SMP & Layanan BK)',
-                'ruang' => 'Ruang Kelompok Pribadi & Sosial',
-                'unit' => 'SMP Alam Anak Saleh',
-                'avatar' => 'DY',
-                'email' => 'davies@anaksaleh.sch.id',
-                'color' => 'amber',
-                'icon' => 'heart-handshake',
-            ],
-        ];
+        // 1. Ambil seluruh data Guru Pengamat SMP dari Database
+        $guruList = GuruPengamat::where('jenjang', 'smp')->orderBy('id')->get();
 
-        // Tentukan guru aktif
+        $allGuruSMP = $guruList->keyBy('nip')->map(function ($g) {
+            return [
+                'id' => $g->id,
+                'nip' => $g->nip,
+                'name' => $g->nama,
+                'email' => $g->email,
+                'kelompok_key' => $g->kelompok_key,
+                'kelompok' => $g->kelompok_nama,
+                'kelompok_short' => $g->kelompok_short,
+                'pos_desc' => $g->pos_desc,
+                'ruang' => $g->ruang,
+                'unit' => $g->unit,
+                'avatar' => $g->avatar,
+                'color' => $g->color,
+            ];
+        })->toArray();
+
+        // Tentukan guru aktif (dari sesi login atau parameter URL)
         $requestedNip = $request->query('guru_nip', session('auth_user.nip', 'GSMP-2026-01'));
         if (! isset($allGuruSMP[$requestedNip])) {
-            $requestedNip = 'GSMP-2026-01';
+            $requestedNip = array_key_first($allGuruSMP) ?? 'GSMP-2026-01';
         }
         $activeGuru = $allGuruSMP[$requestedNip];
 
@@ -272,107 +187,311 @@ class SPMBController extends Controller
         $user['ruang'] = $activeGuru['ruang'];
         session(['auth_user' => $user]);
 
-        // Daftar Calon Murid SMP (Rotasi Terbuka / Tanpa Antrean Kaku)
-        // Siswa bebas masuk kelompok mana pun yang tersedia, urutan fleksibel, wajib terpenuhi 4/4 kelompok
-        $siswaSMP = [
-            [
-                'no' => 'SPMB-2026-SMP01',
-                'name' => 'Bilal Ramadhan Putra',
-                'usia' => '12 Thn 3 Bln',
-                'kelas_target' => 'Kelas 7 Bilingual',
-                'asal_sekolah' => 'SD Karakter Anak Saleh',
-                'wali' => 'Bpk. Andi Ramadhan',
-                'kontak' => '0821-2222-0001',
-                'mulai_dari' => 'Kelompok Keagamaan',
-                'posisi_sekarang' => 'Semua Ruang Tuntas',
-                'keagamaan' => ['pos1' => 26, 'pos2' => 25, 'pos3' => 23, 'pos4' => 26, 'total_skor' => 100, 'nilai' => 92.6, 'status' => 'Selesai'],
-                'akademik' => ['cbt' => ['indo' => 92, 'mtk' => 95, 'ipas' => 90, 'inggris' => 95], 'pos5' => 93.0, 'nilai' => 93.0, 'status' => 'Selesai'],
-                'bakat_minat' => ['pos6_skor' => 26, 'pos6' => 92.9, 'pos7_skor' => 22, 'pos7' => 91.7, 'nilai' => 92.3, 'status' => 'Selesai'],
-                'pribadi_sosial' => ['angket_skor' => 37, 'angket_nilai' => 92.5, 'observasi_skor' => 22, 'observasi_nilai' => 91.7, 'nilai' => 92.1, 'status' => 'Selesai', 'kategori_bk' => 'Sangat Siap'],
-            ],
-            [
-                'no' => 'SPMB-2026-SMP02',
-                'name' => 'Salma Hanifah',
-                'usia' => '12 Thn 1 Bln',
-                'kelas_target' => 'Kelas 7 Tahfidz',
-                'asal_sekolah' => 'SD Karakter Anak Saleh',
-                'wali' => 'Ibu Lina Hanifah',
-                'kontak' => '0821-2222-0002',
-                'mulai_dari' => 'Kelompok Pribadi & Sosial',
-                'posisi_sekarang' => 'Semua Ruang Tuntas',
-                'keagamaan' => ['pos1' => 27, 'pos2' => 28, 'pos3' => 24, 'pos4' => 27, 'total_skor' => 106, 'nilai' => 98.1, 'status' => 'Selesai'],
-                'akademik' => ['cbt' => ['indo' => 94, 'mtk' => 88, 'ipas' => 90, 'inggris' => 92], 'pos5' => 91.0, 'nilai' => 91.0, 'status' => 'Selesai'],
-                'bakat_minat' => ['pos6_skor' => 25, 'pos6' => 89.3, 'pos7_skor' => 23, 'pos7' => 95.8, 'nilai' => 92.6, 'status' => 'Selesai'],
-                'pribadi_sosial' => ['angket_skor' => 38, 'angket_nilai' => 95.0, 'observasi_skor' => 23, 'observasi_nilai' => 95.8, 'nilai' => 95.4, 'status' => 'Selesai', 'kategori_bk' => 'Sangat Siap'],
-            ],
-            [
-                'no' => 'SPMB-2026-SMP03',
-                'name' => 'Umar Al-Faruq',
-                'usia' => '12 Thn 6 Bln',
-                'kelas_target' => 'Kelas 7 Bilingual',
-                'asal_sekolah' => 'SD Plus Insan Mandiri',
-                'wali' => 'Bpk. Zainal Al-Faruq',
-                'kontak' => '0821-2222-0003',
-                'mulai_dari' => 'Kelompok Akademik CBT',
-                'posisi_sekarang' => 'Semua Ruang Tuntas',
-                'keagamaan' => ['pos1' => 23, 'pos2' => 22, 'pos3' => 20, 'pos4' => 23, 'total_skor' => 88, 'nilai' => 81.5, 'status' => 'Selesai'],
-                'akademik' => ['cbt' => ['indo' => 85, 'mtk' => 90, 'ipas' => 86, 'inggris' => 83], 'pos5' => 86.0, 'nilai' => 86.0, 'status' => 'Selesai'],
-                'bakat_minat' => ['pos6_skor' => 23, 'pos6' => 82.1, 'pos7_skor' => 20, 'pos7' => 83.3, 'nilai' => 82.7, 'status' => 'Selesai'],
-                'pribadi_sosial' => ['angket_skor' => 31, 'angket_nilai' => 77.5, 'observasi_skor' => 19, 'observasi_nilai' => 79.2, 'nilai' => 78.4, 'status' => 'Selesai', 'kategori_bk' => 'Siap'],
-            ],
-            [
-                'no' => 'SPMB-2026-SMP04',
-                'name' => 'Jasmine Alya Zahra',
-                'usia' => '12 Thn 0 Bln',
-                'kelas_target' => 'Kelas 7 Reguler',
-                'asal_sekolah' => 'SD Negeri Percobaan 1',
-                'wali' => 'Ibu Zahra Alya',
-                'kontak' => '0821-2222-0004',
-                'mulai_dari' => 'Kelompok Potensi Bakat & Minat',
-                'posisi_sekarang' => 'Sedang di Ruang Akademik',
-                'keagamaan' => ['pos1' => null, 'pos2' => null, 'pos3' => null, 'pos4' => null, 'total_skor' => null, 'nilai' => null, 'status' => 'Belum Diuji'],
-                'akademik' => ['cbt' => ['indo' => 75, 'mtk' => 70, 'ipas' => 72, 'inggris' => 75], 'pos5' => 73.0, 'nilai' => 73.0, 'status' => 'Sedang Diobservasi'],
-                'bakat_minat' => ['pos6_skor' => 20, 'pos6' => 71.4, 'pos7_skor' => 18, 'pos7' => 75.0, 'nilai' => 73.2, 'status' => 'Selesai'],
-                'pribadi_sosial' => ['angket_skor' => 28, 'angket_nilai' => 70.0, 'observasi_skor' => 17, 'observasi_nilai' => 70.8, 'nilai' => 70.4, 'status' => 'Selesai', 'kategori_bk' => 'Cukup Siap'],
-            ],
-            [
-                'no' => 'SPMB-2026-SMP05',
-                'name' => 'Hafizh Mubarok',
-                'usia' => '12 Thn 9 Bln',
-                'kelas_target' => 'Kelas 7 Tahfidz',
-                'asal_sekolah' => 'SDIT Al-Hikmah',
-                'wali' => 'Bpk. Mubarok Hafizh',
-                'kontak' => '0821-2222-0005',
-                'mulai_dari' => 'Kelompok Pribadi & Sosial',
-                'posisi_sekarang' => 'Sedang di Ruang Keagamaan',
-                'keagamaan' => ['pos1' => 22, 'pos2' => 21, 'pos3' => 18, 'pos4' => 21, 'total_skor' => 82, 'nilai' => 75.9, 'status' => 'Sedang Diobservasi'],
-                'akademik' => ['cbt' => null, 'pos5' => null, 'nilai' => null, 'status' => 'Belum Diuji'],
-                'bakat_minat' => ['pos6_skor' => null, 'pos6' => null, 'pos7_skor' => null, 'pos7' => null, 'nilai' => null, 'status' => 'Belum Diuji'],
-                'pribadi_sosial' => ['angket_skor' => 25, 'angket_nilai' => 62.5, 'observasi_skor' => 15, 'observasi_nilai' => 62.5, 'nilai' => 62.5, 'status' => 'Selesai', 'kategori_bk' => 'Butuh Pendampingan Khusus'],
-            ],
-        ];
+        // 2. Ambil seluruh Calon Siswa SMP beserta Asesmen Kelompoknya dari Database
+        $calonSiswas = CalonSiswa::with('asesmenKelompoks')
+            ->where('jenjang', 'smp')
+            ->orderBy('id')
+            ->get();
 
-        // Hitung kelengkapan 4 kelompok untuk setiap siswa
-        $kelompokKeys = ['keagamaan', 'akademik', 'bakat_minat', 'pribadi_sosial'];
-        foreach ($siswaSMP as &$s) {
-            $selesai = 0;
-            foreach ($kelompokKeys as $kk) {
-                if (($s[$kk]['status'] ?? '') === 'Selesai') {
-                    $selesai++;
-                }
-            }
-            $s['selesai_count'] = $selesai;
-            $s['is_lengkap'] = ($selesai === 4);
-        }
-        unset($s);
+        $siswaSMP = $calonSiswas->map(function ($cs) {
+            $asesmens = $cs->asesmenKelompoks->keyBy('kelompok_key');
+
+            $keagamaan = $asesmens->get('keagamaan');
+            $akademik = $asesmens->get('akademik');
+            $bakatMinat = $asesmens->get('bakat_minat');
+            $pribadiSosial = $asesmens->get('pribadi_sosial');
+
+            $kDetail = $keagamaan?->detail_nilai ?? [];
+            $aDetail = $akademik?->detail_nilai ?? [];
+            $bDetail = $bakatMinat?->detail_nilai ?? [];
+            $pDetail = $pribadiSosial?->detail_nilai ?? [];
+
+            // Hitung status kelengkapan 4 kelompok
+            $selesaiCount = $cs->asesmenKelompoks->where('status', 'Selesai')->count();
+
+            return [
+                'id' => $cs->id,
+                'no' => $cs->no_pendaftaran,
+                'name' => $cs->nama,
+                'usia' => $cs->usia,
+                'kelas_target' => $cs->kelas_target,
+                'asal_sekolah' => $cs->asal_sekolah,
+                'wali' => $cs->wali,
+                'kontak' => $cs->kontak,
+                'mulai_dari' => $cs->mulai_dari,
+                'posisi_sekarang' => $cs->posisi_sekarang,
+                'status_rekomendasi' => $cs->status_rekomendasi,
+                'nilai_akhir_terpadu' => $cs->nilai_akhir_terpadu ? (float) $cs->nilai_akhir_terpadu : null,
+                'catatan_umum' => $cs->catatan_umum,
+                'selesai_count' => $selesaiCount,
+                'is_lengkap' => ($selesaiCount >= 4),
+                'keagamaan' => [
+                    'pos1' => $kDetail['pos1'] ?? null,
+                    'pos2' => $kDetail['pos2'] ?? null,
+                    'pos3' => $kDetail['pos3'] ?? null,
+                    'pos4' => $kDetail['pos4'] ?? null,
+                    'total_skor' => $keagamaan?->total_skor,
+                    'nilai' => $keagamaan ? (float) $keagamaan->nilai : null,
+                    'status' => $keagamaan?->status ?? 'Belum Diuji',
+                    'kategori' => $keagamaan?->kategori,
+                    'catatan' => $keagamaan?->catatan,
+                    'detail' => $kDetail,
+                ],
+                'akademik' => [
+                    'cbt' => $aDetail['cbt'] ?? ($aDetail ?: null),
+                    'pos5' => $akademik ? (float) $akademik->nilai : null,
+                    'nilai' => $akademik ? (float) $akademik->nilai : null,
+                    'status' => $akademik?->status ?? 'Belum Diuji',
+                    'kategori' => $akademik?->kategori,
+                    'catatan' => $akademik?->catatan,
+                    'detail' => $aDetail,
+                ],
+                'bakat_minat' => [
+                    'pos6_skor' => $bDetail['pos6_skor'] ?? null,
+                    'pos6' => $bDetail['pos6'] ?? null,
+                    'pos7_skor' => $bDetail['pos7_skor'] ?? null,
+                    'pos7' => $bDetail['pos7'] ?? null,
+                    'total_skor' => $bakatMinat?->total_skor,
+                    'nilai' => $bakatMinat ? (float) $bakatMinat->nilai : null,
+                    'status' => $bakatMinat?->status ?? 'Belum Diuji',
+                    'kategori' => $bakatMinat?->kategori,
+                    'catatan' => $bakatMinat?->catatan,
+                    'detail' => $bDetail,
+                ],
+                'pribadi_sosial' => [
+                    'angket_skor' => $pDetail['angket_skor'] ?? null,
+                    'angket_nilai' => $pDetail['angket_nilai'] ?? null,
+                    'observasi_skor' => $pDetail['observasi_skor'] ?? null,
+                    'observasi_nilai' => $pDetail['observasi_nilai'] ?? null,
+                    'total_skor' => $pribadiSosial?->total_skor,
+                    'nilai' => $pribadiSosial ? (float) $pribadiSosial->nilai : null,
+                    'status' => $pribadiSosial?->status ?? 'Belum Diuji',
+                    'kategori_bk' => $pribadiSosial?->kategori ?? 'Sangat Siap',
+                    'catatan' => $pribadiSosial?->catatan,
+                    'catatan_wawancara' => $pDetail['catatan_wawancara'] ?? null,
+                    'catatan_ortu' => $pDetail['catatan_ortu'] ?? null,
+                    'detail' => $pDetail,
+                ],
+            ];
+        })->toArray();
 
         // Murid aktif yang dipilih
-        $studentNo = $request->query('siswa_no', 'SPMB-2026-SMP01');
-        $activeSiswa = collect($siswaSMP)->firstWhere('no', $studentNo) ?? $siswaSMP[0];
+        $studentNo = $request->query('siswa_no', $siswaSMP[0]['no'] ?? '');
+        $activeSiswa = collect($siswaSMP)->firstWhere('no', $studentNo) ?? ($siswaSMP[0] ?? []);
 
-        return view('guru.observasi', compact('user', 'allGuruSMP', 'activeGuru', 'siswaSMP', 'activeSiswa'));
+        // Murid berikutnya (untuk navigasi praktis mobile)
+        $currentIndex = 0;
+        foreach ($siswaSMP as $idx => $s) {
+            if ($s['no'] === $activeSiswa['no']) {
+                $currentIndex = $idx;
+                break;
+            }
+        }
+        $nextIndex = ($currentIndex + 1) % max(1, count($siswaSMP));
+        $nextSiswa = $siswaSMP[$nextIndex] ?? $activeSiswa;
 
-        return view('guru.observasi', compact('user', 'allGuruSMP', 'activeGuru', 'siswaSMP', 'activeSiswa'));
+        return view('guru.observasi', compact('user', 'allGuruSMP', 'activeGuru', 'siswaSMP', 'activeSiswa', 'nextSiswa'));
+    }
+
+    /**
+     * Simpan / Perbarui Nilai Observasi ke Database MySQL.
+     */
+    public function simpanObservasi(Request $request): JsonResponse
+    {
+        $request->validate([
+            'siswa_no' => 'required|string',
+            'kelompok_key' => 'required|string',
+            'scores' => 'nullable|array',
+            'detail_nilai' => 'nullable|array',
+            'catatan' => 'nullable|string',
+            'status' => 'nullable|string',
+        ]);
+
+        $siswaNo = $request->input('siswa_no');
+        $kelompokKey = $request->input('kelompok_key');
+        $scores = $request->input('scores', []);
+        $detailNilai = $request->input('detail_nilai', []);
+        $catatan = $request->input('catatan');
+        $status = $request->input('status', 'Selesai');
+
+        $siswa = CalonSiswa::where('no_pendaftaran', $siswaNo)->first();
+        if (! $siswa) {
+            return response()->json(['success' => false, 'message' => 'Data calon siswa tidak ditemukan.'], 404);
+        }
+
+        $guru = GuruPengamat::where('kelompok_key', $kelompokKey)->first();
+        if (! $guru) {
+            return response()->json(['success' => false, 'message' => 'Data guru pengamat tidak ditemukan.'], 404);
+        }
+
+        $totalSkor = 0;
+        $skorMaksimal = 100;
+        $nilai = 0.0;
+        $kategori = '';
+
+        if ($kelompokKey === 'keagamaan') {
+            // Pos 1 s/d Pos 4 (Total 27 aspek, skala 1-4, Skor Maksimal = 108)
+            $p1 = 0;
+            for ($i = 0; $i < 7; $i++) {
+                $p1 += intval($scores['p1-'.$i] ?? 4);
+            }
+            $p2 = 0;
+            for ($i = 0; $i < 7; $i++) {
+                $p2 += intval($scores['p2-'.$i] ?? 4);
+            }
+            $p3 = 0;
+            for ($i = 0; $i < 6; $i++) {
+                $p3 += intval($scores['p3-'.$i] ?? 4);
+            }
+            $p4 = 0;
+            for ($i = 0; $i < 7; $i++) {
+                $p4 += intval($scores['p4-'.$i] ?? 4);
+            }
+
+            $totalSkor = ! empty($scores) ? ($p1 + $p2 + $p3 + $p4) : (int) ($request->input('total_skor', 100));
+            $skorMaksimal = 108;
+            $nilai = round(($totalSkor / $skorMaksimal) * 100, 1);
+            $kategori = ($nilai >= 85) ? 'Sangat Baik' : (($nilai >= 75) ? 'Baik' : (($nilai >= 65) ? 'Cukup' : 'Perlu Bimbingan'));
+
+            $detailNilai = array_merge($detailNilai, [
+                'pos1' => $p1,
+                'pos2' => $p2,
+                'pos3' => $p3,
+                'pos4' => $p4,
+                'raw_scores' => $scores,
+            ]);
+        } elseif ($kelompokKey === 'akademik') {
+            // CBT Pos 5: B. Indonesia, Matematika, IPAS, B. Inggris (0-100)
+            $indo = (float) ($scores['indo'] ?? ($detailNilai['cbt']['indo'] ?? 90));
+            $mtk = (float) ($scores['mtk'] ?? ($detailNilai['cbt']['mtk'] ?? 90));
+            $ipas = (float) ($scores['ipas'] ?? ($detailNilai['cbt']['ipas'] ?? 90));
+            $inggris = (float) ($scores['inggris'] ?? ($detailNilai['cbt']['inggris'] ?? 90));
+
+            $totalSkor = (int) round($indo + $mtk + $ipas + $inggris);
+            $skorMaksimal = 400;
+            $nilai = round($totalSkor / 4, 1);
+            $kategori = ($nilai >= 85) ? 'Sangat Baik (A)' : (($nilai >= 75) ? 'Baik (B)' : (($nilai >= 65) ? 'Cukup (C)' : 'Perlu Bimbingan (D)'));
+
+            $detailNilai = [
+                'cbt' => [
+                    'indo' => $indo,
+                    'mtk' => $mtk,
+                    'ipas' => $ipas,
+                    'inggris' => $inggris,
+                ],
+            ];
+        } elseif ($kelompokKey === 'bakat_minat') {
+            // Pos 6 (7 aspek, max 28) + Pos 7 (6 aspek, max 24) = Total Maksimal 52
+            $p6 = 0;
+            for ($i = 0; $i < 7; $i++) {
+                $p6 += intval($scores['p6-'.$i] ?? 4);
+            }
+            $p7 = 0;
+            for ($i = 0; $i < 6; $i++) {
+                $p7 += intval($scores['p7-'.$i] ?? 4);
+            }
+
+            $totalSkor = ! empty($scores) ? ($p6 + $p7) : (int) ($request->input('total_skor', 48));
+            $skorMaksimal = 52;
+            $nilai = round(($totalSkor / $skorMaksimal) * 100, 1);
+            $kategori = ($nilai >= 85) ? 'Sangat Baik' : (($nilai >= 75) ? 'Baik' : (($nilai >= 65) ? 'Cukup' : 'Perlu Bimbingan'));
+
+            $detailNilai = array_merge($detailNilai, [
+                'pos6_skor' => $p6,
+                'pos6' => round(($p6 / 28) * 100, 1),
+                'pos7_skor' => $p7,
+                'pos7' => round(($p7 / 24) * 100, 1),
+                'raw_scores' => $scores,
+            ]);
+        } elseif ($kelompokKey === 'pribadi_sosial') {
+            // Sub-Tab A: Angket Refleksi (10 item, skala 1-4, max 40)
+            // Sub-Tab C: Observasi Kelompok (6 aspek, skala 1-4, max 24)
+            $angSkor = 0;
+            for ($i = 0; $i < 10; $i++) {
+                $angSkor += intval($scores['ang-'.$i] ?? 4);
+            }
+            $obsSkor = 0;
+            for ($i = 0; $i < 6; $i++) {
+                $obsSkor += intval($scores['obs-'.$i] ?? 4);
+            }
+
+            $totalSkor = $angSkor + $obsSkor;
+            $skorMaksimal = 64;
+
+            $angketNilai = round(($angSkor / 40) * 100, 1);
+            $observasiNilai = round(($obsSkor / 24) * 100, 1);
+            $nilai = round(($angketNilai + $observasiNilai) / 2, 1);
+
+            // Pemetaan Layanan BK Otomatis
+            if ($nilai >= 86) {
+                $kategori = 'Sangat Siap';
+            } elseif ($nilai >= 76) {
+                $kategori = 'Siap';
+            } elseif ($nilai >= 60) {
+                $kategori = 'Berkembang';
+            } else {
+                $kategori = 'Perlu Pendampingan';
+            }
+
+            $detailNilai = array_merge($detailNilai, [
+                'angket_skor' => $angSkor,
+                'angket_nilai' => $angketNilai,
+                'observasi_skor' => $obsSkor,
+                'observasi_nilai' => $observasiNilai,
+                'catatan_wawancara' => $request->input('catatan_wawancara', $detailNilai['catatan_wawancara'] ?? ''),
+                'catatan_ortu' => $request->input('catatan_ortu', $detailNilai['catatan_ortu'] ?? ''),
+                'raw_scores' => $scores,
+            ]);
+        }
+
+        // Simpan / Perbarui Asesmen ke Database
+        AsesmenKelompok::updateOrCreate(
+            [
+                'calon_siswa_id' => $siswa->id,
+                'kelompok_key' => $kelompokKey,
+            ],
+            [
+                'guru_pengamat_id' => $guru->id,
+                'total_skor' => $totalSkor,
+                'skor_maksimal' => $skorMaksimal,
+                'nilai' => $nilai,
+                'status' => $status,
+                'kategori' => $kategori,
+                'catatan' => $catatan,
+                'detail_nilai' => $detailNilai,
+            ]
+        );
+
+        // Muat ulang data siswa & evaluasi kelengkapan 4 kelompok
+        $siswa->load('asesmenKelompoks');
+        $selesaiCount = $siswa->asesmenKelompoks->where('status', 'Selesai')->count();
+        $isLengkap = ($selesaiCount >= 4);
+
+        if ($isLengkap) {
+            $avgScore = round($siswa->asesmenKelompoks->where('status', 'Selesai')->avg('nilai'), 2);
+            $siswa->update([
+                'nilai_akhir_terpadu' => $avgScore,
+                'status_rekomendasi' => ($avgScore >= 75) ? 'Diterima' : 'Dipertimbangkan',
+                'posisi_sekarang' => 'Semua Ruang Tuntas',
+            ]);
+        } else {
+            $siswa->update([
+                'posisi_sekarang' => 'Sedang di Ruang '.$guru->kelompok_short,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Alhamdulillah! Nilai {$guru->kelompok_short} untuk ananda {$siswa->nama} berhasil disimpan ke database.",
+            'nilai' => $nilai,
+            'kategori' => $kategori,
+            'total_skor' => $totalSkor,
+            'skor_maksimal' => $skorMaksimal,
+            'status' => $status,
+            'selesai_count' => $selesaiCount,
+            'is_lengkap' => $isLengkap,
+            'posisi_sekarang' => $siswa->posisi_sekarang,
+        ]);
     }
 
     /**
