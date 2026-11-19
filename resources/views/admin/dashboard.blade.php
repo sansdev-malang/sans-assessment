@@ -254,7 +254,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-border/60 text-foreground/90">
-                            @foreach($data['students'] as $student)
+                            @forelse($data['students'] as $student)
                                 <tr class="hover:bg-muted transition-colors">
                                     <td class="p-4 font-mono text-muted-foreground">{{ $student['id'] }}</td>
                                     <td class="p-4 font-medium text-foreground">{{ $student['name'] }}</td>
@@ -266,6 +266,11 @@
                                         @if($student['badge'] === 'emerald')
                                             <span class="inline-flex items-center gap-1 rounded-md border border-emerald-200 dark:border-emerald-800/80 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:text-emerald-300">
                                                 <i data-lucide="check" class="h-3 w-3 text-emerald-600 dark:text-emerald-400"></i>
+                                                <span>{{ $student['status'] }}</span>
+                                            </span>
+                                        @elseif($student['badge'] === 'blue')
+                                            <span class="inline-flex items-center gap-1 rounded-md border border-blue-200 dark:border-blue-800/80 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 text-[11px] font-medium text-blue-800 dark:text-blue-300">
+                                                <i data-lucide="clock" class="h-3 w-3 text-blue-600 dark:text-blue-400"></i>
                                                 <span>{{ $student['status'] }}</span>
                                             </span>
                                         @else
@@ -282,7 +287,17 @@
                                         </button>
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="p-8 text-center text-muted-foreground">
+                                        <div class="flex flex-col items-center justify-center gap-2">
+                                            <i data-lucide="inbox" class="h-8 w-8 text-muted-foreground/40"></i>
+                                            <p class="text-sm font-medium">Belum ada data calon siswa untuk jenjang ini</p>
+                                            <p class="text-xs text-muted-foreground/70">Silakan tambahkan atau import calon siswa melalui menu Calon Siswa</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

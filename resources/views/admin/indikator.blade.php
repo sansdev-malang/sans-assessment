@@ -69,6 +69,15 @@
                         </div>
                         <span class="hidden sm:inline text-xs font-medium text-foreground">{{ $user['name'] ?? 'Administrator' }}</span>
                     </div>
+                    <!-- Jenjang Switcher -->
+                    <div class="inline-flex items-center rounded-lg border border-border bg-card p-1 text-xs">
+                        <a href="{{ route('admin.indikator', ['jenjang' => 'sd']) }}" class="px-2.5 py-1 rounded-md font-medium transition-all {{ ($jenjang ?? 'sd') === 'sd' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground' }}">
+                            SD Karakter
+                        </a>
+                        <a href="{{ route('admin.indikator', ['jenjang' => 'smp']) }}" class="px-2.5 py-1 rounded-md font-medium transition-all {{ ($jenjang ?? 'sd') === 'smp' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground' }}">
+                            SMP Karakter
+                        </a>
+                    </div>
                     <x-theme-settings />
                     <a href="{{ route('logout') }}" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-border bg-transparent px-2.5 text-xs font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-colors">
                         <i data-lucide="log-out" class="h-3.5 w-3.5"></i>
@@ -85,7 +94,7 @@
             <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-border">
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="text-xl font-semibold tracking-tight text-foreground">Pedoman Rubrik & Instrumen Penilaian SPMB</h1>
+                        <h1 class="text-xl font-semibold tracking-tight text-foreground">Pedoman Rubrik &amp; Instrumen Penilaian SPMB</h1>
                         <span class="rounded-md border border-border bg-card px-2 py-0.5 text-[11px] text-muted-foreground font-mono">
                             {{ $user['unit'] ?? '-' }}
                         </span>
@@ -93,12 +102,6 @@
                     <p class="text-xs text-muted-foreground mt-0.5">
                         Acuan rubrik, panduan penilaian, dan bobot tiap aspek asesmen SPMB — hanya untuk referensi
                     </p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-muted px-3 text-xs font-medium text-muted-foreground">
-                        <i data-lucide="book-open" class="h-3.5 w-3.5"></i>
-                        <span>Pedoman Saja</span>
-                    </span>
                 </div>
             </div>
 
@@ -110,15 +113,15 @@
                         <i data-lucide="list-checks" class="h-4 w-4 text-muted-foreground"></i>
                     </div>
                     <div class="text-2xl font-bold font-mono text-foreground">{{ count($indikator) }}</div>
-                    <p class="text-[11px] text-muted-foreground">Instrumen observasi</p>
+                    <p class="text-[11px] text-muted-foreground">Instrumen observasi {{ strtoupper($jenjang ?? 'sd') }}</p>
                 </div>
                 <div class="rounded-xl border border-border bg-card p-4 space-y-1">
                     <div class="flex items-center justify-between text-xs font-medium text-muted-foreground">
-                        <span>Aspek Dinilai</span>
+                        <span>Aspek / Sentra Dinilai</span>
                         <i data-lucide="layers" class="h-4 w-4 text-indigo-400"></i>
                     </div>
                     <div class="text-2xl font-bold font-mono text-foreground">{{ $grouped->count() }}</div>
-                    <p class="text-[11px] text-muted-foreground">Domain / aspek unik</p>
+                    <p class="text-[11px] text-muted-foreground">Domain / sentra unik</p>
                 </div>
                 <div class="rounded-xl border border-border bg-card p-4 space-y-1">
                     <div class="flex items-center justify-between text-xs font-medium text-muted-foreground">
@@ -136,16 +139,21 @@
                         <i data-lucide="percent" class="h-4 w-4 text-amber-400"></i>
                     </div>
                     <div class="text-2xl font-bold font-mono text-foreground">
-                        {{ collect($indikator)->where('status', 'Aktif')->sum('bobot') }}%
+                        {{ round(collect($indikator)->where('status', 'Aktif')->sum('bobot')) }}%
                     </div>
-                    <p class="text-[11px] text-amber-400">Harus total 100%</p>
+                    <p class="text-[11px] text-amber-400">Akumulasi bobot 100%</p>
                 </div>
             </div>
 
-            <!-- Indikator Groups (4 Kelompok SPMB) -->
+            <!-- Indikator Groups (Sentra Asesmen SD / 4 Kelompok SMP) -->
             <div class="space-y-4">
                 @php
                     $aspekMeta = [
+                        // SD Sentras
+                        'Sentra Ubudiyah'                                                        => ['icon' => 'book-open',       'color' => 'emerald', 'ring' => 'border-emerald-800/60 bg-emerald-950/20', 'text' => 'text-emerald-400', 'dot' => 'bg-emerald-900/60'],
+                        'Sentra Persiapan'                                                       => ['icon' => 'laptop',          'color' => 'indigo',  'ring' => 'border-indigo-800/60 bg-indigo-950/20',   'text' => 'text-indigo-400',  'dot' => 'bg-indigo-900/60'],
+                        'Sentra Eksplorasi Diri'                                                 => ['icon' => 'sparkles',        'color' => 'amber',   'ring' => 'border-amber-800/60 bg-amber-950/20',     'text' => 'text-amber-400',   'dot' => 'bg-amber-900/60'],
+                        // SMP Kelompoks
                         'Kelompok Keagamaan'                                                     => ['icon' => 'book-open',       'color' => 'emerald', 'ring' => 'border-emerald-800/60 bg-emerald-950/20', 'text' => 'text-emerald-400', 'dot' => 'bg-emerald-900/60'],
                         'Kelompok Akademik (Numerasi, Literasi, Science, and English)'           => ['icon' => 'laptop',          'color' => 'indigo',  'ring' => 'border-indigo-800/60 bg-indigo-950/20',   'text' => 'text-indigo-400',  'dot' => 'bg-indigo-900/60'],
                         'Kelompok Potensi Bakat dan Minat'                                       => ['icon' => 'sparkles',        'color' => 'amber',   'ring' => 'border-amber-800/60 bg-amber-950/20',     'text' => 'text-amber-400',   'dot' => 'bg-amber-900/60'],
@@ -183,6 +191,118 @@
 
                         <!-- Indikator Items (Collapsible) -->
                         <div id="{{ $groupId }}" class="divide-y divide-border/60">
+
+                            @if($aspek === 'Sentra Ubudiyah')
+                                <!-- Banner Pedoman Sentra Ubudiyah -->
+                                <div class="p-5 bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-zinc-900 border-b border-border space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-emerald-800 bg-emerald-950/80 text-emerald-400">
+                                            <i data-lucide="book-open" class="h-4 w-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+                                                Pedoman Asesmen Sentra Ubudiyah
+                                                <span class="rounded bg-emerald-900/60 border border-emerald-700/60 text-emerald-300 text-[10px] font-mono px-1.5 py-0.5">3 Sub-Aspek &bull; 7 Indikator &bull; Skala 1–4</span>
+                                            </h3>
+                                            <p class="text-xs text-muted-foreground mt-0.5">
+                                                Observasi pembiasaan ibadah dasar anak: 1.1 Praktek Wudhu dan Sholat &bull; 1.2 Hafalan Doa Sehari-hari &bull; 1.3 Hafalan Surat-Surat Pendek.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 text-xs">
+                                        <div class="p-3 rounded-lg border border-border bg-card space-y-1">
+                                            <span class="font-semibold text-foreground flex items-center gap-1.5">
+                                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span> 1.1 Praktek Wudhu &amp; Sholat
+                                            </span>
+                                            <p class="text-[11px] text-muted-foreground">Urutan wudhu tertib, gerakan sholat tuma'ninah, dan bacaan sholat tartil.</p>
+                                        </div>
+                                        <div class="p-3 rounded-lg border border-border bg-card space-y-1">
+                                            <span class="font-semibold text-foreground flex items-center gap-1.5">
+                                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span> 1.2 Doa Sehari-hari
+                                            </span>
+                                            <p class="text-[11px] text-muted-foreground">Doa sebelum makan dan doa setelah makan dengan adab dan pelafalan fasih.</p>
+                                        </div>
+                                        <div class="p-3 rounded-lg border border-border bg-card space-y-1">
+                                            <span class="font-semibold text-foreground flex items-center gap-1.5">
+                                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span> 1.3 Surat Pendek
+                                            </span>
+                                            <p class="text-[11px] text-muted-foreground">Makharijul huruf dan kelancaran Surat Al-Fatihah dan Al-Ikhlas.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($aspek === 'Sentra Persiapan')
+                                <!-- Banner Pedoman Sentra Persiapan -->
+                                <div class="p-5 bg-gradient-to-r from-indigo-950/40 via-zinc-900 to-zinc-900 border-b border-border space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-indigo-800 bg-indigo-950/80 text-indigo-400">
+                                            <i data-lucide="laptop" class="h-4 w-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+                                                Pedoman Asesmen Sentra Persiapan (Calistung &amp; Bahasa)
+                                                <span class="rounded bg-indigo-900/60 border border-indigo-700/60 text-indigo-300 text-[10px] font-mono px-1.5 py-0.5">4 Sub-Aspek &bull; 14 Indikator &bull; Skala 1–4</span>
+                                            </h3>
+                                            <p class="text-xs text-muted-foreground mt-0.5">
+                                                Kesiapan akademik awal anak masuk SD: 2.1 Membaca (3 Aspek) &bull; 2.2 Menulis / Dikte (2 Aspek) &bull; 2.3 Berhitung (5 Aspek) &bull; 2.4 English (4 Aspek).
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 text-xs">
+                                        <div class="p-3 rounded-lg border border-border bg-card space-y-1">
+                                            <span class="font-semibold text-foreground">2.1 Membaca</span>
+                                            <p class="text-[11px] text-muted-foreground">Huruf A–Z urut, membaca suku kata KV, membaca per kata.</p>
+                                        </div>
+                                        <div class="p-3 rounded-lg border border-border bg-card space-y-1">
+                                            <span class="font-semibold text-foreground">2.2 Menulis / Dikte</span>
+                                            <p class="text-[11px] text-muted-foreground">Teknik tripod grasp pensil dan menulis nama benda.</p>
+                                        </div>
+                                        <div class="p-3 rounded-lg border border-border bg-card space-y-1">
+                                            <span class="font-semibold text-foreground">2.3 Berhitung</span>
+                                            <p class="text-[11px] text-muted-foreground">Membilang 1–10 maju/mundur, angka acak, kuantitas &amp; ukuran.</p>
+                                        </div>
+                                        <div class="p-3 rounded-lg border border-border bg-card space-y-1">
+                                            <span class="font-semibold text-foreground">2.4 English</span>
+                                            <p class="text-[11px] text-muted-foreground">Listening colour, speaking greeting, kosakata buah &amp; hewan.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($aspek === 'Sentra Eksplorasi Diri')
+                                <!-- Banner Pedoman Sentra Eksplorasi Diri -->
+                                <div class="p-5 bg-gradient-to-r from-amber-950/40 via-zinc-900 to-zinc-900 border-b border-border space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-amber-800 bg-amber-950/80 text-amber-400">
+                                            <i data-lucide="sparkles" class="h-4 w-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+                                                Pedoman Asesmen Sentra Eksplorasi Diri (Motorik &amp; Sosial Emosional)
+                                                <span class="rounded bg-amber-900/60 border border-amber-700/60 text-amber-300 text-[10px] font-mono px-1.5 py-0.5">2 Sub-Aspek &bull; 18 Indikator &bull; Skala 1–4</span>
+                                            </h3>
+                                            <p class="text-xs text-muted-foreground mt-0.5">
+                                                3.1 Aspek Motorik Halus &amp; Kasar (10 Indikator) &bull; 3.2 Wawancara Transisi Sosial Emosional (8 Pertanyaan).
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1 text-xs">
+                                        <div class="p-3 rounded-lg border border-border bg-card space-y-1">
+                                            <span class="font-semibold text-amber-400 flex items-center gap-1.5">
+                                                <i data-lucide="activity" class="h-3.5 w-3.5"></i> 3.1 Aspek Motorik (10 Aspek)
+                                            </span>
+                                            <p class="text-[11px] text-muted-foreground">Meronce, finger painting, menggunting, mencocok jarum, meniti titian, melompat/merayap, koordinasi gerak, meniup balon, duduk tertib, dan eye contact.</p>
+                                        </div>
+                                        <div class="p-3 rounded-lg border border-border bg-card space-y-1">
+                                            <span class="font-semibold text-amber-400 flex items-center gap-1.5">
+                                                <i data-lucide="heart-handshake" class="h-3.5 w-3.5"></i> 3.2 Sosial Emosional (8 Pertanyaan)
+                                            </span>
+                                            <p class="text-[11px] text-muted-foreground">Kemandirian rutinitas pagi, toilet training, merapikan mainan &amp; sepatu, regulasi emosi saat dilarang, resiliensi saat jatuh, meminta tolong, dan resolusi konflik.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
 
                             @if($aspek === 'Kelompok Keagamaan')
                                 <!-- Banner Rumus Perhitungan & Rekomendasi Otomatis Keagamaan -->
@@ -740,8 +860,11 @@
                                             class="w-full px-5 py-3.5 bg-card hover:bg-muted border-b border-border flex flex-wrap items-center justify-between gap-3 text-left transition-colors cursor-pointer"
                                         >
                                             <div class="flex items-center gap-3">
-                                                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-950 border border-purple-800 text-purple-400 text-xs font-bold font-mono shrink-0">
-                                                    {{ substr($posTitle, 4, 1) }}
+                                                @php
+                                                    $posBadge = str_starts_with($posTitle, 'Pos') ? substr($posTitle, 4, 1) : explode(' ', $posTitle)[0];
+                                                @endphp
+                                                <span class="flex h-7 min-w-7 px-1.5 items-center justify-center rounded-lg bg-muted border border-border text-foreground text-xs font-bold font-mono shrink-0">
+                                                    {{ $posBadge }}
                                                 </span>
                                                 <div>
                                                     <h4 class="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -750,9 +873,9 @@
                                                     </h4>
                                                     <p class="text-[11px] text-muted-foreground mt-0.5">
                                                         @if($isCbt)
-                                                            Skala Nilai 0–100 per Mapel &bull; Bobot: {{ $posItems->sum('bobot') }}% &bull; Rumus Pos: Rata-rata 4 Mapel
+                                                            Skala Nilai 0–100 per Mapel &bull; Bobot: {{ round($posItems->sum('bobot'), 1) }}% &bull; Rumus Pos: Rata-rata 4 Mapel
                                                         @else
-                                                            Skala Nilai 1–4 &bull; Skor Maksimal {{ $posMaxScore }} &bull; Bobot Pos: {{ $posItems->sum('bobot') }}% &bull; Rumus: (Skor / {{ $posMaxScore }}) × 100
+                                                            Skala Nilai 1–4 &bull; Skor Maksimal {{ $posMaxScore }} &bull; Bobot Pos: {{ round($posItems->sum('bobot'), 1) }}% &bull; Rumus: (Skor / {{ $posMaxScore }}) × 100
                                                         @endif
                                                     </p>
                                                 </div>

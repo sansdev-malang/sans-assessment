@@ -128,9 +128,9 @@
 
                 <!-- Horizontal Candidate Carousel -->
                 <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 pt-0.5">
-                    @foreach ($siswaSMP as $s)
+                    @forelse ($siswaSMP as $s)
                         @php
-                            $isSelected = ($activeSiswa['no'] === $s['no']);
+                            $isSelected = (($activeSiswa['no'] ?? '') === $s['no']);
                             $kKey = $activeGuru['kelompok_key'];
                             $kData = $s[$kKey] ?? [];
                             $statusRuangIni = $kData['status'] ?? 'Belum Diuji';
@@ -188,13 +188,18 @@
                                 Mulai: <span class="text-muted-foreground">{{ $s['mulai_dari'] }}</span>
                             </div>
                         </a>
-                    @endforeach
+                    @empty
+                        <div class="w-full py-4 px-3 text-center text-xs text-muted-foreground bg-muted/20 rounded-lg border border-dashed border-border">
+                            Belum ada calon siswa terdaftar di ruang ini. Silakan tambahkan atau import siswa di menu Admin Siswa.
+                        </div>
+                    @endforelse
                 </div>
             </div>
 
             <!-- ========================================================================= -->
             <!-- 3. ACTIVE STUDENT QUICK CARD & 4-STATION ROTATION MATRIX                   -->
             <!-- ========================================================================= -->
+            @if(!empty($activeSiswa))
             <div class="rounded-xl border border-border bg-card p-3.5 sm:p-4 shadow-sm space-y-3">
                 
                 <!-- Candidate Header -->
@@ -1172,9 +1177,29 @@
                 </div>
 
             </div>
+            @else
+                <div class="rounded-xl border border-border bg-card p-8 text-center space-y-3">
+                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                        <i data-lucide="users" class="h-6 w-6"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="text-sm font-semibold text-foreground">Belum Ada Calon Siswa</h3>
+                        <p class="text-xs text-muted-foreground max-w-sm mx-auto">
+                            Saat ini belum ada data calon siswa untuk jenjang SMP. Silakan tambahkan atau import data siswa melalui menu Admin Siswa.
+                        </p>
+                    </div>
+                    @if(($user['role'] ?? '') === 'admin')
+                        <a href="{{ route('admin.siswa', ['jenjang' => 'smp']) }}" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors">
+                            <i data-lucide="plus" class="h-3.5 w-3.5"></i>
+                            <span>Buka Admin Siswa SMP</span>
+                        </a>
+                    @endif
+                </div>
+            @endif
 
         </main>
 
+        @if(!empty($activeSiswa))
         <!-- ========================================================================= -->
         <!-- 5. STICKY BOTTOM ACTION BAR (OPTIMAL UNTUK SMARTPHONE SCREEN)             -->
         <!-- ========================================================================= -->
@@ -1317,6 +1342,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
         <!-- ========================================================================= -->
         <!-- 7. CBT IMPORT MODAL                                                       -->
@@ -1591,7 +1617,7 @@
                 }
 
                 const payload = {
-                    siswa_no: "{{ $activeSiswa['no'] }}",
+                    siswa_no: "{{ $activeSiswa['no'] ?? '' }}",
                     kelompok_key: "{{ $activeGuru['kelompok_key'] }}",
                     scores: Object.assign({}, window.currentScores),
                     detail_nilai: {},
@@ -1689,7 +1715,7 @@
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-foreground">Alhamdulillah! 4/4 Kelompok Tuntas</h3>
-                            <p class="text-xs text-muted-foreground mt-1">Ananda <strong class="text-emerald-400">{{ $activeSiswa["name"] }}</strong> telah menyelesaikan seluruh 4 ruang observasi SMP.</p>
+                            <p class="text-xs text-muted-foreground mt-1">Ananda <strong class="text-emerald-400">{{ $activeSiswa["name"] ?? "" }}</strong> telah menyelesaikan seluruh 4 ruang observasi SMP.</p>
                         </div>
                         <div class="p-3 rounded-xl bg-muted/40 border border-border text-xs space-y-1">
                             <div class="flex justify-between text-muted-foreground">
