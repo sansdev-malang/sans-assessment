@@ -102,7 +102,7 @@
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                             </span>
-                            <span>SPMB Ramah Anak &amp; Holistik • Perguruan Anak Saleh</span>
+                            <span>SPMB Ramah Anak &amp; Holistik • Sekolah Alam Anak Saleh</span>
                             <span class="text-white/20">|</span>
                             <span class="text-zinc-400 font-mono text-[11px]">TK • SD • SMP</span>
                         </div>
@@ -212,7 +212,7 @@
             <!-- TIGA JENJANG PENDIDIKAN ANAK SALEH (Overview Badges) -->
             <section id="jenjang" class="max-w-6xl mx-auto px-4 py-8">
                 <div class="text-center text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-6">
-                    Penerimaan Siswa Baru Terpadu Perguruan Anak Saleh
+                    Penerimaan Siswa Baru Terpadu Sekolah Alam Anak Saleh
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     
@@ -1056,7 +1056,7 @@
                     <!-- Col 4: Informasi & Kontak -->
                     <div class="flex flex-col gap-2.5">
                         <span class="text-white font-semibold text-xs tracking-wider uppercase font-mono">Sekretariat SPMB</span>
-                        <span class="text-zinc-400">Kampus Perguruan Anak Saleh</span>
+                        <span class="text-zinc-400">Kampus Sekolah Alam Anak Saleh</span>
                         <span class="text-zinc-400">Jam Layanan: 07.30 - 15.00 WIB</span>
                         <a href="#daftar" class="text-emerald-400 hover:text-emerald-300 transition-colors">Konsultasi via WhatsApp &rarr;</a>
                     </div>
@@ -1065,7 +1065,7 @@
 
                 <!-- Footer Bottom Credits -->
                 <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-zinc-400">
-                    <p>&copy; 2026 Perguruan Anak Saleh. Hak Cipta Dilindungi Undang-Undang.</p>
+                    <p>&copy; 2026 Sekolah Alam Anak Saleh. Hak Cipta Dilindungi Undang-Undang.</p>
                     <div class="flex items-center gap-6">
                         <a href="#navbar-header" class="hover:text-white transition-colors">&uarr; Kembali ke Atas</a>
                     </div>

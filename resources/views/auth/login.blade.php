@@ -8,13 +8,7 @@
         <!-- Theme Initialization Script (Prevents FOUT) -->
         <script>
             (function () {
-                const theme = localStorage.getItem('saans-theme') || 'amber';
                 const mode = localStorage.getItem('saans-mode') || 'dark';
-                const fontScale = localStorage.getItem('saans-font-scale') || '106.25%';
-                const radius = localStorage.getItem('saans-radius') || '0.875rem';
-                document.documentElement.setAttribute('data-theme', theme);
-                document.documentElement.style.fontSize = fontScale;
-                document.documentElement.style.setProperty('--radius', radius);
                 if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                     document.documentElement.classList.add('dark');
                 } else {
@@ -30,24 +24,24 @@
         <!-- Styles & Scripts via Vite -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="h-full bg-zinc-950 text-zinc-100 antialiased font-sans">
+    <body class="h-full bg-background text-foreground antialiased font-sans">
 
         <div class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
             
             <!-- Left Side: Brand Panel (Shadcn Authentication Pattern) -->
-            <div class="relative hidden lg:flex flex-col justify-between border-r border-zinc-800 bg-zinc-900/30 p-10 overflow-hidden">
+            <div class="relative hidden lg:flex flex-col justify-between border-r border-border bg-card p-10 overflow-hidden">
                 
                 <!-- Background Geometric Grid (Minimalist) -->
                 <div class="absolute inset-0 bg-[linear-gradient(to_right,#27272a33_1px,transparent_1px),linear-gradient(to_bottom,#27272a33_1px,transparent_1px)] bg-[size:32px_32px]"></div>
 
                 <!-- Brand Header -->
                 <div class="relative z-10 flex items-center gap-2.5">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-700 bg-zinc-800 text-zinc-100 shadow-sm">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-sm">
                         <i data-lucide="graduation-cap" class="h-4 w-4"></i>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-sm font-semibold tracking-tight text-zinc-100">SAANS Assessment</span>
-                        <span class="text-[11px] text-zinc-400">Perguruan Anak Saleh (TK • SD • SMP)</span>
+                        <span class="text-sm font-semibold tracking-tight text-foreground">SAANS Assessment</span>
+                        <span class="text-[11px] text-muted-foreground">Sekolah Alam Anak Saleh (TK • SD • SMP)</span>
                     </div>
                 </div>
 
@@ -55,7 +49,7 @@
                 <div class="relative z-10 my-auto flex flex-col items-center">
                     <div id="three-login-container" class="h-72 w-full max-w-sm cursor-grab active:cursor-grabbing"></div>
                     <div class="text-center">
-                        <div class="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/80 px-3 py-1 text-xs text-zinc-400">
+                        <div class="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
                             <i data-lucide="sparkles" class="h-3 w-3 text-emerald-400"></i>
                             <span>Sistem Observasi &amp; Kesiapan Siswa Baru 2026/2027</span>
                         </div>
@@ -63,13 +57,13 @@
                 </div>
 
                 <!-- Footer Quote -->
-                <div class="relative z-10 border-t border-zinc-800/80 pt-6">
+                <div class="relative z-10 border-t border-border pt-6">
                     <blockquote class="space-y-2">
-                        <p class="text-xs text-zinc-400 leading-relaxed flex gap-2">
+                        <p class="text-xs text-muted-foreground leading-relaxed flex gap-2">
                             <i data-lucide="quote" class="h-3.5 w-3.5 shrink-0 text-zinc-600"></i>
                             <span>Mengenali keunikan gaya belajar, kemandirian emosi, dan adab ananda sejak dini untuk menghadirkan pendampingan pendidikan terbaik.</span>
                         </p>
-                        <footer class="text-xs text-zinc-500 pl-5.5">
+                        <footer class="text-xs text-muted-foreground pl-5.5">
                             Tim Psikologi &amp; Panitia SPMB Sekolah Anak Saleh
                         </footer>
                     </blockquote>
@@ -88,34 +82,34 @@
                     
                     <!-- Mobile Brand Logo -->
                     <div class="flex lg:hidden items-center gap-2.5 justify-center mb-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-700 bg-zinc-800 text-zinc-100">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-muted text-foreground">
                             <i data-lucide="graduation-cap" class="h-4 w-4"></i>
                         </div>
-                        <span class="text-sm font-semibold text-zinc-100">SAANS Assessment SPMB</span>
+                        <span class="text-sm font-semibold text-foreground">SAANS Assessment SPMB</span>
                     </div>
 
                     <!-- Form Header -->
                     <div class="flex flex-col space-y-1.5 text-center sm:text-left">
-                        <h1 class="text-xl font-semibold tracking-tight text-zinc-100">
+                        <h1 class="text-xl font-semibold tracking-tight text-foreground">
                             Masuk ke Akun
                         </h1>
-                        <p id="role-hint" class="text-xs text-zinc-400">
+                        <p id="role-hint" class="text-xs text-muted-foreground">
                             Pilih peran untuk diarahkan langsung ke halaman kerja Anda
                         </p>
                     </div>
 
                     <!-- Shadcn 2-Way Role Selector Tabs -->
                     <div class="space-y-1.5">
-                        <label class="text-xs font-medium leading-none text-zinc-300">
+                        <label class="text-xs font-medium leading-none text-foreground/90">
                             Pilih Peran Masuk
                         </label>
-                        <div class="grid grid-cols-2 gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/70 p-1 text-xs">
-                            <button type="button" id="tab-guru" class="inline-flex items-center justify-center gap-1.5 rounded-md bg-zinc-800 px-2.5 py-1.5 font-medium text-zinc-100 shadow-sm transition-all border border-zinc-700/80">
+                        <div class="grid grid-cols-2 gap-1.5 rounded-lg border border-border bg-card p-1 text-xs">
+                            <button type="button" id="tab-guru" class="inline-flex items-center justify-center gap-1.5 rounded-md bg-muted px-2.5 py-1.5 font-medium text-foreground shadow-sm transition-all border border-border">
                                 <i data-lucide="user-check" class="h-3.5 w-3.5 text-emerald-400"></i>
                                 <span>Guru Pengamat</span>
                             </button>
-                            <button type="button" id="tab-admin" class="inline-flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 font-medium text-zinc-400 hover:text-zinc-200 transition-all border border-transparent">
-                                <i data-lucide="shield-check" class="h-3.5 w-3.5 text-zinc-400"></i>
+                            <button type="button" id="tab-admin" class="inline-flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 font-medium text-muted-foreground hover:text-foreground transition-all border border-transparent">
+                                <i data-lucide="shield-check" class="h-3.5 w-3.5 text-muted-foreground"></i>
                                 <span>Admin</span>
                             </button>
                         </div>
@@ -123,9 +117,9 @@
 
                     <!-- Flash Notification -->
                     @if (session('status'))
-                        <div class="rounded-md border border-emerald-900/50 bg-emerald-950/30 p-3 text-xs text-emerald-400 flex items-center gap-2">
-                            <i data-lucide="check" class="h-3.5 w-3.5 shrink-0"></i>
-                            <span>{{ session('status') }}</span>
+                        <div class="rounded-md border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                            <i data-lucide="check" class="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
+                            <span class="font-medium">{{ session('status') }}</span>
                         </div>
                     @endif
 
@@ -135,8 +129,8 @@
                         <input type="hidden" name="role" id="input-role" value="guru">
 
                         <div class="space-y-1.5">
-                            <label class="text-xs font-medium leading-none text-zinc-300 flex items-center gap-1.5" for="input-email">
-                                <i data-lucide="mail" class="h-3.5 w-3.5 text-zinc-500"></i>
+                            <label class="text-xs font-medium leading-none text-foreground/90 flex items-center gap-1.5" for="input-email">
+                                <i data-lucide="mail" class="h-3.5 w-3.5 text-muted-foreground"></i>
                                 <span>Email / ID Akun</span>
                             </label>
                             <input 
@@ -146,17 +140,17 @@
                                 required
                                 value="guru@anaksaleh.sch.id"
                                 placeholder="name@anaksaleh.sch.id" 
-                                class="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-3 py-1 text-xs text-zinc-100 shadow-sm placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors"
+                                class="flex h-9 w-full rounded-md border border-border bg-card px-3 py-1 text-xs text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors"
                             />
                         </div>
 
                         <div class="space-y-1.5">
                             <div class="flex items-center justify-between">
-                                <label class="text-xs font-medium leading-none text-zinc-300 flex items-center gap-1.5" for="input-password">
-                                    <i data-lucide="lock" class="h-3.5 w-3.5 text-zinc-500"></i>
+                                <label class="text-xs font-medium leading-none text-foreground/90 flex items-center gap-1.5" for="input-password">
+                                    <i data-lucide="lock" class="h-3.5 w-3.5 text-muted-foreground"></i>
                                     <span>Kata Sandi</span>
                                 </label>
-                                <span class="text-[11px] text-zinc-500">Demo bebas</span>
+                                <span class="text-[11px] text-muted-foreground">Demo bebas</span>
                             </div>
                             <input 
                                 id="input-password" 
@@ -165,16 +159,16 @@
                                 required
                                 value="guru123"
                                 placeholder="••••••••" 
-                                class="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-3 py-1 text-xs text-zinc-100 shadow-sm placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors font-mono"
+                                class="flex h-9 w-full rounded-md border border-border bg-card px-3 py-1 text-xs text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors font-mono"
                             />
                         </div>
 
                         <div class="flex items-center justify-between text-xs">
-                            <label class="flex items-center gap-2 text-zinc-400 cursor-pointer">
-                                <input type="checkbox" checked class="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 text-zinc-100 focus:ring-0">
+                            <label class="flex items-center gap-2 text-muted-foreground cursor-pointer">
+                                <input type="checkbox" checked class="h-3.5 w-3.5 rounded border-border bg-card text-foreground focus:ring-0">
                                 <span>Ingat sesi masuk</span>
                             </label>
-                            <span class="text-zinc-500 hover:text-zinc-400 text-[11px] cursor-pointer">Lupa sandi?</span>
+                            <span class="text-muted-foreground hover:text-muted-foreground text-[11px] cursor-pointer">Lupa sandi?</span>
                         </div>
 
                         <!-- Shadcn Primary Button with Lucide Icon -->
@@ -184,8 +178,8 @@
                         </button>
                     </form>
 
-                    <p class="px-4 text-center text-[11px] text-zinc-500 leading-normal">
-                        Perguruan Anak Saleh &bull; Sistem Asesmen Siswa Baru Terpadu
+                    <p class="px-4 text-center text-[11px] text-muted-foreground leading-normal">
+                        Sekolah Alam Anak Saleh &bull; Sistem Asesmen Siswa Baru Terpadu
                     </p>
 
                 </div>
@@ -227,11 +221,11 @@
                 function activateTab(role) {
                     tabs.forEach(t => {
                         const isActive = t.role === role;
-                        t.btn?.classList.toggle('bg-zinc-800', isActive);
-                        t.btn?.classList.toggle('text-zinc-100', isActive);
+                        t.btn?.classList.toggle('bg-muted', isActive);
+                        t.btn?.classList.toggle('text-foreground', isActive);
                         t.btn?.classList.toggle('shadow-sm', isActive);
-                        t.btn?.classList.toggle('border-zinc-700/80', isActive);
-                        t.btn?.classList.toggle('text-zinc-400', !isActive);
+                        t.btn?.classList.toggle('border-border', isActive);
+                        t.btn?.classList.toggle('text-muted-foreground', !isActive);
                         t.btn?.classList.toggle('border-transparent', !isActive);
 
                         if (isActive) {

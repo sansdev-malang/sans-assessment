@@ -133,7 +133,7 @@ class SPMBController extends Controller
                 'email' => $email ?: 'guru@anaksaleh.sch.id',
                 'role' => 'guru',
                 'jenjang' => 'all',
-                'unit' => 'Perguruan Anak Saleh',
+                'unit' => 'Sekolah Alam Anak Saleh',
                 'role_label' => 'Tim Pengamat & Psikolog Anak',
             ],
         ]);
