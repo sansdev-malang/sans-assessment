@@ -123,7 +123,7 @@
                         <span>Locking Aktif</span>
                     </span>
 
-                    {{-- Quick Switch Co-Pengamat di Sentra Ini (Memudahkan pengujian & rotasi guru) --}}
+                    <!-- {{-- Quick Switch Co-Pengamat di Sentra Ini (Memudahkan pengujian & rotasi guru) --}}
                     @if(isset($sentraGurus) && $sentraGurus->count() > 1)
                         <div class="flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border text-[10px]">
                             <span class="text-muted-foreground px-1 hidden xs:inline">Simulasi Co-Pengamat:</span>
@@ -138,7 +138,7 @@
                                 </a>
                             @endforeach
                         </div>
-                    @endif
+                    @endif -->
                 </div>
             </div>
 
