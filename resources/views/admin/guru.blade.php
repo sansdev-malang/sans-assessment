@@ -65,10 +65,10 @@
                     <!-- Jenjang Switcher -->
                     <div class="inline-flex items-center rounded-lg border border-border bg-card p-1 text-xs">
                         <a href="{{ route('admin.guru', ['jenjang' => 'sd']) }}" class="px-2.5 py-1 rounded-md font-medium transition-all {{ ($jenjang ?? 'sd') === 'sd' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground' }}">
-                            SD Karakter
+                            SD
                         </a>
                         <a href="{{ route('admin.guru', ['jenjang' => 'smp']) }}" class="px-2.5 py-1 rounded-md font-medium transition-all {{ ($jenjang ?? 'sd') === 'smp' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground' }}">
-                            SMP Karakter
+                            SMP
                         </a>
                     </div>
                     

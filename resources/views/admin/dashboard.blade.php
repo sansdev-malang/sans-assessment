@@ -79,6 +79,16 @@
                         <span class="hidden sm:inline text-xs font-medium text-foreground">{{ $user['name'] ?? 'Administrator' }}</span>
                     </div>
 
+                    <!-- Jenjang Switcher -->
+                    <div class="inline-flex items-center rounded-lg border border-border bg-card p-1 text-xs">
+                        <a href="{{ route('admin.dashboard', ['jenjang' => 'sd']) }}" class="px-2.5 py-1 rounded-md font-medium transition-all {{ ($currentJenjang ?? 'sd') === 'sd' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground' }}">
+                            SD
+                        </a>
+                        <a href="{{ route('admin.dashboard', ['jenjang' => 'smp']) }}" class="px-2.5 py-1 rounded-md font-medium transition-all {{ ($currentJenjang ?? 'sd') === 'smp' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground' }}">
+                            SMP
+                        </a>
+                    </div>
+
                     <!-- <a href="{{ route('guru.observasi') }}" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs font-medium text-foreground/90 hover:bg-muted hover:text-foreground transition-colors">
                         <i data-lucide="clipboard-pen-line" class="h-3.5 w-3.5 text-emerald-400"></i>
                         <span>Observasi Guru</span>

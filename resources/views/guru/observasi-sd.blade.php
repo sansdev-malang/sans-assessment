@@ -338,7 +338,7 @@
                             </div>
                             <p class="text-xs text-muted-foreground">
                                 Target: <strong class="text-foreground">{{ $activeSiswa['kelas_target'] ?? 'Kelas 1' }}</strong>
-                                &bull; Asal: {{ $activeSiswa['asal_sekolah'] ?? 'SD Karakter Anak Saleh' }}
+                                &bull; Asal: {{ $activeSiswa['asal_sekolah'] ?? 'SD Alam Anak Saleh' }}
                                 &bull; Wali: {{ $activeSiswa['wali'] ?? '-' }}
                             </p>
                         </div>
@@ -859,7 +859,7 @@
                     <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 flex items-center justify-between">
                         <div>
                             <span class="font-bold text-xs text-foreground">Nilai Akhir Terpadu 3 Sentra:</span>
-                            <div class="text-[10px] text-muted-foreground">Kesiapan Belajar Kelas 1 SD Karakter</div>
+                            <div class="text-[10px] text-muted-foreground">Kesiapan Belajar Kelas 1 SD Alam</div>
                         </div>
                         <span class="text-xl font-bold font-mono text-emerald-400">
                             {{ !empty($activeSiswa['nilai_akhir_terpadu']) ? number_format($activeSiswa['nilai_akhir_terpadu'], 1).'%' : 'Dalam Proses' }}
@@ -878,7 +878,7 @@
 
         <!-- Footer -->
         <footer class="border-t border-border py-4 px-6 text-center text-xs text-muted-foreground">
-            SAANS Assessment &bull; Sekolah Alam Anak Saleh &bull; Observasi Calon Siswa Baru SD Karakter
+            SAANS Assessment &bull; Sekolah Alam Anak Saleh &bull; Observasi Calon Siswa Baru SD Alam
         </footer>
 
         <!-- Javascript Logic -->

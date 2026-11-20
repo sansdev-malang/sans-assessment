@@ -29,139 +29,133 @@ class SPMBController extends Controller
      */
     public function login(Request $request): RedirectResponse
     {
-        $role = $request->input('role', 'guru');
-        $email = strtolower($request->input('email', ''));
-        $nip = $request->input('nip');
+        $request->validate([
+            'email' => 'required|string',
+            'password' => 'required|string',
+        ], [
+            'email.required' => 'Email atau NIP wajib diisi.',
+            'password.required' => 'Kata sandi wajib diisi.',
+        ]);
 
-        // Deteksi unit admin berdasarkan email (tab Admin tunggal)
-        if ($role === 'admin' || str_contains($email, 'admin')) {
-            // Admin TK
-            if (str_contains($email, 'admin.tk')) {
-                session([
-                    'auth_user' => [
-                        'name' => 'Ustadzah Siti Aminah, S.Pd.I.',
-                        'email' => $email ?: 'admin.tk@anaksaleh.sch.id',
-                        'role' => 'admin_tk',
-                        'jenjang' => 'tk',
-                        'unit' => 'KB & TK Anak Saleh',
-                        'role_label' => 'Admin SPMB KB & TK',
-                    ],
-                ]);
+        $loginInput = trim($request->input('email'));
+        $password = $request->input('password');
 
-                return redirect()->route('admin.dashboard')
-                    ->with('status', 'Selamat datang di Dashboard Observasi SPMB KB & TK Anak Saleh!');
+        // 1. Cari User berdasarkan email atau NIP Guru
+        $user = null;
+        $guru = null;
+
+        // Cek apakah loginInput adalah NIP di tabel guru_pengamats
+        $guru = GuruPengamat::where('nip', $loginInput)->first();
+        if ($guru) {
+            if ($guru->user_id) {
+                $user = User::find($guru->user_id);
             }
-
-            // Admin SMP
-            if (str_contains($email, 'admin.smp')) {
-                session([
-                    'auth_user' => [
-                        'name' => 'Ustadz Ridwan Malik, M.Si.',
-                        'email' => $email ?: 'admin.smp@anaksaleh.sch.id',
-                        'role' => 'admin_smp',
-                        'jenjang' => 'smp',
-                        'unit' => 'SMP Alam Anak Saleh',
-                        'role_label' => 'Admin SPMB SMP',
-                    ],
-                ]);
-
-                return redirect()->route('admin.dashboard')
-                    ->with('status', 'Selamat datang di Dashboard Observasi SPMB SMP Anak Saleh!');
+            if (! $user && $guru->email) {
+                $user = User::where('email', $guru->email)->first();
             }
+        } else {
+            // Cari berdasarkan email di tabel users
+            $user = User::where('email', $loginInput)->first();
+            if ($user) {
+                $guru = GuruPengamat::where('user_id', $user->id)
+                    ->orWhere('email', $user->email)
+                    ->first();
+            } else {
+                // Cari di tabel guru_pengamats berdasarkan email
+                $guru = GuruPengamat::where('email', $loginInput)->first();
+                if ($guru && $guru->user_id) {
+                    $user = User::find($guru->user_id);
+                }
+            }
+        }
 
-            // Admin SD (default admin)
-            session([
-                'auth_user' => [
-                    'name' => 'Admin',
-                    'email' => $email ?: 'admin.sd@anaksaleh.sch.id',
-                    'role' => 'admin_sd',
-                    'jenjang' => 'sd',
-                    'unit' => 'SD Karakter Anak Saleh',
-                    'role_label' => 'Admin SPMB SD',
+        // 2. Pastikan akun admin utama SPMB terpadu ada di database jika dicoba login
+        if (! $user) {
+            $defaultAdmins = [
+                'admin@anaksaleh.sch.id' => [
+                    'name' => 'Administrator SPMB',
                 ],
-            ]);
+                'admin.sd@anaksaleh.sch.id' => [
+                    'name' => 'Administrator SPMB',
+                ],
+                'admin.smp@anaksaleh.sch.id' => [
+                    'name' => 'Administrator SPMB',
+                ],
+            ];
 
-            return redirect()->route('admin.dashboard')
-                ->with('status', 'Selamat datang di Dashboard Observasi SPMB SD Anak Saleh!');
-        }
-
-        // Cek akun Guru Pengamat SMP dari Database
-        $guruDb = null;
-        if (! empty($nip)) {
-            $guruDb = GuruPengamat::where('nip', $nip)->first();
-        } elseif (! empty($email)) {
-            $guruDb = GuruPengamat::where('email', $email)->first();
-        }
-
-        if (! $guruDb && ! empty($email)) {
-            // Guru Pengamat SD
-            if (str_contains($email, 'hasan') || str_contains($email, 'ubudiyah')) {
-                $guruDb = GuruPengamat::where('nip', 'GSD-2026-01')->first();
-            } elseif (str_contains($email, 'khadijah')) {
-                $guruDb = GuruPengamat::where('nip', 'GSD-2026-05')->first();
-            } elseif (str_contains($email, 'fatimah') || str_contains($email, 'persiapan')) {
-                $guruDb = GuruPengamat::where('nip', 'GSD-2026-02')->first();
-            } elseif (str_contains($email, 'faqih')) {
-                $guruDb = GuruPengamat::where('nip', 'GSD-2026-06')->first();
-            } elseif (str_contains($email, 'maryam') || str_contains($email, 'eksplorasi')) {
-                $guruDb = GuruPengamat::where('nip', 'GSD-2026-03')->first();
-            } elseif (str_contains($email, 'aisyah')) {
-                $guruDb = GuruPengamat::where('nip', 'GSD-2026-07')->first();
+            $lowerInput = strtolower($loginInput);
+            if (isset($defaultAdmins[$lowerInput])) {
+                $meta = $defaultAdmins[$lowerInput];
+                $user = User::create([
+                    'name' => $meta['name'],
+                    'email' => $lowerInput,
+                    'password' => Hash::make('admin123'),
+                ]);
             }
-            // Guru Pengamat SMP
-            elseif (str_contains($email, 'hadi') || str_contains($email, 'keagamaan')) {
-                $guruDb = GuruPengamat::where('nip', 'GSMP-2026-01')->first();
-            } elseif (str_contains($email, 'imarotul') || str_contains($email, 'akademik')) {
-                $guruDb = GuruPengamat::where('nip', 'GSMP-2026-02')->first();
-            } elseif (str_contains($email, 'mutaahirotul') || str_contains($email, 'bakat')) {
-                $guruDb = GuruPengamat::where('nip', 'GSMP-2026-03')->first();
-            } elseif (str_contains($email, 'davies') || str_contains($email, 'pribadi') || str_contains($email, 'sosial')) {
-                $guruDb = GuruPengamat::where('nip', 'GSMP-2026-04')->first();
+        }
+        // 3. Jika guru terdaftar tapi belum punya user account di tabel users, buatkan
+        if ($guru && ! $user) {
+            $user = User::firstOrCreate(
+                ['email' => $guru->email],
+                [
+                    'name' => $guru->nama,
+                    'password' => Hash::make('guru123'),
+                ]
+            );
+            if (! $guru->user_id) {
+                $guru->update(['user_id' => $user->id]);
             }
         }
 
-        if ($guruDb) {
+        // 4. Verifikasi Kata Sandi
+        if (! $user || ! Hash::check($password, $user->password)) {
+            return back()
+                ->withInput($request->only('email'))
+                ->with('error', 'Email/NIP atau kata sandi yang Anda masukkan salah.');
+        }
+
+        // 5. Autentikasi berhasil: jika terhubung sebagai Guru Pengamat
+        if ($guru) {
             session([
                 'auth_user' => [
-                    'id' => $guruDb->id,
-                    'name' => $guruDb->nama,
-                    'nip' => $guruDb->nip,
-                    'email' => $guruDb->email,
+                    'id' => $guru->id,
+                    'user_id' => $user->id,
+                    'name' => $guru->nama,
+                    'nip' => $guru->nip,
+                    'email' => $guru->email,
                     'role' => 'guru',
-                    'jenjang' => $guruDb->jenjang,
-                    'unit' => $guruDb->unit,
-                    'role_label' => 'Guru Pengamat '.$guruDb->kelompok_short,
-                    'kelompok' => $guruDb->kelompok_nama,
-                    'ruang' => $guruDb->ruang,
-                    'pos_desc' => $guruDb->pos_desc,
-                    'avatar' => $guruDb->avatar,
-                    'color' => $guruDb->color,
+                    'jenjang' => $guru->jenjang,
+                    'unit' => $guru->unit,
+                    'role_label' => 'Guru Pengamat '.$guru->kelompok_short,
+                    'kelompok' => $guru->kelompok_nama,
+                    'ruang' => $guru->ruang,
+                    'pos_desc' => $guru->pos_desc,
+                    'avatar' => $guru->avatar,
+                    'color' => $guru->color,
                 ],
             ]);
 
-            return redirect()->route('guru.observasi', ['guru_nip' => $guruDb->nip])
-                ->with('status', 'Selamat bertugas, '.$guruDb->nama.' ('.$guruDb->kelompok_short.')!');
+            return redirect()->route('guru.observasi', ['guru_nip' => $guru->nip])
+                ->with('status', 'Selamat bertugas, '.$guru->nama.' ('.$guru->kelompok_short.')!');
         }
 
-        // Fallback default: Guru Pengamat SD/TK
+        // 6. Autentikasi berhasil: jika peran Admin Tunggal SPMB
         session([
             'auth_user' => [
-                'name' => 'Ustadzah Fatimah Azzahra, S.Pd.',
-                'email' => $email ?: 'guru@anaksaleh.sch.id',
-                'role' => 'guru',
-                'jenjang' => 'all',
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => 'admin',
+                'jenjang' => 'sd',
                 'unit' => 'Sekolah Alam Anak Saleh',
-                'role_label' => 'Tim Pengamat & Psikolog Anak',
+                'role_label' => 'Administrator SPMB',
             ],
         ]);
 
-        return redirect()->route('guru.observasi')
-            ->with('status', 'Selamat bertugas di Halaman Observasi Siswa Baru!');
+        return redirect()->route('admin.dashboard')
+            ->with('status', 'Selamat datang di Dashboard Observasi SPMB Sekolah Alam Anak Saleh!');
     }
-
-    /**
-     * Halaman Observasi Siswa Baru untuk Guru Pengamat (SMP & SD).
-     */
+     
     public function observasi(Request $request): View
     {
         $user = session('auth_user', []);
@@ -217,7 +211,7 @@ class SPMBController extends Controller
                 'kelompok_short' => 'Sentra Ubudiyah',
                 'pos_desc'       => '-',
                 'ruang'          => '-',
-                'unit'           => 'SD Karakter Anak Saleh',
+                'unit'           => 'SD Alam Anak Saleh',
                 'avatar'         => 'GP',
                 'color'          => 'emerald',
             ];
@@ -235,7 +229,7 @@ class SPMBController extends Controller
         $user['email']       = $activeGuru['email'];
         $user['role']        = 'guru';
         $user['jenjang']     = 'sd';
-        $user['unit']        = 'SD Karakter Anak Saleh';
+        $user['unit']        = 'SD Alam Anak Saleh';
         $user['role_label']  = 'Guru Pengamat '.$activeGuru['kelompok_short'];
         $user['kelompok']    = $activeGuru['kelompok'];
         $user['ruang']       = $activeGuru['ruang'];
@@ -932,16 +926,23 @@ class SPMBController extends Controller
      */
     public function dashboard(): View
     {
+        $requestedJenjang = request('jenjang');
+        if ($requestedJenjang && in_array($requestedJenjang, ['sd', 'smp', 'tk'])) {
+            $user = session('auth_user', []);
+            $user['jenjang'] = $requestedJenjang;
+            session(['auth_user' => $user]);
+        }
+
         $user = session('auth_user', [
-            'name' => 'Admin',
-            'email' => 'admin.sd@anaksaleh.sch.id',
-            'role' => 'admin_sd',
+            'name' => 'Administrator SPMB',
+            'email' => 'admin@anaksaleh.sch.id',
+            'role' => 'admin',
             'jenjang' => 'sd',
-            'unit' => 'SD Karakter Anak Saleh',
-            'role_label' => 'Admin SPMB SD',
+            'unit' => 'Sekolah Alam Anak Saleh',
+            'role_label' => 'Administrator SPMB',
         ]);
 
-        $currentJenjang = $user['jenjang'] ?? 'sd';
+        $currentJenjang = $requestedJenjang ?? ($user['jenjang'] ?? 'sd');
 
         $jenjang = $currentJenjang;
 
@@ -957,7 +958,7 @@ class SPMBController extends Controller
         $rataKesiapan     = $allSiswa->whereNotNull('nilai_akhir_terpadu')->avg('nilai_akhir_terpadu');
         $persen           = $totalPendaftar > 0 ? round(($selesaiObservasi / $totalPendaftar) * 100, 1) : 0;
 
-        $unitTitles = ['sd' => 'SD Karakter Anak Saleh', 'smp' => 'SMP Alam Anak Saleh', 'tk' => 'KB & TK Anak Saleh'];
+        $unitTitles = ['sd' => 'SD Alam Anak Saleh', 'smp' => 'SMP Alam Anak Saleh', 'tk' => 'KB & TK Anak Saleh'];
         $unitBadges = ['sd' => 'Jenjang Sekolah Dasar (Kelas 1)', 'smp' => 'Jenjang Sekolah Menengah Pertama (Kelas 7)', 'tk' => 'Jenjang Usia Dini (3 - 6 Tahun)'];
 
         $data = [
@@ -1016,17 +1017,17 @@ class SPMBController extends Controller
             $user = session('auth_user', []);
             $user['jenjang'] = $requestedJenjang;
             $user['role_label'] = 'Admin SPMB ' . strtoupper($requestedJenjang);
-            $user['unit'] = $requestedJenjang === 'sd' ? 'SD Karakter Anak Saleh' : ($requestedJenjang === 'smp' ? 'SMP Karakter Anak Saleh' : 'TK Anak Saleh');
+            $user['unit'] = $requestedJenjang === 'sd' ? 'SD Alam Anak Saleh' : ($requestedJenjang === 'smp' ? 'SMP Alam Anak Saleh' : 'TK Anak Saleh');
             session(['auth_user' => $user]);
         }
 
         $user = session('auth_user', [
-            'name' => 'Admin',
-            'email' => 'admin.sd@anaksaleh.sch.id',
-            'role' => 'admin_sd',
+            'name' => 'Administrator SPMB',
+            'email' => 'admin@anaksaleh.sch.id',
+            'role' => 'admin',
             'jenjang' => 'sd',
-            'unit' => 'SD Karakter Anak Saleh',
-            'role_label' => 'Admin SPMB SD',
+            'unit' => 'Sekolah Alam Anak Saleh',
+            'role_label' => 'Administrator SPMB',
         ]);
 
         $jenjang = $user['jenjang'] ?? 'sd';
@@ -1109,7 +1110,7 @@ class SPMBController extends Controller
             'kelompok_nama' => $meta['nama'],
             'pos_desc' => $request->input('pos_desc') ?: $meta['pos_desc'],
             'ruang' => $request->input('ruang') ?: $meta['ruang'],
-            'unit' => $jenjang === 'sd' ? 'SD Karakter Anak Saleh' : ($jenjang === 'smp' ? 'SMP Karakter Anak Saleh' : 'TK Anak Saleh'),
+            'unit' => $jenjang === 'sd' ? 'SD Alam Anak Saleh' : ($jenjang === 'smp' ? 'SMP Alam Anak Saleh' : 'TK Anak Saleh'),
             'avatar' => $initials ?: 'GP',
             'color' => $meta['color'],
             'status' => $request->input('status', 'Aktif'),
@@ -1272,7 +1273,7 @@ class SPMBController extends Controller
                     'kelompok_nama' => $meta['nama'],
                     'ruang' => $row['ruang'] ?? ($row['ruangan'] ?? $meta['ruang']),
                     'pos_desc' => $row['pos_desc'] ?? ($row['deskripsi_pos'] ?? $meta['pos_desc']),
-                    'unit' => $jenjang === 'sd' ? 'SD Karakter Anak Saleh' : ($jenjang === 'smp' ? 'SMP Karakter Anak Saleh' : 'TK Anak Saleh'),
+                    'unit' => $jenjang === 'sd' ? 'SD Alam Anak Saleh' : ($jenjang === 'smp' ? 'SMP Alam Anak Saleh' : 'TK Anak Saleh'),
                     'avatar' => $initials ?: 'GP',
                     'color' => $meta['color'],
                     'status' => $row['status'] ?? 'Aktif',
@@ -1296,17 +1297,17 @@ class SPMBController extends Controller
             $user = session('auth_user', []);
             $user['jenjang'] = $requestedJenjang;
             $user['role_label'] = 'Admin SPMB ' . strtoupper($requestedJenjang);
-            $user['unit'] = $requestedJenjang === 'sd' ? 'SD Karakter Anak Saleh' : ($requestedJenjang === 'smp' ? 'SMP Karakter Anak Saleh' : 'TK Anak Saleh');
+            $user['unit'] = $requestedJenjang === 'sd' ? 'SD Alam Anak Saleh' : ($requestedJenjang === 'smp' ? 'SMP Alam Anak Saleh' : 'TK Anak Saleh');
             session(['auth_user' => $user]);
         }
 
         $user = session('auth_user', [
-            'name' => 'Admin',
-            'email' => 'admin.sd@anaksaleh.sch.id',
-            'role' => 'admin_sd',
+            'name' => 'Administrator SPMB',
+            'email' => 'admin@anaksaleh.sch.id',
+            'role' => 'admin',
             'jenjang' => 'sd',
-            'unit' => 'SD Karakter Anak Saleh',
-            'role_label' => 'Admin SPMB SD',
+            'unit' => 'Sekolah Alam Anak Saleh',
+            'role_label' => 'Administrator SPMB',
         ]);
 
         $jenjang = $user['jenjang'] ?? 'sd';
@@ -1470,7 +1471,7 @@ class SPMBController extends Controller
             fputcsv($output, ['SPMB-2026-SD08', 'Fathimah Zahira', 'sd', '6 Thn 4 Bln', 'Kelas 1 Unggulan', 'TK Pertiwi', 'Ibu Zahira', '0812-9999-0008', 'Sentra Persiapan', 'Dalam Proses', 'Hafalan surat lancar.']);
         } else {
             fputcsv($output, ['SPMB-2026-SMP06', 'Daffa Ibnu Malik', 'smp', '12 Thn 4 Bln', 'Kelas 7 Bilingual', 'SDIT Bina Anak Saleh', 'Bpk. Malik', '0821-9999-0006', 'Kelompok Keagamaan', 'Dalam Proses', 'Bakat kepemimpinan baik.']);
-            fputcsv($output, ['SPMB-2026-SMP07', 'Nadia Syakira', 'smp', '12 Thn 2 Bln', 'Kelas 7 Tahfidz', 'SD Karakter', 'Ibu Syakira', '0821-9999-0007', 'Kelompok Pribadi & Sosial', 'Dalam Proses', 'Santun dan mandiri.']);
+            fputcsv($output, ['SPMB-2026-SMP07', 'Nadia Syakira', 'smp', '12 Thn 2 Bln', 'Kelas 7 Tahfidz', 'SD Alam', 'Ibu Syakira', '0821-9999-0007', 'Kelompok Pribadi & Sosial', 'Dalam Proses', 'Santun dan mandiri.']);
         }
 
         rewind($output);
@@ -1738,17 +1739,17 @@ class SPMBController extends Controller
             $user = session('auth_user', []);
             $user['jenjang'] = $requestedJenjang;
             $user['role_label'] = 'Admin SPMB ' . strtoupper($requestedJenjang);
-            $user['unit'] = $requestedJenjang === 'sd' ? 'SD Karakter Anak Saleh' : ($requestedJenjang === 'smp' ? 'SMP Karakter Anak Saleh' : 'TK Anak Saleh');
+            $user['unit'] = $requestedJenjang === 'sd' ? 'SD Alam Anak Saleh' : ($requestedJenjang === 'smp' ? 'SMP Alam Anak Saleh' : 'TK Anak Saleh');
             session(['auth_user' => $user]);
         }
 
         $user = session('auth_user', [
-            'name' => 'Admin',
-            'email' => 'admin.sd@anaksaleh.sch.id',
-            'role' => 'admin_sd',
+            'name' => 'Administrator SPMB',
+            'email' => 'admin@anaksaleh.sch.id',
+            'role' => 'admin',
             'jenjang' => 'sd',
-            'unit' => 'SD Karakter Anak Saleh',
-            'role_label' => 'Admin SPMB SD',
+            'unit' => 'Sekolah Alam Anak Saleh',
+            'role_label' => 'Administrator SPMB',
         ]);
 
         $jenjang = $user['jenjang'] ?? 'sd';

@@ -78,7 +78,7 @@
                     <x-theme-settings />
                 </div>
 
-                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[420px]">
+                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
                     
                     <!-- Mobile Brand Logo -->
                     <div class="flex lg:hidden items-center gap-2.5 justify-center mb-2">
@@ -93,29 +93,12 @@
                         <h1 class="text-xl font-semibold tracking-tight text-foreground">
                             Masuk ke Akun
                         </h1>
-                        <p id="role-hint" class="text-xs text-muted-foreground">
-                            Pilih peran untuk diarahkan langsung ke halaman kerja Anda
+                        <p class="text-xs text-muted-foreground">
+                            Silakan masukkan Email atau NIP akun Anda untuk melanjutkan
                         </p>
                     </div>
 
-                    <!-- Shadcn 2-Way Role Selector Tabs -->
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-medium leading-none text-foreground/90">
-                            Pilih Peran Masuk
-                        </label>
-                        <div class="grid grid-cols-2 gap-1.5 rounded-lg border border-border bg-card p-1 text-xs">
-                            <button type="button" id="tab-guru" class="inline-flex items-center justify-center gap-1.5 rounded-md bg-muted px-2.5 py-1.5 font-medium text-foreground shadow-sm transition-all border border-border">
-                                <i data-lucide="user-check" class="h-3.5 w-3.5 text-emerald-400"></i>
-                                <span>Guru Pengamat</span>
-                            </button>
-                            <button type="button" id="tab-admin" class="inline-flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 font-medium text-muted-foreground hover:text-foreground transition-all border border-transparent">
-                                <i data-lucide="shield-check" class="h-3.5 w-3.5 text-muted-foreground"></i>
-                                <span>Admin</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Flash Notification -->
+                    <!-- Flash Notification: Success / Status -->
                     @if (session('status'))
                         <div class="rounded-md border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
                             <i data-lucide="check" class="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
@@ -123,23 +106,43 @@
                         </div>
                     @endif
 
+                    <!-- Flash Notification: Error -->
+                    @if (session('error'))
+                        <div class="rounded-md border border-red-200 dark:border-red-800/80 bg-red-50 dark:bg-red-950/40 p-3 text-xs text-red-800 dark:text-red-300 flex items-center gap-2">
+                            <i data-lucide="alert-circle" class="h-3.5 w-3.5 shrink-0 text-red-600 dark:text-red-400"></i>
+                            <span class="font-medium">{{ session('error') }}</span>
+                        </div>
+                    @endif
+
+                    <!-- Validation Errors -->
+                    @if ($errors->any())
+                        <div class="rounded-md border border-red-200 dark:border-red-800/80 bg-red-50 dark:bg-red-950/40 p-3 text-xs text-red-800 dark:text-red-300 space-y-1">
+                            @foreach ($errors->all() as $err)
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="alert-circle" class="h-3.5 w-3.5 shrink-0 text-red-600 dark:text-red-400"></i>
+                                    <span>{{ $err }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <!-- Form -->
                     <form action="{{ route('login.post') }}" method="POST" class="space-y-4">
                         @csrf
-                        <input type="hidden" name="role" id="input-role" value="guru">
 
                         <div class="space-y-1.5">
                             <label class="text-xs font-medium leading-none text-foreground/90 flex items-center gap-1.5" for="input-email">
-                                <i data-lucide="mail" class="h-3.5 w-3.5 text-muted-foreground"></i>
-                                <span>Email / ID Akun</span>
+                                <i data-lucide="user" class="h-3.5 w-3.5 text-muted-foreground"></i>
+                                <span>Email / NIP</span>
                             </label>
                             <input 
                                 id="input-email" 
                                 name="email" 
-                                type="email" 
+                                type="text" 
                                 required
-                                value="guru@anaksaleh.sch.id"
-                                placeholder="name@anaksaleh.sch.id" 
+                                autofocus
+                                value="{{ old('email') }}"
+                                placeholder="nama@anaksaleh.sch.id atau NIP" 
                                 class="flex h-9 w-full rounded-md border border-border bg-card px-3 py-1 text-xs text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors"
                             />
                         </div>
@@ -150,14 +153,12 @@
                                     <i data-lucide="lock" class="h-3.5 w-3.5 text-muted-foreground"></i>
                                     <span>Kata Sandi</span>
                                 </label>
-                                <span class="text-[11px] text-muted-foreground">Demo bebas</span>
                             </div>
                             <input 
                                 id="input-password" 
                                 name="password" 
                                 type="password" 
                                 required
-                                value="guru123"
                                 placeholder="••••••••" 
                                 class="flex h-9 w-full rounded-md border border-border bg-card px-3 py-1 text-xs text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 transition-colors font-mono"
                             />
@@ -165,15 +166,15 @@
 
                         <div class="flex items-center justify-between text-xs">
                             <label class="flex items-center gap-2 text-muted-foreground cursor-pointer">
-                                <input type="checkbox" checked class="h-3.5 w-3.5 rounded border-border bg-card text-foreground focus:ring-0">
+                                <input type="checkbox" name="remember" class="h-3.5 w-3.5 rounded border-border bg-card text-foreground focus:ring-0">
                                 <span>Ingat sesi masuk</span>
                             </label>
-                            <span class="text-muted-foreground hover:text-muted-foreground text-[11px] cursor-pointer">Lupa sandi?</span>
+                            <span class="text-muted-foreground hover:text-foreground text-[11px] cursor-pointer transition-colors">Lupa sandi?</span>
                         </div>
 
                         <!-- Shadcn Primary Button with Lucide Icon -->
-                        <button type="submit" id="btn-submit" class="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-zinc-100 px-4 py-2 text-xs font-semibold text-zinc-900 shadow hover:bg-zinc-200 transition-colors">
-                            <span id="btn-submit-label">Masuk ke Halaman Observasi</span>
+                        <button type="submit" id="btn-submit" class="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-foreground text-background px-4 py-2 text-xs font-semibold shadow hover:opacity-90 transition-opacity">
+                            <span>Masuk ke Sistem</span>
                             <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
                         </button>
                     </form>
@@ -187,60 +188,11 @@
 
         </div>
 
-        <!-- 2-Role Toggle Script -->
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                const tabGuru = document.getElementById('tab-guru');
-                const tabAdmin = document.getElementById('tab-admin');
-
-                const inputRole = document.getElementById('input-role');
-                const inputEmail = document.getElementById('input-email');
-                const inputPass = document.getElementById('input-password');
-                const roleHint = document.getElementById('role-hint');
-                const btnSubmitLabel = document.getElementById('btn-submit-label');
-
-                const tabs = [
-                    {
-                        btn: tabGuru,
-                        role: 'guru',
-                        email: 'guru@anaksaleh.sch.id',
-                        pass: 'guru123',
-                        hint: 'Mengarahkan langsung ke Halaman Observasi Siswa Baru.',
-                        label: 'Masuk ke Halaman Observasi'
-                    },
-                    {
-                        btn: tabAdmin,
-                        role: 'admin',
-                        email: 'admin.sd@anaksaleh.sch.id',
-                        pass: 'admin123',
-                        hint: 'Gunakan email unit Anda: admin.tk / admin.sd / admin.smp@anaksaleh.sch.id',
-                        label: 'Masuk ke Dashboard Admin'
-                    },
-                ];
-
-                function activateTab(role) {
-                    tabs.forEach(t => {
-                        const isActive = t.role === role;
-                        t.btn?.classList.toggle('bg-muted', isActive);
-                        t.btn?.classList.toggle('text-foreground', isActive);
-                        t.btn?.classList.toggle('shadow-sm', isActive);
-                        t.btn?.classList.toggle('border-border', isActive);
-                        t.btn?.classList.toggle('text-muted-foreground', !isActive);
-                        t.btn?.classList.toggle('border-transparent', !isActive);
-
-                        if (isActive) {
-                            inputRole.value = t.role;
-                            inputEmail.value = t.email;
-                            inputPass.value = t.pass;
-                            roleHint.textContent = t.hint;
-                            btnSubmitLabel.textContent = t.label;
-                        }
-                    });
-                    if (window.refreshLucideIcons) window.refreshLucideIcons();
+                if (window.refreshLucideIcons) {
+                    window.refreshLucideIcons();
                 }
-
-                tabGuru?.addEventListener('click', () => activateTab('guru'));
-                tabAdmin?.addEventListener('click', () => activateTab('admin'));
             });
         </script>
 
