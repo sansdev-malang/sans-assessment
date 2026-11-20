@@ -326,7 +326,7 @@
 
                                     {{-- Aksi --}}
                                     <td class="p-3 text-center whitespace-nowrap">
-                                        <div class="flex items-center justify-center gap-1.5">
+                                        <div class="flex items-center justify-center gap-1.5 mb-2">
                                             <button
                                                 type="button"
                                                 onclick="openDetailSiswaModal({{ json_encode($s) }})"
@@ -344,6 +344,17 @@
                                             >
                                                 <i data-lucide="pencil" class="h-3 w-3 text-muted-foreground"></i>
                                                 <span class="hidden md:inline">Edit</span>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <button
+                                                type="button"
+                                                onclick="confirmResetNilai({{ json_encode($s) }})"
+                                                class="inline-flex h-7 items-center justify-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 text-[11px] font-medium text-amber-400 hover:bg-amber-500/20 transition-colors cursor-pointer"
+                                                title="Reset Nilai Observasi Siswa"
+                                            >
+                                                <i data-lucide="rotate-ccw" class="h-3 w-3"></i>
+                                                <span class="hidden md:inline">Reset Nilai</span>
                                             </button>
                                             <button
                                                 type="button"
@@ -436,7 +447,11 @@
                     </div>
                 </div>
 
-                <div class="p-3 bg-muted/40 border-t border-border flex items-center justify-end">
+                <div class="p-3 bg-muted/40 border-t border-border flex items-center justify-between">
+                    <button type="button" id="btn-detail-reset-nilai" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 transition-colors cursor-pointer">
+                        <i data-lucide="rotate-ccw" class="h-3.5 w-3.5"></i>
+                        <span>Reset Penilaian Siswa</span>
+                    </button>
                     <button type="button" onclick="closeDetailSiswaModal()" class="inline-flex h-8 items-center justify-center rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer">
                         Tutup
                     </button>
@@ -672,6 +687,53 @@
         </div>
 
         <!-- ========================================================================= -->
+        <!-- MODAL RESET PENILAIAN SISWA (KHUSUS ADMIN)                                -->
+        <!-- ========================================================================= -->
+        <div id="modal-reset-nilai-siswa" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="w-full max-w-sm rounded-xl border border-border bg-card text-foreground shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                <div class="p-4 border-b border-border flex items-center gap-2.5 text-amber-400">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                        <i data-lucide="rotate-ccw" class="h-4 w-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-foreground">Reset Penilaian Siswa</h3>
+                        <p class="text-[11px] text-muted-foreground">Kosongkan nilai observasi calon siswa</p>
+                    </div>
+                </div>
+
+                <form action="{{ route('admin.siswa.reset_nilai') }}" method="POST" class="p-4 space-y-3 text-xs">
+                    @csrf
+                    <input type="hidden" name="id" id="reset-nilai-siswa-id">
+
+                    <p class="text-muted-foreground leading-relaxed">
+                        Apakah Anda yakin ingin mereset seluruh penilaian untuk siswa <strong class="text-foreground" id="reset-nilai-siswa-nama">-</strong> (<span class="font-mono text-muted-foreground" id="reset-nilai-siswa-no">-</span>)?
+                    </p>
+                    <div class="text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-md p-2.5 space-y-1">
+                        <div class="font-semibold flex items-center gap-1">
+                            <i data-lucide="info" class="h-3.5 w-3.5 shrink-0"></i>
+                            <span>Catatan Penting:</span>
+                        </div>
+                        <ul class="list-disc list-inside space-y-0.5 text-muted-foreground text-[10px]">
+                            <li>Seluruh skor dan riwayat asesmen kelompok akan dihapus/dikosongkan.</li>
+                            <li>Status observasi siswa akan kembali menjadi <strong>Belum Diuji</strong>.</li>
+                            <li><strong class="text-foreground">Data profil siswa (nama, wali, kontak, dll) tetap aman dan tidak terhapus.</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="pt-2 border-t border-border flex items-center justify-end gap-2">
+                        <button type="button" onclick="closeResetNilaiModal()" class="inline-flex h-8 items-center justify-center rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer">
+                            Batal
+                        </button>
+                        <button type="submit" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-amber-600 hover:bg-amber-500 text-white px-3 text-xs font-semibold shadow-xs transition-colors cursor-pointer">
+                            <i data-lucide="rotate-ccw" class="h-3.5 w-3.5"></i>
+                            <span>Ya, Reset Penilaian</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
         <!-- MODAL IMPORT CALON SISWA (CSV)                                            -->
         <!-- ========================================================================= -->
         <div id="modal-import-siswa" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -802,8 +864,17 @@
                     rekomEl.textContent = siswa.rekomendasi || 'Dalam Proses';
                 }
 
+                const btnDetailReset = document.getElementById('btn-detail-reset-nilai');
+                if (btnDetailReset) {
+                    btnDetailReset.onclick = function() {
+                        closeDetailSiswaModal();
+                        confirmResetNilai(siswa);
+                    };
+                }
+
                 document.getElementById('modal-detail-siswa')?.classList.remove('hidden');
                 if (window.refreshLucideIcons) window.refreshLucideIcons();
+                if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
             }
 
             function closeDetailSiswaModal() {
@@ -856,6 +927,21 @@
                 document.getElementById('modal-delete-siswa')?.classList.add('hidden');
             }
 
+            // Reset Penilaian Siswa (Khusus Admin)
+            function confirmResetNilai(siswa) {
+                document.getElementById('reset-nilai-siswa-id').value = siswa.id || '';
+                document.getElementById('reset-nilai-siswa-nama').textContent = siswa.name || '-';
+                document.getElementById('reset-nilai-siswa-no').textContent = siswa.no || '-';
+
+                document.getElementById('modal-reset-nilai-siswa')?.classList.remove('hidden');
+                if (window.refreshLucideIcons) window.refreshLucideIcons();
+                if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+            }
+
+            function closeResetNilaiModal() {
+                document.getElementById('modal-reset-nilai-siswa')?.classList.add('hidden');
+            }
+
             // Import Siswa
             function openImportSiswaModal() {
                 document.getElementById('modal-import-siswa')?.classList.remove('hidden');
@@ -873,6 +959,7 @@
                     closeTambahSiswaModal();
                     closeEditSiswaModal();
                     closeDeleteSiswaModal();
+                    closeResetNilaiModal();
                     closeImportSiswaModal();
                 }
             });

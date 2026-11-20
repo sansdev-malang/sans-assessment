@@ -15,6 +15,7 @@ Route::post('/observasi/lepas', [SPMBController::class, 'lepasSiswa'])->name('gu
 
 // Dashboard Observasi untuk Admin SPMB
 Route::get('/admin/dashboard', [SPMBController::class, 'dashboard'])->name('admin.dashboard');
+Route::get('/admin/rapor/{siswa}', [SPMBController::class, 'rapor'])->name('admin.rapor');
 Route::get('/admin/guru', [SPMBController::class, 'guruList'])->name('admin.guru');
 Route::post('/admin/guru/store', [SPMBController::class, 'guruStore'])->name('admin.guru.store');
 Route::post('/admin/guru/update', [SPMBController::class, 'guruUpdate'])->name('admin.guru.update');
@@ -26,6 +27,7 @@ Route::get('/admin/siswa', [SPMBController::class, 'siswaList'])->name('admin.si
 Route::post('/admin/siswa/store', [SPMBController::class, 'siswaStore'])->name('admin.siswa.store');
 Route::post('/admin/siswa/update', [SPMBController::class, 'siswaUpdate'])->name('admin.siswa.update');
 Route::post('/admin/siswa/delete', [SPMBController::class, 'siswaDelete'])->name('admin.siswa.delete');
+Route::post('/admin/siswa/reset-nilai', [SPMBController::class, 'siswaResetNilai'])->name('admin.siswa.reset_nilai');
 Route::get('/admin/siswa/template', [SPMBController::class, 'siswaTemplate'])->name('admin.siswa.template');
 Route::post('/admin/siswa/import', [SPMBController::class, 'siswaImport'])->name('admin.siswa.import');
 Route::get('/admin/siswa/export', [SPMBController::class, 'siswaExport'])->name('admin.siswa.export');

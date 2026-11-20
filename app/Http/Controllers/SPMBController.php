@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\AsesmenKelompok;
 use App\Models\CalonSiswa;
 use App\Models\GuruPengamat;
-use App\Models\IndikatorPenilaian;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -155,7 +154,7 @@ class SPMBController extends Controller
         return redirect()->route('admin.dashboard')
             ->with('status', 'Selamat datang di Dashboard Observasi SPMB Sekolah Alam Anak Saleh!');
     }
-     
+
     public function observasi(Request $request): View
     {
         $user = session('auth_user', []);
@@ -185,35 +184,35 @@ class SPMBController extends Controller
 
         $allGuruSD = $guruList->keyBy('nip')->map(function ($g) {
             return [
-                'id'            => $g->id,
-                'nip'           => $g->nip,
-                'name'          => $g->nama,
-                'email'         => $g->email,
-                'kelompok_key'  => $g->kelompok_key,
-                'kelompok'      => $g->kelompok_nama,
+                'id' => $g->id,
+                'nip' => $g->nip,
+                'name' => $g->nama,
+                'email' => $g->email,
+                'kelompok_key' => $g->kelompok_key,
+                'kelompok' => $g->kelompok_nama,
                 'kelompok_short' => $g->kelompok_short,
-                'pos_desc'      => $g->pos_desc,
-                'ruang'         => $g->ruang,
-                'unit'          => $g->unit,
-                'avatar'        => $g->avatar,
-                'color'         => $g->color,
+                'pos_desc' => $g->pos_desc,
+                'ruang' => $g->ruang,
+                'unit' => $g->unit,
+                'avatar' => $g->avatar,
+                'color' => $g->color,
             ];
         })->toArray();
 
         if (empty($allGuruSD)) {
             $activeGuru = [
-                'id'             => null,
-                'nip'            => '-',
-                'name'           => 'Belum Ada Guru Pengamat',
-                'email'          => '-',
-                'kelompok_key'   => 'ubudiyah',
-                'kelompok'       => 'Sentra Ubudiyah',
+                'id' => null,
+                'nip' => '-',
+                'name' => 'Belum Ada Guru Pengamat',
+                'email' => '-',
+                'kelompok_key' => 'ubudiyah',
+                'kelompok' => 'Sentra Ubudiyah',
                 'kelompok_short' => 'Sentra Ubudiyah',
-                'pos_desc'       => '-',
-                'ruang'          => '-',
-                'unit'           => 'SD Alam Anak Saleh',
-                'avatar'         => 'GP',
-                'color'          => 'emerald',
+                'pos_desc' => '-',
+                'ruang' => '-',
+                'unit' => 'SD Alam Anak Saleh',
+                'avatar' => 'GP',
+                'color' => 'emerald',
             ];
             $allGuruSD = ['-' => $activeGuru];
         } else {
@@ -224,15 +223,15 @@ class SPMBController extends Controller
         }
 
         // Sinkronisasi sesi
-        $user['name']        = $activeGuru['name'];
-        $user['nip']         = $activeGuru['nip'];
-        $user['email']       = $activeGuru['email'];
-        $user['role']        = 'guru';
-        $user['jenjang']     = 'sd';
-        $user['unit']        = 'SD Alam Anak Saleh';
-        $user['role_label']  = 'Guru Pengamat '.$activeGuru['kelompok_short'];
-        $user['kelompok']    = $activeGuru['kelompok'];
-        $user['ruang']       = $activeGuru['ruang'];
+        $user['name'] = $activeGuru['name'];
+        $user['nip'] = $activeGuru['nip'];
+        $user['email'] = $activeGuru['email'];
+        $user['role'] = 'guru';
+        $user['jenjang'] = 'sd';
+        $user['unit'] = 'SD Alam Anak Saleh';
+        $user['role_label'] = 'Guru Pengamat '.$activeGuru['kelompok_short'];
+        $user['kelompok'] = $activeGuru['kelompok'];
+        $user['ruang'] = $activeGuru['ruang'];
         session(['auth_user' => $user]);
 
         // 2. Load calon siswa SD dari DB beserta relasi pengamatnya
@@ -241,62 +240,62 @@ class SPMBController extends Controller
             ->orderBy('id')
             ->get();
 
-            $siswaSD = $calonSiswas->map(function ($cs) {
-                $asesmens   = $cs->asesmenKelompoks->keyBy('kelompok_key');
-                $ubudiyah   = $asesmens->get('ubudiyah');
-                $persiapan  = $asesmens->get('persiapan');
-                $eksplorasi = $asesmens->get('eksplorasi');
+        $siswaSD = $calonSiswas->map(function ($cs) {
+            $asesmens = $cs->asesmenKelompoks->keyBy('kelompok_key');
+            $ubudiyah = $asesmens->get('ubudiyah');
+            $persiapan = $asesmens->get('persiapan');
+            $eksplorasi = $asesmens->get('eksplorasi');
 
-                $selesaiCount = $cs->asesmenKelompoks->where('status', 'Selesai')->count();
+            $selesaiCount = $cs->asesmenKelompoks->where('status', 'Selesai')->count();
 
-                return [
-                    'id'                  => $cs->id,
-                    'no'                  => $cs->no_pendaftaran,
-                    'name'                => $cs->nama,
-                    'usia'                => $cs->usia,
-                    'kelas_target'        => $cs->kelas_target,
-                    'asal_sekolah'        => $cs->asal_sekolah,
-                    'wali'                => $cs->wali,
-                    'kontak'              => $cs->kontak,
-                    'mulai_dari'          => $cs->mulai_dari,
-                    'posisi_sekarang'     => $cs->posisi_sekarang,
-                    'status_rekomendasi'  => $cs->status_rekomendasi,
-                    'nilai_akhir_terpadu' => $cs->nilai_akhir_terpadu ? (float) $cs->nilai_akhir_terpadu : null,
-                    'catatan_umum'        => $cs->catatan_umum,
-                    'selesai_count'       => $selesaiCount,
-                    'is_lengkap'          => ($selesaiCount >= 3),
-                    'ubudiyah' => [
-                        'guru_id'   => $ubudiyah?->guru_pengamat_id,
-                        'guru_nip'  => $ubudiyah?->guruPengamat?->nip,
-                        'guru_nama' => $ubudiyah?->guruPengamat?->nama,
-                        'nilai'     => $ubudiyah ? (float) $ubudiyah->nilai : null,
-                        'status'    => $ubudiyah?->status ?? 'Belum Diuji',
-                        'kategori'  => $ubudiyah?->kategori,
-                        'catatan'   => $ubudiyah?->catatan_anecdotal,
-                        'detail'    => $ubudiyah?->detail_nilai ?? [],
-                    ],
-                    'persiapan' => [
-                        'guru_id'   => $persiapan?->guru_pengamat_id,
-                        'guru_nip'  => $persiapan?->guruPengamat?->nip,
-                        'guru_nama' => $persiapan?->guruPengamat?->nama,
-                        'nilai'     => $persiapan ? (float) $persiapan->nilai : null,
-                        'status'    => $persiapan?->status ?? 'Belum Diuji',
-                        'kategori'  => $persiapan?->kategori,
-                        'catatan'   => $persiapan?->catatan_anecdotal,
-                        'detail'    => $persiapan?->detail_nilai ?? [],
-                    ],
-                    'eksplorasi' => [
-                        'guru_id'   => $eksplorasi?->guru_pengamat_id,
-                        'guru_nip'  => $eksplorasi?->guruPengamat?->nip,
-                        'guru_nama' => $eksplorasi?->guruPengamat?->nama,
-                        'nilai'     => $eksplorasi ? (float) $eksplorasi->nilai : null,
-                        'status'    => $eksplorasi?->status ?? 'Belum Diuji',
-                        'kategori'  => $eksplorasi?->kategori,
-                        'catatan'   => $eksplorasi?->catatan_anecdotal,
-                        'detail'    => $eksplorasi?->detail_nilai ?? [],
-                    ],
-                ];
-            })->toArray();
+            return [
+                'id' => $cs->id,
+                'no' => $cs->no_pendaftaran,
+                'name' => $cs->nama,
+                'usia' => $cs->usia,
+                'kelas_target' => $cs->kelas_target,
+                'asal_sekolah' => $cs->asal_sekolah,
+                'wali' => $cs->wali,
+                'kontak' => $cs->kontak,
+                'mulai_dari' => $cs->mulai_dari,
+                'posisi_sekarang' => $cs->posisi_sekarang,
+                'status_rekomendasi' => $cs->status_rekomendasi,
+                'nilai_akhir_terpadu' => $cs->nilai_akhir_terpadu ? (float) $cs->nilai_akhir_terpadu : null,
+                'catatan_umum' => $cs->catatan_umum,
+                'selesai_count' => $selesaiCount,
+                'is_lengkap' => ($selesaiCount >= 3),
+                'ubudiyah' => [
+                    'guru_id' => $ubudiyah?->guru_pengamat_id,
+                    'guru_nip' => $ubudiyah?->guruPengamat?->nip,
+                    'guru_nama' => $ubudiyah?->guruPengamat?->nama,
+                    'nilai' => $ubudiyah ? (float) $ubudiyah->nilai : null,
+                    'status' => $ubudiyah?->status ?? 'Belum Diuji',
+                    'kategori' => $ubudiyah?->kategori,
+                    'catatan' => $ubudiyah?->catatan_anecdotal,
+                    'detail' => $ubudiyah?->detail_nilai ?? [],
+                ],
+                'persiapan' => [
+                    'guru_id' => $persiapan?->guru_pengamat_id,
+                    'guru_nip' => $persiapan?->guruPengamat?->nip,
+                    'guru_nama' => $persiapan?->guruPengamat?->nama,
+                    'nilai' => $persiapan ? (float) $persiapan->nilai : null,
+                    'status' => $persiapan?->status ?? 'Belum Diuji',
+                    'kategori' => $persiapan?->kategori,
+                    'catatan' => $persiapan?->catatan_anecdotal,
+                    'detail' => $persiapan?->detail_nilai ?? [],
+                ],
+                'eksplorasi' => [
+                    'guru_id' => $eksplorasi?->guru_pengamat_id,
+                    'guru_nip' => $eksplorasi?->guruPengamat?->nip,
+                    'guru_nama' => $eksplorasi?->guruPengamat?->nama,
+                    'nilai' => $eksplorasi ? (float) $eksplorasi->nilai : null,
+                    'status' => $eksplorasi?->status ?? 'Belum Diuji',
+                    'kategori' => $eksplorasi?->kategori,
+                    'catatan' => $eksplorasi?->catatan_anecdotal,
+                    'detail' => $eksplorasi?->detail_nilai ?? [],
+                ],
+            ];
+        })->toArray();
 
         // Tentukan murid aktif
         $mySentraKey = $activeGuru['kelompok_key'] ?? 'ubudiyah';
@@ -315,6 +314,7 @@ class SPMBController extends Controller
                 // 3. Fallback murid pertama
                 $activeSiswa = collect($siswaSD)->first(function ($s) use ($mySentraKey, $activeGuru) {
                     $nip = $s[$mySentraKey]['guru_nip'] ?? null;
+
                     return $nip === $activeGuru['nip'];
                 }) ?? collect($siswaSD)->first(function ($s) use ($mySentraKey) {
                     return empty($s[$mySentraKey]['guru_nip']);
@@ -324,6 +324,7 @@ class SPMBController extends Controller
             // Navigasi ke murid berikutnya (yang tidak terkunci oleh co-pengamat jika ada)
             $unlockedSiswa = collect($siswaSD)->filter(function ($s) use ($mySentraKey, $activeGuru) {
                 $nip = $s[$mySentraKey]['guru_nip'] ?? null;
+
                 return empty($nip) || $nip === $activeGuru['nip'];
             })->values()->toArray();
 
@@ -355,35 +356,35 @@ class SPMBController extends Controller
 
         $allGuruSMP = $guruList->keyBy('nip')->map(function ($g) {
             return [
-                'id'            => $g->id,
-                'nip'           => $g->nip,
-                'name'          => $g->nama,
-                'email'         => $g->email,
-                'kelompok_key'  => $g->kelompok_key,
-                'kelompok'      => $g->kelompok_nama,
+                'id' => $g->id,
+                'nip' => $g->nip,
+                'name' => $g->nama,
+                'email' => $g->email,
+                'kelompok_key' => $g->kelompok_key,
+                'kelompok' => $g->kelompok_nama,
                 'kelompok_short' => $g->kelompok_short,
-                'pos_desc'      => $g->pos_desc,
-                'ruang'         => $g->ruang,
-                'unit'          => $g->unit,
-                'avatar'        => $g->avatar,
-                'color'         => $g->color,
+                'pos_desc' => $g->pos_desc,
+                'ruang' => $g->ruang,
+                'unit' => $g->unit,
+                'avatar' => $g->avatar,
+                'color' => $g->color,
             ];
         })->toArray();
 
         if (empty($allGuruSMP)) {
             $activeGuru = [
-                'id'             => null,
-                'nip'            => '-',
-                'name'           => 'Belum Ada Guru Pengamat',
-                'email'          => '-',
-                'kelompok_key'   => 'keagamaan',
-                'kelompok'       => 'Kelompok Keagamaan',
+                'id' => null,
+                'nip' => '-',
+                'name' => 'Belum Ada Guru Pengamat',
+                'email' => '-',
+                'kelompok_key' => 'keagamaan',
+                'kelompok' => 'Kelompok Keagamaan',
                 'kelompok_short' => 'Keagamaan',
-                'pos_desc'       => '-',
-                'ruang'          => '-',
-                'unit'           => 'SMP Alam Anak Saleh',
-                'avatar'         => 'GP',
-                'color'          => 'emerald',
+                'pos_desc' => '-',
+                'ruang' => '-',
+                'unit' => 'SMP Alam Anak Saleh',
+                'avatar' => 'GP',
+                'color' => 'emerald',
             ];
             $allGuruSMP = ['-' => $activeGuru];
         } else {
@@ -394,15 +395,15 @@ class SPMBController extends Controller
         }
 
         // Sinkronisasi sesi guru aktif
-        $user['name']        = $activeGuru['name'];
-        $user['nip']         = $activeGuru['nip'];
-        $user['email']       = $activeGuru['email'];
-        $user['role']        = 'guru';
-        $user['jenjang']     = 'smp';
-        $user['unit']        = 'SMP Alam Anak Saleh';
-        $user['role_label']  = 'Guru Pengamat '.$activeGuru['kelompok_short'];
-        $user['kelompok']    = $activeGuru['kelompok'];
-        $user['ruang']       = $activeGuru['ruang'];
+        $user['name'] = $activeGuru['name'];
+        $user['nip'] = $activeGuru['nip'];
+        $user['email'] = $activeGuru['email'];
+        $user['role'] = 'guru';
+        $user['jenjang'] = 'smp';
+        $user['unit'] = 'SMP Alam Anak Saleh';
+        $user['role_label'] = 'Guru Pengamat '.$activeGuru['kelompok_short'];
+        $user['kelompok'] = $activeGuru['kelompok'];
+        $user['ruang'] = $activeGuru['ruang'];
         session(['auth_user' => $user]);
 
         // 2. Ambil seluruh Calon Siswa SMP beserta Asesmen Kelompoknya dari Database
@@ -754,9 +755,10 @@ class SPMBController extends Controller
                 ->first();
             if ($existingAsesmen && $existingAsesmen->guru_pengamat_id && $existingAsesmen->guru_pengamat_id != $guru->id) {
                 $otherGuru = GuruPengamat::find($existingAsesmen->guru_pengamat_id);
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Maaf, siswa ini sedang/sudah diobservasi oleh rekan Co-Pengamat: ' . ($otherGuru->nama ?? 'Guru Lain') . '. Anda tidak dapat mengubah penilaian ini.',
+                    'message' => 'Maaf, siswa ini sedang/sudah diobservasi oleh rekan Co-Pengamat: '.($otherGuru->nama ?? 'Guru Lain').'. Anda tidak dapat mengubah penilaian ini.',
                 ], 422);
             }
         }
@@ -809,6 +811,8 @@ class SPMBController extends Controller
             'selesai_count' => $selesaiCount,
             'is_lengkap' => $isLengkap,
             'posisi_sekarang' => $siswa->posisi_sekarang,
+            'siswa_no' => $siswaNo,
+            'kelompok_key' => $kelompokKey,
         ]);
     }
 
@@ -844,9 +848,10 @@ class SPMBController extends Controller
             // Cek jika sudah diklaim oleh guru co-pengamat lain
             if ($asesmen->exists && $asesmen->guru_pengamat_id && $asesmen->guru_pengamat_id != $guru->id) {
                 $otherGuru = GuruPengamat::find($asesmen->guru_pengamat_id);
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Siswa ini sedang/sudah diobservasi oleh rekan Co-Pengamat: ' . ($otherGuru->nama ?? 'Guru Lain') . '.',
+                    'message' => 'Siswa ini sedang/sudah diobservasi oleh rekan Co-Pengamat: '.($otherGuru->nama ?? 'Guru Lain').'.',
                 ], 422);
             }
 
@@ -857,7 +862,7 @@ class SPMBController extends Controller
             $asesmen->save();
 
             $siswa->update([
-                'posisi_sekarang' => 'Sedang di ' . ($guru->kelompok_short ?? $guru->ruang),
+                'posisi_sekarang' => 'Sedang di '.($guru->kelompok_short ?? $guru->ruang),
             ]);
         }
 
@@ -948,63 +953,116 @@ class SPMBController extends Controller
 
         $targetCount = ($jenjang === 'smp') ? 4 : 3;
 
-        $allSiswa = \App\Models\CalonSiswa::with('asesmenKelompoks')
+        $allSiswa = CalonSiswa::with('asesmenKelompoks')
             ->where('jenjang', $jenjang)
             ->get();
 
-        $totalPendaftar   = $allSiswa->count();
+        $totalPendaftar = $allSiswa->count();
         $selesaiObservasi = $allSiswa->filter(fn ($cs) => $cs->asesmenKelompoks->where('status', 'Selesai')->count() >= $targetCount)->count();
-        $antrean          = $allSiswa->filter(fn ($cs) => $cs->asesmenKelompoks->where('status', 'Selesai')->count() > 0 && $cs->asesmenKelompoks->where('status', 'Selesai')->count() < $targetCount)->count();
-        $rataKesiapan     = $allSiswa->whereNotNull('nilai_akhir_terpadu')->avg('nilai_akhir_terpadu');
-        $persen           = $totalPendaftar > 0 ? round(($selesaiObservasi / $totalPendaftar) * 100, 1) : 0;
+        $antrean = $allSiswa->filter(fn ($cs) => $cs->asesmenKelompoks->where('status', 'Selesai')->count() > 0 && $cs->asesmenKelompoks->where('status', 'Selesai')->count() < $targetCount)->count();
+        $rataKesiapan = $allSiswa->whereNotNull('nilai_akhir_terpadu')->avg('nilai_akhir_terpadu');
+        $persen = $totalPendaftar > 0 ? round(($selesaiObservasi / $totalPendaftar) * 100, 1) : 0;
 
         $unitTitles = ['sd' => 'SD Alam Anak Saleh', 'smp' => 'SMP Alam Anak Saleh', 'tk' => 'KB & TK Anak Saleh'];
         $unitBadges = ['sd' => 'Jenjang Sekolah Dasar (Kelas 1)', 'smp' => 'Jenjang Sekolah Menengah Pertama (Kelas 7)', 'tk' => 'Jenjang Usia Dini (3 - 6 Tahun)'];
 
         $data = [
-            'unit_title'          => $unitTitles[$jenjang] ?? $unitTitles['sd'],
-            'unit_badge'          => $unitBadges[$jenjang] ?? $unitBadges['sd'],
-            'total_pendaftar'     => $totalPendaftar,
-            'pendaftar_sub'       => $totalPendaftar === 0 ? 'Belum ada data pendaftar' : 'Tahun ajaran 2026/2027',
-            'selesai_observasi'   => $selesaiObservasi,
-            'persen_selesai'      => $persen . '% selesai diobservasi',
-            'antrean_hari_ini'    => $antrean,
-            'antrean_sub'         => $antrean > 0 ? 'Sedang dalam proses observasi' : 'Tidak ada antrian aktif',
-            'rata_kesiapan'       => $rataKesiapan ? number_format($rataKesiapan, 1) . '%' : '—',
-            'analytics_1_title'   => $jenjang === 'smp' ? 'Distribusi Kelengkapan Asesmen (SMP)' : 'Distribusi Kelengkapan Asesmen (SD)',
-            'analytics_1_subtitle' => $selesaiObservasi . ' Siswa Terpetakan',
-            'analytics_1_items'   => [
-                ['label' => 'Selesai semua ' . ($jenjang === 'smp' ? '4 kelompok' : '3 sentra'), 'val' => $selesaiObservasi . ' Siswa', 'bar' => $totalPendaftar > 0 ? round(($selesaiObservasi / $totalPendaftar) * 100) . '%' : '0%'],
-                ['label' => 'Sedang diobservasi (parsial)', 'val' => $antrean . ' Siswa', 'bar' => $totalPendaftar > 0 ? round(($antrean / $totalPendaftar) * 100) . '%' : '0%'],
-                ['label' => 'Belum mulai observasi', 'val' => ($totalPendaftar - $selesaiObservasi - $antrean) . ' Siswa', 'bar' => $totalPendaftar > 0 ? round((($totalPendaftar - $selesaiObservasi - $antrean) / $totalPendaftar) * 100) . '%' : '0%'],
+            'unit_title' => $unitTitles[$jenjang] ?? $unitTitles['sd'],
+            'unit_badge' => $unitBadges[$jenjang] ?? $unitBadges['sd'],
+            'total_pendaftar' => $totalPendaftar,
+            'pendaftar_sub' => $totalPendaftar === 0 ? 'Belum ada data pendaftar' : 'Tahun ajaran 2026/2027',
+            'selesai_observasi' => $selesaiObservasi,
+            'persen_selesai' => $persen.'% selesai diobservasi',
+            'antrean_hari_ini' => $antrean,
+            'antrean_sub' => $antrean > 0 ? 'Sedang dalam proses observasi' : 'Tidak ada antrian aktif',
+            'rata_kesiapan' => $rataKesiapan ? number_format($rataKesiapan, 1).'%' : '—',
+            'analytics_1_title' => $jenjang === 'smp' ? 'Distribusi Kelengkapan Asesmen (SMP)' : 'Distribusi Kelengkapan Asesmen (SD)',
+            'analytics_1_subtitle' => $selesaiObservasi.' Siswa Terpetakan',
+            'analytics_1_items' => [
+                ['label' => 'Selesai semua '.($jenjang === 'smp' ? '4 kelompok' : '3 sentra'), 'val' => $selesaiObservasi.' Siswa', 'bar' => $totalPendaftar > 0 ? round(($selesaiObservasi / $totalPendaftar) * 100).'%' : '0%'],
+                ['label' => 'Sedang diobservasi (parsial)', 'val' => $antrean.' Siswa', 'bar' => $totalPendaftar > 0 ? round(($antrean / $totalPendaftar) * 100).'%' : '0%'],
+                ['label' => 'Belum mulai observasi', 'val' => ($totalPendaftar - $selesaiObservasi - $antrean).' Siswa', 'bar' => $totalPendaftar > 0 ? round((($totalPendaftar - $selesaiObservasi - $antrean) / $totalPendaftar) * 100).'%' : '0%'],
             ],
-            'analytics_2_title'    => 'Status Rekomendasi Penerimaan',
+            'analytics_2_title' => 'Status Rekomendasi Penerimaan',
             'analytics_2_subtitle' => 'Rekap Keputusan',
-            'analytics_2_boxes'    => [
+            'analytics_2_boxes' => [
                 ['val' => (string) $allSiswa->where('status_rekomendasi', 'Diterima')->count(), 'title' => 'Diterima', 'sub' => 'Rekomendasi Final'],
                 ['val' => (string) $allSiswa->where('status_rekomendasi', 'Dalam Proses')->count(), 'title' => 'Dalam Proses', 'sub' => 'Sedang Dinilai'],
                 ['val' => (string) $allSiswa->whereIn('status_rekomendasi', ['Pendampingan', 'Dipertimbangkan'])->count(), 'title' => 'Lainnya', 'sub' => 'Pertimbangan Khusus'],
             ],
             'students' => $allSiswa->map(function ($cs) use ($targetCount) {
                 $selesai = $cs->asesmenKelompoks->where('status', 'Selesai')->count();
-                $nilai   = $cs->nilai_akhir_terpadu ? number_format($cs->nilai_akhir_terpadu, 1) . '%' : '—';
-                $status  = $selesai >= $targetCount ? 'Selesai Observasi' : ($selesai > 0 ? 'Dalam Proses' : 'Menunggu');
-                $badge   = $cs->status_rekomendasi === 'Diterima' ? 'emerald' : ($cs->status_rekomendasi === 'Dalam Proses' ? 'blue' : 'amber');
+                $nilai = $cs->nilai_akhir_terpadu ? number_format($cs->nilai_akhir_terpadu, 1).'%' : '—';
+                $status = $selesai >= $targetCount ? 'Selesai Observasi' : ($selesai > 0 ? 'Dalam Proses' : 'Menunggu');
+                $displayStatus = ($cs->status_rekomendasi && $cs->status_rekomendasi !== 'Belum Diuji')
+                    ? $cs->status_rekomendasi
+                    : $status;
+                $badge = $displayStatus === 'Diterima' ? 'emerald' : ($displayStatus === 'Dalam Proses' ? 'blue' : 'amber');
 
                 return [
-                    'id'     => $cs->no_pendaftaran,
-                    'name'   => $cs->nama,
-                    'class'  => $cs->kelas_target ?? '-',
-                    'guru'   => '-',
-                    'score'  => $nilai,
-                    'char'   => $cs->catatan_umum ?? '-',
-                    'status' => $cs->status_rekomendasi ?? $status,
-                    'badge'  => $badge,
+                    'id' => $cs->no_pendaftaran,
+                    'name' => $cs->nama,
+                    'class' => $cs->kelas_target ?? '-',
+                    'guru' => '-',
+                    'score' => $nilai,
+                    'char' => $cs->catatan_umum ?? '-',
+                    'status' => $displayStatus,
+                    'badge' => $badge,
                 ];
             })->values()->toArray(),
         ];
 
         return view('admin.dashboard', compact('user', 'currentJenjang', 'data'));
+    }
+
+    /**
+     * Tampilkan rapor hasil observasi seorang calon siswa.
+     */
+    public function rapor(string $siswa): View
+    {
+        $calonSiswa = CalonSiswa::with('asesmenKelompoks.guruPengamat')
+            ->where('no_pendaftaran', $siswa)
+            ->firstOrFail();
+
+        $targetCount = $calonSiswa->jenjang === 'smp' ? 4 : 3;
+        $asesmens = $calonSiswa->asesmenKelompoks->sortBy('created_at');
+        $selesaiCount = $asesmens->where('status', 'Selesai')->count();
+        $indikatorById = collect($this->getIndikatorData($calonSiswa->jenjang))->keyBy('id');
+        $kelompokLabels = [
+            'ubudiyah' => 'Sentra Ubudiyah',
+            'persiapan' => 'Sentra Persiapan',
+            'eksplorasi' => 'Sentra Eksplorasi Diri',
+            'keagamaan' => 'Keagamaan',
+            'akademik' => 'Akademik',
+            'bakat_minat' => 'Bakat dan Minat',
+            'pribadi_sosial' => 'Pribadi dan Sosial',
+        ];
+
+        $rapor = [
+            'siswa' => $calonSiswa,
+            'kelompok' => $asesmens->map(fn (AsesmenKelompok $asesmen) => [
+                'label' => $kelompokLabels[$asesmen->kelompok_key] ?? ucfirst(str_replace('_', ' ', $asesmen->kelompok_key)),
+                'asesmen' => $asesmen,
+                'detail' => $asesmen->detail_nilai ?? [],
+                'indikator' => collect($asesmen->detail_nilai ?? [])->map(function ($score, $key) use ($indikatorById) {
+                    $indikator = $indikatorById->get($key);
+
+                    return [
+                        'key' => $key,
+                        'name' => $indikator['nama'] ?? ucfirst(str_replace(['_', '-'], ' ', (string) $key)),
+                        'aspect' => $indikator['aspek'] ?? null,
+                        'score' => is_numeric($score) ? (float) $score : null,
+                        'rubrik' => is_numeric($score) ? ($indikator['rubrik'][(int) $score] ?? null) : null,
+                        'raw' => is_scalar($score) ? (string) $score : null,
+                    ];
+                })->filter(fn (array $item) => $item['raw'] !== null)->values(),
+            ])->values(),
+            'selesai_count' => $selesaiCount,
+            'target_count' => $targetCount,
+            'status' => $selesaiCount >= $targetCount ? 'Observasi lengkap' : 'Observasi belum lengkap',
+        ];
+
+        return view('admin.rapor', compact('rapor'));
     }
 
     /**
@@ -1016,7 +1074,7 @@ class SPMBController extends Controller
         if ($requestedJenjang && in_array($requestedJenjang, ['sd', 'smp', 'tk'])) {
             $user = session('auth_user', []);
             $user['jenjang'] = $requestedJenjang;
-            $user['role_label'] = 'Admin SPMB ' . strtoupper($requestedJenjang);
+            $user['role_label'] = 'Admin SPMB '.strtoupper($requestedJenjang);
             $user['unit'] = $requestedJenjang === 'sd' ? 'SD Alam Anak Saleh' : ($requestedJenjang === 'smp' ? 'SMP Alam Anak Saleh' : 'TK Anak Saleh');
             session(['auth_user' => $user]);
         }
@@ -1096,7 +1154,7 @@ class SPMBController extends Controller
         $initials = collect(explode(' ', preg_replace('/[^a-zA-Z\s]/', '', $request->input('nama'))))
             ->filter()
             ->take(2)
-            ->map(fn($w) => strtoupper($w[0]))
+            ->map(fn ($w) => strtoupper($w[0]))
             ->implode('');
 
         GuruPengamat::create([
@@ -1130,8 +1188,8 @@ class SPMBController extends Controller
 
         $request->validate([
             'nama' => 'required|string|max:255',
-            'nip' => 'required|string|max:50|unique:guru_pengamats,nip,' . $id,
-            'email' => 'required|email|max:255|unique:guru_pengamats,email,' . $id,
+            'nip' => 'required|string|max:50|unique:guru_pengamats,nip,'.$id,
+            'email' => 'required|email|max:255|unique:guru_pengamats,email,'.$id,
             'kelompok_key' => 'required|string',
             'ruang' => 'nullable|string|max:255',
             'pos_desc' => 'nullable|string|max:255',
@@ -1258,7 +1316,7 @@ class SPMBController extends Controller
             $initials = collect(explode(' ', preg_replace('/[^a-zA-Z\s]/', '', $nama)))
                 ->filter()
                 ->take(2)
-                ->map(fn($w) => strtoupper($w[0]))
+                ->map(fn ($w) => strtoupper($w[0]))
                 ->implode('');
 
             GuruPengamat::updateOrCreate(
@@ -1296,7 +1354,7 @@ class SPMBController extends Controller
         if ($requestedJenjang && in_array($requestedJenjang, ['sd', 'smp', 'tk'])) {
             $user = session('auth_user', []);
             $user['jenjang'] = $requestedJenjang;
-            $user['role_label'] = 'Admin SPMB ' . strtoupper($requestedJenjang);
+            $user['role_label'] = 'Admin SPMB '.strtoupper($requestedJenjang);
             $user['unit'] = $requestedJenjang === 'sd' ? 'SD Alam Anak Saleh' : ($requestedJenjang === 'smp' ? 'SMP Alam Anak Saleh' : 'TK Anak Saleh');
             session(['auth_user' => $user]);
         }
@@ -1406,7 +1464,7 @@ class SPMBController extends Controller
         $siswa = CalonSiswa::findOrFail($id);
 
         $request->validate([
-            'no_pendaftaran' => 'required|string|max:50|unique:calon_siswas,no_pendaftaran,' . $id,
+            'no_pendaftaran' => 'required|string|max:50|unique:calon_siswas,no_pendaftaran,'.$id,
             'nama' => 'required|string|max:255',
             'usia' => 'nullable|string|max:50',
             'kelas_target' => 'nullable|string|max:100',
@@ -1453,6 +1511,34 @@ class SPMBController extends Controller
 
         return redirect()->route('admin.siswa', ['jenjang' => $jenjang])
             ->with('status', "Calon siswa {$nama} ({$no}) berhasil dihapus dari sistem.");
+    }
+
+    /**
+     * Reset / Kosongkan seluruh nilai observasi calon siswa tanpa menghapus data profil siswa (Khusus Admin).
+     */
+    public function siswaResetNilai(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'id' => 'required|exists:calon_siswas,id',
+        ]);
+
+        $siswa = CalonSiswa::findOrFail($request->input('id'));
+        $jenjang = $siswa->jenjang;
+        $nama = $siswa->nama;
+        $no = $siswa->no_pendaftaran;
+
+        // 1. Hapus seluruh riwayat asesmen penilaian kelompok / sentra siswa ini
+        AsesmenKelompok::where('calon_siswa_id', $siswa->id)->delete();
+
+        // 2. Kembalikan status dan nilai siswa ke kondisi awal (belum diobservasi)
+        $siswa->update([
+            'nilai_akhir_terpadu' => null,
+            'status_rekomendasi' => 'Belum Diuji',
+            'posisi_sekarang' => 'Belum Diuji',
+        ]);
+
+        return redirect()->route('admin.siswa', ['jenjang' => $jenjang])
+            ->with('status', "Alhamdulillah! Seluruh nilai observasi untuk siswa {$nama} ({$no}) berhasil direset. Data profil siswa tetap aman dan tersimpan.");
     }
 
     /**
@@ -1542,7 +1628,7 @@ class SPMBController extends Controller
     public function siswaExport(Request $request): Response
     {
         $jenjang = $request->query('jenjang', 'sd');
-        $filename = "data-calon-siswa-{$jenjang}-" . date('Ymd_His') . ".csv";
+        $filename = "data-calon-siswa-{$jenjang}-".date('Ymd_His').'.csv';
 
         $siswas = CalonSiswa::with('asesmenKelompoks')
             ->where('jenjang', $jenjang)
@@ -1645,8 +1731,8 @@ class SPMBController extends Controller
             'short' => ucfirst($key),
             'nama' => ucfirst($key),
             'color' => 'zinc',
-            'ruang' => 'Ruang Observasi ' . ucfirst($key),
-            'pos_desc' => 'Observasi Asesmen ' . ucfirst($key),
+            'ruang' => 'Ruang Observasi '.ucfirst($key),
+            'pos_desc' => 'Observasi Asesmen '.ucfirst($key),
         ];
     }
 
@@ -1712,8 +1798,10 @@ class SPMBController extends Controller
                 $header = array_map(function ($h) {
                     $clean = strtolower(trim($h));
                     $clean = preg_replace('/[^a-z0-9_]/', '_', $clean);
+
                     return trim($clean, '_');
                 }, $row);
+
                 continue;
             }
 
@@ -1738,7 +1826,7 @@ class SPMBController extends Controller
         if ($requestedJenjang && in_array($requestedJenjang, ['sd', 'smp', 'tk'])) {
             $user = session('auth_user', []);
             $user['jenjang'] = $requestedJenjang;
-            $user['role_label'] = 'Admin SPMB ' . strtoupper($requestedJenjang);
+            $user['role_label'] = 'Admin SPMB '.strtoupper($requestedJenjang);
             $user['unit'] = $requestedJenjang === 'sd' ? 'SD Alam Anak Saleh' : ($requestedJenjang === 'smp' ? 'SMP Alam Anak Saleh' : 'TK Anak Saleh');
             session(['auth_user' => $user]);
         }
@@ -1753,7 +1841,21 @@ class SPMBController extends Controller
         ]);
 
         $jenjang = $user['jenjang'] ?? 'sd';
+        $indikator = $this->getIndikatorData($jenjang);
 
+        // Group by aspek
+        $grouped = collect($indikator)->groupBy('aspek');
+
+        return view('admin.indikator', compact('user', 'indikator', 'grouped', 'jenjang'));
+    }
+
+    /**
+     * Definisi indikator yang dipakai pada halaman manajemen indikator dan rapor.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function getIndikatorData(string $jenjang): array
+    {
         $allIndikator = [
             'tk' => [
                 [
@@ -3534,15 +3636,7 @@ class SPMBController extends Controller
             ],
         ];
 
-        $indikator = $allIndikator[$jenjang] ?? $allIndikator['sd'];
-
-        // Group by aspek
-        $grouped = collect($indikator)->groupBy('aspek');
-
-        // Database Peserta & Rekapitulasi Terpadu SMP (4 Kelompok)
-
-
-        return view('admin.indikator', compact('user', 'indikator', 'grouped', 'jenjang'));
+        return $allIndikator[$jenjang] ?? $allIndikator['sd'];
     }
 
     /**

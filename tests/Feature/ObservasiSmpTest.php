@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AsesmenKelompok;
 use App\Models\CalonSiswa;
 use App\Models\GuruPengamat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -8,6 +9,52 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->seed();
+
+    GuruPengamat::create([
+        'nip' => 'GSMP-2026-01',
+        'nama' => 'Ust. Ahmad Fauzi, S.Pd.I',
+        'email' => 'ahmad.fauzi@anaksaleh.sch.id',
+        'jenjang' => 'smp',
+        'kelompok_key' => 'keagamaan',
+        'kelompok_short' => 'Keagamaan',
+        'kelompok_nama' => 'Kelompok Keagamaan',
+        'pos_desc' => 'Pos 1 s/d Pos 4',
+        'ruang' => 'Ruang Al-Kautsar',
+    ]);
+
+    CalonSiswa::create([
+        'no_pendaftaran' => 'SPMB-2026-SMP01',
+        'nama' => 'Muhammad Rayhan Al-Fatih',
+        'jenjang' => 'smp',
+        'kelas_target' => 'Kelas 7 SMP',
+        'asal_sekolah' => 'SD Alam Anak Saleh',
+        'mulai_dari' => 'Kelompok Keagamaan',
+    ]);
+
+    CalonSiswa::create([
+        'no_pendaftaran' => 'SPMB-2026-SMP04',
+        'nama' => 'Aisyah Humaira',
+        'jenjang' => 'smp',
+        'kelas_target' => 'Kelas 7 SMP',
+        'mulai_dari' => 'Kelompok Keagamaan',
+    ]);
+
+    $cs5 = CalonSiswa::create([
+        'no_pendaftaran' => 'SPMB-2026-SMP05',
+        'nama' => 'Fathir Ahmad',
+        'jenjang' => 'smp',
+        'kelas_target' => 'Kelas 7 SMP',
+        'mulai_dari' => 'Kelompok Keagamaan',
+    ]);
+
+    AsesmenKelompok::create([
+        'calon_siswa_id' => $cs5->id,
+        'kelompok_key' => 'pribadi_sosial',
+        'nilai' => 85,
+        'status' => 'Selesai',
+        'total_skor' => 50,
+        'skor_maksimal' => 64,
+    ]);
 });
 
 test('halaman observasi smp memuat data guru dan siswa dari database tanpa switcher simulasi', function () {
@@ -115,4 +162,31 @@ test('kelengkapan 4 kelompok otomatis memperbarui status siswa menjadi semua rua
     $siswa->refresh();
     expect($siswa->is_lengkap)->toBeTrue();
     expect($siswa->posisi_sekarang)->toBe('Semua Ruang Tuntas');
+});
+
+test('admin dapat mereset seluruh penilaian calon siswa tanpa menghapus data profil siswa', function () {
+    $siswa = CalonSiswa::where('no_pendaftaran', 'SPMB-2026-SMP05')->first();
+    expect($siswa)->not->toBeNull();
+
+    // Pastikan siswa memiliki asesmen awal
+    expect($siswa->asesmenKelompoks()->count())->toBeGreaterThan(0);
+
+    // Kirim request reset nilai oleh admin
+    $response = $this->post(route('admin.siswa.reset_nilai'), [
+        'id' => $siswa->id,
+    ]);
+
+    $response->assertRedirect(route('admin.siswa', ['jenjang' => $siswa->jenjang]));
+    $response->assertSessionHas('status');
+
+    // Verifikasi seluruh asesmen siswa ini telah terhapus
+    expect($siswa->asesmenKelompoks()->count())->toBe(0);
+
+    // Verifikasi data profil siswa tetap ada di database dan statusnya direset
+    $siswa->refresh();
+    expect($siswa->nama)->toBe('Fathir Ahmad');
+    expect($siswa->no_pendaftaran)->toBe('SPMB-2026-SMP05');
+    expect($siswa->nilai_akhir_terpadu)->toBeNull();
+    expect($siswa->status_rekomendasi)->toBe('Belum Diuji');
+    expect($siswa->posisi_sekarang)->toBe('Belum Diuji');
 });

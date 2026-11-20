@@ -226,7 +226,7 @@
                                     @endif
                                 </div>
 
-                                <div class="border-t border-border/70 pt-1.5 mt-1 text-[11px] space-y-0.5">
+                                <div id="sd-carousel-status-{{ $s['no'] }}" class="border-t border-border/70 pt-1.5 mt-1 text-[11px] space-y-0.5">
                                     <div class="flex items-center gap-1 font-mono font-medium {{ $sudahDinilai ? 'text-emerald-400 font-semibold' : 'text-muted-foreground' }}">
                                         @if($sudahDinilai)
                                             <i data-lucide="check" class="h-3 w-3 text-emerald-400"></i>
@@ -371,7 +371,7 @@
                             <i data-lucide="check-square" class="h-3.5 w-3.5 text-emerald-400"></i>
                             <span>Status Kelengkapan 3 Sentra (Wajib Terpenuhi Semua):</span>
                         </span>
-                        <span class="text-[11px] font-mono {{ ($activeSiswa['is_lengkap'] ?? false) ? 'text-emerald-400 font-bold' : 'text-amber-400' }}">
+                        <span id="sd-matrix-progress-text" class="text-[11px] font-mono {{ ($activeSiswa['is_lengkap'] ?? false) ? 'text-emerald-400 font-bold' : 'text-amber-400' }}">
                             {{ $activeSiswa['selesai_count'] ?? 0 }}/3 Sentra Terpenuhi
                         </span>
                     </div>
@@ -388,13 +388,13 @@
                         <div class="p-2.5 rounded-lg border {{ $isUbudActive ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 ring-1 ring-emerald-500/30' : 'border-border bg-card' }}">
                             <div class="flex items-center justify-between text-[11px] mb-1">
                                 <span class="font-semibold text-foreground">1. Sentra Ubudiyah</span>
-                                <span class="font-mono font-bold text-emerald-400">
+                                <span id="sd-mini-score-ubudiyah" class="font-mono font-bold text-emerald-400">
                                     {{ !empty($ubud['nilai']) ? number_format($ubud['nilai'], 1).'%' : '—' }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between text-[10px] text-muted-foreground">
                                 <span>Pos 1.1–1.3</span>
-                                <span class="{{ $ubudDone ? 'text-emerald-400 font-medium' : 'text-muted-foreground' }}">
+                                <span id="sd-mini-status-ubudiyah" class="{{ $ubudDone ? 'text-emerald-400 font-medium' : 'text-muted-foreground' }}">
                                     {{ $ubudDone ? '✓ Selesai' : ($ubud['status'] ?? 'Belum Diuji') }}
                                 </span>
                             </div>
@@ -414,13 +414,13 @@
                         <div class="p-2.5 rounded-lg border {{ $isPersActive ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30 ring-1 ring-indigo-500/30' : 'border-border bg-card' }}">
                             <div class="flex items-center justify-between text-[11px] mb-1">
                                 <span class="font-semibold text-foreground">2. Sentra Persiapan</span>
-                                <span class="font-mono font-bold text-indigo-400">
+                                <span id="sd-mini-score-persiapan" class="font-mono font-bold text-indigo-400">
                                     {{ !empty($pers['nilai']) ? number_format($pers['nilai'], 1).'%' : '—' }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between text-[10px] text-muted-foreground">
                                 <span>Pos 2.1–2.4</span>
-                                <span class="{{ $persDone ? 'text-indigo-400 font-medium' : 'text-muted-foreground' }}">
+                                <span id="sd-mini-status-persiapan" class="{{ $persDone ? 'text-indigo-400 font-medium' : 'text-muted-foreground' }}">
                                     {{ $persDone ? '✓ Selesai' : ($pers['status'] ?? 'Belum Diuji') }}
                                 </span>
                             </div>
@@ -440,13 +440,13 @@
                         <div class="p-2.5 rounded-lg border {{ $isEksActive ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30 ring-1 ring-amber-500/30' : 'border-border bg-card' }}">
                             <div class="flex items-center justify-between text-[11px] mb-1">
                                 <span class="font-semibold text-foreground">3. Sentra Eksplorasi Diri</span>
-                                <span class="font-mono font-bold text-amber-400">
+                                <span id="sd-mini-score-eksplorasi" class="font-mono font-bold text-amber-400">
                                     {{ !empty($eks['nilai']) ? number_format($eks['nilai'], 1).'%' : '—' }}
                                 </span>
                             </div>
                             <div class="flex items-center justify-between text-[10px] text-muted-foreground">
                                 <span>Pos 3.1–3.2</span>
-                                <span class="{{ $eksDone ? 'text-amber-400 font-medium' : 'text-muted-foreground' }}">
+                                <span id="sd-mini-status-eksplorasi" class="{{ $eksDone ? 'text-amber-400 font-medium' : 'text-muted-foreground' }}">
                                     {{ $eksDone ? '✓ Selesai' : ($eks['status'] ?? 'Belum Diuji') }}
                                 </span>
                             </div>
@@ -806,7 +806,7 @@
                     <div class="rounded-lg border border-border bg-muted/20 p-3 space-y-1">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-foreground">1. Sentra Ubudiyah (Pos 1.1–1.3)</span>
-                            <span class="font-mono font-bold text-emerald-400">
+                            <span id="sd-rekap-score-ubudiyah" class="font-mono font-bold text-emerald-400">
                                 {{ !empty($u['nilai']) ? number_format($u['nilai'], 1).'%' : 'Belum Lengkap' }}
                             </span>
                         </div>
@@ -824,7 +824,7 @@
                     <div class="rounded-lg border border-border bg-muted/20 p-3 space-y-1">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-foreground">2. Sentra Persiapan (Pos 2.1–2.4)</span>
-                            <span class="font-mono font-bold text-indigo-400">
+                            <span id="sd-rekap-score-persiapan" class="font-mono font-bold text-indigo-400">
                                 {{ !empty($p['nilai']) ? number_format($p['nilai'], 1).'%' : 'Belum Lengkap' }}
                             </span>
                         </div>
@@ -842,7 +842,7 @@
                     <div class="rounded-lg border border-border bg-muted/20 p-3 space-y-1">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-foreground">3. Sentra Eksplorasi Diri (Pos 3.1–3.2)</span>
-                            <span class="font-mono font-bold text-amber-400">
+                            <span id="sd-rekap-score-eksplorasi" class="font-mono font-bold text-amber-400">
                                 {{ !empty($e['nilai']) ? number_format($e['nilai'], 1).'%' : 'Belum Lengkap' }}
                             </span>
                         </div>
@@ -861,7 +861,7 @@
                             <span class="font-bold text-xs text-foreground">Nilai Akhir Terpadu 3 Sentra:</span>
                             <div class="text-[10px] text-muted-foreground">Kesiapan Belajar Kelas 1 SD Alam</div>
                         </div>
-                        <span class="text-xl font-bold font-mono text-emerald-400">
+                        <span id="sd-rekap-score-akhir" class="text-xl font-bold font-mono text-emerald-400">
                             {{ !empty($activeSiswa['nilai_akhir_terpadu']) ? number_format($activeSiswa['nilai_akhir_terpadu'], 1).'%' : 'Dalam Proses' }}
                         </span>
                     </div>
@@ -1065,6 +1065,9 @@
 
                     const data = await response.json();
                     if (data.success) {
+                        // Kembalikan scroll ke posisi paling atas secara halus
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+
                         // Tampilkan Toast Sukses
                         const toast = document.createElement('div');
                         toast.className = 'fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-950/90 backdrop-blur-md px-4 py-2.5 text-xs font-semibold text-emerald-300 shadow-2xl';
@@ -1072,19 +1075,58 @@
                         document.body.appendChild(toast);
                         setTimeout(() => toast.remove(), 3500);
 
-                        if (btnDesktop) { btnDesktop.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>✓ Tersimpan</span>'; }
-                        if (btnMobile) { btnMobile.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>✓ Tersimpan</span>'; }
+                        if (btnDesktop) { btnDesktop.innerHTML = '<svg class="h-4 w-4 inline mr-1 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>✓ Tersimpan</span>'; btnDesktop.disabled = false; }
+                        if (btnMobile) { btnMobile.innerHTML = '<svg class="h-4 w-4 inline mr-1 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>✓ Tersimpan</span>'; btnMobile.disabled = false; }
 
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1200);
+                        // 1. Update Carousel Card Status
+                        const carouselStatus = document.getElementById('sd-carousel-status-' + siswaNo);
+                        if (carouselStatus) {
+                            carouselStatus.innerHTML = `
+                                <div class="flex items-center gap-1 font-mono font-medium text-emerald-400 font-semibold">
+                                    <svg class="h-3 w-3 text-emerald-400 shrink-0 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    <span>Sudah Dinilai: ${data.nilai}%</span>
+                                </div>
+                                <div class="text-[10px] text-muted-foreground truncate">
+                                    Status: Selesai
+                                </div>
+                            `;
+                        }
+
+                        // 2. Update Live Score in Header
+                        const headerScore = document.getElementById('header-score-live');
+                        if (headerScore) headerScore.textContent = data.nilai + '%';
+
+                        // 3. Update 3-Sentra Rotation Matrix
+                        const progressText = document.getElementById('sd-matrix-progress-text');
+                        if (progressText) {
+                            progressText.textContent = `${data.selesai_count}/3 Sentra Terpenuhi`;
+                            if (data.is_lengkap) {
+                                progressText.className = 'text-[11px] font-mono text-emerald-400 font-bold';
+                            }
+                        }
+
+                        // 4. Update Current Sentra Score & Status
+                        const miniScore = document.getElementById('sd-mini-score-' + kelompokKey);
+                        if (miniScore) miniScore.textContent = data.nilai + '%';
+                        const miniStatus = document.getElementById('sd-mini-status-' + kelompokKey);
+                        if (miniStatus) {
+                            miniStatus.textContent = '✓ Selesai';
+                            miniStatus.className = 'text-emerald-400 font-medium';
+                        }
+
+                        // 5. Update Rekap Modal
+                        const rekapScore = document.getElementById('sd-rekap-score-' + kelompokKey);
+                        if (rekapScore) rekapScore.textContent = data.nilai + '%';
+
+                        if (window.refreshLucideIcons) window.refreshLucideIcons();
+                        if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
                     } else {
                         throw new Error(data.message || 'Gagal menyimpan.');
                     }
                 } catch (err) {
                     alert('Gagal menyimpan: ' + err.message);
-                    if (btnDesktop) { btnDesktop.disabled = false; btnDesktop.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>Simpan Nilai</span>'; }
-                    if (btnMobile) { btnMobile.disabled = false; btnMobile.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>Simpan Nilai</span>'; }
+                    if (btnDesktop) { btnDesktop.disabled = false; btnDesktop.innerHTML = '<svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Simpan Nilai</span>'; }
+                    if (btnMobile) { btnMobile.disabled = false; btnMobile.innerHTML = '<svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Simpan Nilai</span>'; }
                 }
 
                 if (window.refreshLucideIcons) window.refreshLucideIcons();

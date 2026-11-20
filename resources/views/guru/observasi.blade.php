@@ -139,6 +139,7 @@
                             $selesaiCount = ($s['selesai_count'] ?? 0);
                         @endphp
                         <a 
+                            id="carousel-card-{{ $s['no'] }}"
                             href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $s['no']]) }}" 
                             class="flex-shrink-0 flex flex-col p-2.5 rounded-xl border text-left transition-all min-w-[190px] sm:min-w-[210px]
                                 {{ $isSelected 
@@ -154,19 +155,13 @@
                                         {{ $s['no'] }}
                                     </div>
                                 </div>
-                                @if($isCompleteAll)
-                                    <span class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300">
-                                        4/4 Lengkap
-                                    </span>
-                                @else
-                                    <span class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300">
-                                        {{ $selesaiCount }}/4 Kelompok
-                                    </span>
-                                @endif
+                                <span id="carousel-badge-{{ $s['no'] }}" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold {{ $isCompleteAll ? 'bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300' }}">
+                                    {{ $isCompleteAll ? '4/4 Lengkap' : $selesaiCount.'/4 Kelompok' }}
+                                </span>
                             </div>
 
                             <!-- Status di Ruang Aktif Ini -->
-                            <div class="mt-2 pt-1.5 border-t border-border flex items-center justify-between text-[10px]">
+                            <div id="carousel-status-{{ $s['no'] }}" class="mt-2 pt-1.5 border-t border-border flex items-center justify-between text-[10px]">
                                 @if($statusRuangIni === 'Selesai')
                                     <span class="text-emerald-400 font-semibold flex items-center gap-1">
                                         <i data-lucide="check" class="h-3 w-3"></i>
@@ -252,7 +247,7 @@
                             <i data-lucide="check-square" class="h-3.5 w-3.5 text-emerald-400"></i>
                             <span>Status Kelengkapan 4 Kelompok (Wajib Terpenuhi Semua):</span>
                         </span>
-                        <span class="text-[11px] font-mono {{ ($activeSiswa['is_lengkap'] ?? false) ? 'text-emerald-400 font-bold' : 'text-amber-400' }}">
+                        <span id="matrix-progress-text" class="text-[11px] font-mono {{ ($activeSiswa['is_lengkap'] ?? false) ? 'text-emerald-400 font-bold' : 'text-amber-400' }}">
                             {{ $activeSiswa['selesai_count'] ?? 0 }}/4 Kelompok Terpenuhi
                         </span>
                     </div>
@@ -261,86 +256,102 @@
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
                         
                         <!-- 1. Keagamaan -->
-                        <div class="p-2.5 rounded-lg border {{ ($activeGuru['kelompok_key'] === 'keagamaan') ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 ring-1 ring-emerald-500/30' : 'border-border bg-card' }}">
+                        <div id="mini-station-box-keagamaan" class="p-2.5 rounded-lg border {{ ($activeGuru['kelompok_key'] === 'keagamaan') ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 ring-1 ring-emerald-500/30' : 'border-border bg-card' }}">
                             <div class="flex items-center justify-between text-[11px]">
                                 <span class="font-medium text-foreground">1. Keagamaan</span>
-                                @if(($activeSiswa['keagamaan']['status'] ?? '') === 'Selesai')
-                                    <span class="text-emerald-600 dark:text-emerald-400 font-bold font-mono">{{ $activeSiswa['keagamaan']['nilai'] }}%</span>
-                                @elseif(($activeSiswa['keagamaan']['status'] ?? '') === 'Sedang Diobservasi')
-                                    <span class="text-amber-600 dark:text-amber-400 text-[10px] animate-pulse font-medium">Sedang Uji</span>
-                                @else
-                                    <span class="text-muted-foreground text-[10px]">Belum</span>
-                                @endif
+                                <span id="mini-station-score-keagamaan" class="{{ (($activeSiswa['keagamaan']['status'] ?? '') === 'Selesai') ? 'text-emerald-600 dark:text-emerald-400 font-bold font-mono' : ((($activeSiswa['keagamaan']['status'] ?? '') === 'Sedang Diobservasi') ? 'text-amber-600 dark:text-amber-400 text-[10px] animate-pulse font-medium' : 'text-muted-foreground text-[10px]') }}">
+                                    @if(($activeSiswa['keagamaan']['status'] ?? '') === 'Selesai')
+                                        {{ $activeSiswa['keagamaan']['nilai'] }}%
+                                    @elseif(($activeSiswa['keagamaan']['status'] ?? '') === 'Sedang Diobservasi')
+                                        Sedang Uji
+                                    @else
+                                        Belum
+                                    @endif
+                                </span>
                             </div>
                             <div class="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                                @if(($activeSiswa['keagamaan']['status'] ?? '') === 'Selesai')
-                                    <span class="text-emerald-600 dark:text-emerald-400 font-medium">✓ Selesai</span>
-                                @else
-                                    <span class="text-muted-foreground">Pos 1–4</span>
-                                @endif
+                                <span id="mini-station-status-keagamaan" class="{{ (($activeSiswa['keagamaan']['status'] ?? '') === 'Selesai') ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-muted-foreground' }}">
+                                    @if(($activeSiswa['keagamaan']['status'] ?? '') === 'Selesai')
+                                        ✓ Selesai
+                                    @else
+                                        Pos 1–4
+                                    @endif
+                                </span>
                             </div>
                         </div>
 
                         <!-- 2. Akademik CBT -->
-                        <div class="p-2.5 rounded-lg border {{ ($activeGuru['kelompok_key'] === 'akademik') ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30 ring-1 ring-blue-500/30' : 'border-border bg-card' }}">
+                        <div id="mini-station-box-akademik" class="p-2.5 rounded-lg border {{ ($activeGuru['kelompok_key'] === 'akademik') ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30 ring-1 ring-blue-500/30' : 'border-border bg-card' }}">
                             <div class="flex items-center justify-between text-[11px]">
                                 <span class="font-medium text-foreground">2. Akademik CBT</span>
-                                @if(($activeSiswa['akademik']['status'] ?? '') === 'Selesai')
-                                    <span class="text-blue-600 dark:text-blue-400 font-bold font-mono">{{ $activeSiswa['akademik']['nilai'] }}%</span>
-                                @elseif(($activeSiswa['akademik']['status'] ?? '') === 'Sedang Diobservasi')
-                                    <span class="text-amber-600 dark:text-amber-400 text-[10px] animate-pulse font-medium">Sedang Uji</span>
-                                @else
-                                    <span class="text-muted-foreground text-[10px]">Belum</span>
-                                @endif
+                                <span id="mini-station-score-akademik" class="{{ (($activeSiswa['akademik']['status'] ?? '') === 'Selesai') ? 'text-blue-600 dark:text-blue-400 font-bold font-mono' : ((($activeSiswa['akademik']['status'] ?? '') === 'Sedang Diobservasi') ? 'text-amber-600 dark:text-amber-400 text-[10px] animate-pulse font-medium' : 'text-muted-foreground text-[10px]') }}">
+                                    @if(($activeSiswa['akademik']['status'] ?? '') === 'Selesai')
+                                        {{ $activeSiswa['akademik']['nilai'] }}%
+                                    @elseif(($activeSiswa['akademik']['status'] ?? '') === 'Sedang Diobservasi')
+                                        Sedang Uji
+                                    @else
+                                        Belum
+                                    @endif
+                                </span>
                             </div>
                             <div class="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                                @if(($activeSiswa['akademik']['status'] ?? '') === 'Selesai')
-                                    <span class="text-blue-600 dark:text-blue-400 font-medium">✓ Selesai</span>
-                                @else
-                                    <span class="text-muted-foreground">Pos 5 CBT</span>
-                                @endif
+                                <span id="mini-station-status-akademik" class="{{ (($activeSiswa['akademik']['status'] ?? '') === 'Selesai') ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-muted-foreground' }}">
+                                    @if(($activeSiswa['akademik']['status'] ?? '') === 'Selesai')
+                                        ✓ Selesai
+                                    @else
+                                        Pos 5 CBT
+                                    @endif
+                                </span>
                             </div>
                         </div>
 
                         <!-- 3. Bakat Minat -->
-                        <div class="p-2.5 rounded-lg border {{ ($activeGuru['kelompok_key'] === 'bakat_minat') ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30 ring-1 ring-purple-500/30' : 'border-border bg-card' }}">
+                        <div id="mini-station-box-bakat_minat" class="p-2.5 rounded-lg border {{ ($activeGuru['kelompok_key'] === 'bakat_minat') ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30 ring-1 ring-purple-500/30' : 'border-border bg-card' }}">
                             <div class="flex items-center justify-between text-[11px]">
                                 <span class="font-medium text-foreground">3. Bakat Minat</span>
-                                @if(($activeSiswa['bakat_minat']['status'] ?? '') === 'Selesai')
-                                    <span class="text-purple-600 dark:text-purple-400 font-bold font-mono">{{ $activeSiswa['bakat_minat']['nilai'] }}%</span>
-                                @elseif(($activeSiswa['bakat_minat']['status'] ?? '') === 'Sedang Diobservasi')
-                                    <span class="text-amber-600 dark:text-amber-400 text-[10px] animate-pulse font-medium">Sedang Uji</span>
-                                @else
-                                    <span class="text-muted-foreground text-[10px]">Belum</span>
-                                @endif
+                                <span id="mini-station-score-bakat_minat" class="{{ (($activeSiswa['bakat_minat']['status'] ?? '') === 'Selesai') ? 'text-purple-600 dark:text-purple-400 font-bold font-mono' : ((($activeSiswa['bakat_minat']['status'] ?? '') === 'Sedang Diobservasi') ? 'text-amber-600 dark:text-amber-400 text-[10px] animate-pulse font-medium' : 'text-muted-foreground text-[10px]') }}">
+                                    @if(($activeSiswa['bakat_minat']['status'] ?? '') === 'Selesai')
+                                        {{ $activeSiswa['bakat_minat']['nilai'] }}%
+                                    @elseif(($activeSiswa['bakat_minat']['status'] ?? '') === 'Sedang Diobservasi')
+                                        Sedang Uji
+                                    @else
+                                        Belum
+                                    @endif
+                                </span>
                             </div>
                             <div class="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                                @if(($activeSiswa['bakat_minat']['status'] ?? '') === 'Selesai')
-                                    <span class="text-purple-600 dark:text-purple-400 font-medium">✓ Selesai</span>
-                                @else
-                                    <span class="text-muted-foreground">Pos 6–7</span>
-                                @endif
+                                <span id="mini-station-status-bakat_minat" class="{{ (($activeSiswa['bakat_minat']['status'] ?? '') === 'Selesai') ? 'text-purple-600 dark:text-purple-400 font-medium' : 'text-muted-foreground' }}">
+                                    @if(($activeSiswa['bakat_minat']['status'] ?? '') === 'Selesai')
+                                        ✓ Selesai
+                                    @else
+                                        Pos 6–7
+                                    @endif
+                                </span>
                             </div>
                         </div>
 
                         <!-- 4. Pribadi Sosial -->
-                        <div class="p-2.5 rounded-lg border {{ ($activeGuru['kelompok_key'] === 'pribadi_sosial') ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30 ring-1 ring-amber-500/30' : 'border-border bg-card' }}">
+                        <div id="mini-station-box-pribadi_sosial" class="p-2.5 rounded-lg border {{ ($activeGuru['kelompok_key'] === 'pribadi_sosial') ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30 ring-1 ring-amber-500/30' : 'border-border bg-card' }}">
                             <div class="flex items-center justify-between text-[11px]">
                                 <span class="font-medium text-foreground">4. Pribadi &amp; Sosial</span>
-                                @if(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Selesai')
-                                    <span class="text-amber-600 dark:text-amber-400 font-bold font-mono">{{ $activeSiswa['pribadi_sosial']['nilai'] }}%</span>
-                                @elseif(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Sedang Diobservasi')
-                                    <span class="text-amber-600 dark:text-amber-400 text-[10px] animate-pulse font-medium">Sedang Uji</span>
-                                @else
-                                    <span class="text-muted-foreground text-[10px]">Belum</span>
-                                @endif
+                                <span id="mini-station-score-pribadi_sosial" class="{{ (($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Selesai') ? 'text-amber-600 dark:text-amber-400 font-bold font-mono' : ((($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Sedang Diobservasi') ? 'text-amber-600 dark:text-amber-400 text-[10px] animate-pulse font-medium' : 'text-muted-foreground text-[10px]') }}">
+                                    @if(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Selesai')
+                                        {{ $activeSiswa['pribadi_sosial']['nilai'] }}%
+                                    @elseif(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Sedang Diobservasi')
+                                        Sedang Uji
+                                    @else
+                                        Belum
+                                    @endif
+                                </span>
                             </div>
                             <div class="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                                @if(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Selesai')
-                                    <span class="text-amber-600 dark:text-amber-400 font-medium">✓ Selesai</span>
-                                @else
-                                    <span class="text-muted-foreground">Pos 8 / BK</span>
-                                @endif
+                                <span id="mini-station-status-pribadi_sosial" class="{{ (($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Selesai') ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-muted-foreground' }}">
+                                    @if(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Selesai')
+                                        ✓ Selesai
+                                    @else
+                                        Pos 8 / BK
+                                    @endif
+                                </span>
                             </div>
                         </div>
 
@@ -348,16 +359,18 @@
 
                     <!-- Progress bar -->
                     <div class="w-full bg-muted h-1.5 rounded-full overflow-hidden mt-1">
-                        <div class="h-full bg-emerald-500 transition-all duration-300" style="width: {{ (($activeSiswa['selesai_count'] ?? 0) / 4) * 100 }}%"></div>
+                        <div id="matrix-progress-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: {{ (($activeSiswa['selesai_count'] ?? 0) / 4) * 100 }}%"></div>
                     </div>
 
                     <div class="flex items-center justify-between text-[10px] text-muted-foreground">
                         <span>Mulai pertama dari: <strong class="text-foreground">{{ $activeSiswa['mulai_dari'] }}</strong></span>
-                        @if($activeSiswa['is_lengkap'] ?? false)
-                            <span class="text-emerald-400 font-semibold">✓ Seluruh Observasi Terpenuhi</span>
-                        @else
-                            <span class="text-amber-400">Tersisa {{ 4 - ($activeSiswa['selesai_count'] ?? 0) }} kelompok lagi</span>
-                        @endif
+                        <span id="matrix-remaining-text">
+                            @if($activeSiswa['is_lengkap'] ?? false)
+                                <span class="text-emerald-400 font-semibold">✓ Seluruh Observasi Terpenuhi</span>
+                            @else
+                                <span class="text-amber-400">Tersisa {{ 4 - ($activeSiswa['selesai_count'] ?? 0) }} kelompok lagi</span>
+                            @endif
+                        </span>
                     </div>
                 </div>
 
@@ -1269,13 +1282,15 @@
                                 <div class="text-[10px] text-muted-foreground">Sholat, Mengaji, Doa, Surat</div>
                             </div>
                         </div>
-                        @if(($activeSiswa['keagamaan']['status'] ?? '') === 'Selesai')
-                            <span class="font-mono font-bold text-sm text-emerald-400">{{ $activeSiswa['keagamaan']['nilai'] }}%</span>
-                        @elseif(($activeSiswa['keagamaan']['status'] ?? '') === 'Sedang Diobservasi')
-                            <span class="text-[11px] text-amber-400 font-semibold animate-pulse">Sedang Berlangsung</span>
-                        @else
-                            <span class="text-[11px] text-muted-foreground">Belum Diuji</span>
-                        @endif
+                        <div id="rekap-score-keagamaan">
+                            @if(($activeSiswa['keagamaan']['status'] ?? '') === 'Selesai')
+                                <span class="font-mono font-bold text-sm text-emerald-400">{{ $activeSiswa['keagamaan']['nilai'] }}%</span>
+                            @elseif(($activeSiswa['keagamaan']['status'] ?? '') === 'Sedang Diobservasi')
+                                <span class="text-[11px] text-amber-400 font-semibold animate-pulse">Sedang Berlangsung</span>
+                            @else
+                                <span class="text-[11px] text-muted-foreground">Belum Diuji</span>
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Kelompok Akademik -->
@@ -1287,13 +1302,15 @@
                                 <div class="text-[10px] text-muted-foreground">B. Indo, MTK, IPAS, B. Inggris</div>
                             </div>
                         </div>
-                        @if(($activeSiswa['akademik']['status'] ?? '') === 'Selesai')
-                            <span class="font-mono font-bold text-sm text-blue-400">{{ $activeSiswa['akademik']['nilai'] }}%</span>
-                        @elseif(($activeSiswa['akademik']['status'] ?? '') === 'Sedang Diobservasi')
-                            <span class="text-[11px] text-amber-400 font-semibold animate-pulse">Sedang Berlangsung</span>
-                        @else
-                            <span class="text-[11px] text-muted-foreground">Belum Diuji</span>
-                        @endif
+                        <div id="rekap-score-akademik">
+                            @if(($activeSiswa['akademik']['status'] ?? '') === 'Selesai')
+                                <span class="font-mono font-bold text-sm text-blue-400">{{ $activeSiswa['akademik']['nilai'] }}%</span>
+                            @elseif(($activeSiswa['akademik']['status'] ?? '') === 'Sedang Diobservasi')
+                                <span class="text-[11px] text-amber-400 font-semibold animate-pulse">Sedang Berlangsung</span>
+                            @else
+                                <span class="text-[11px] text-muted-foreground">Belum Diuji</span>
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Kelompok Bakat Minat -->
@@ -1305,13 +1322,15 @@
                                 <div class="text-[10px] text-muted-foreground">Motorik Halus &amp; Kreativitas Inovasi</div>
                             </div>
                         </div>
-                        @if(($activeSiswa['bakat_minat']['status'] ?? '') === 'Selesai')
-                            <span class="font-mono font-bold text-sm text-purple-400">{{ $activeSiswa['bakat_minat']['nilai'] }}%</span>
-                        @elseif(($activeSiswa['bakat_minat']['status'] ?? '') === 'Sedang Diobservasi')
-                            <span class="text-[11px] text-amber-400 font-semibold animate-pulse">Sedang Berlangsung</span>
-                        @else
-                            <span class="text-[11px] text-muted-foreground">Belum Diuji</span>
-                        @endif
+                        <div id="rekap-score-bakat_minat">
+                            @if(($activeSiswa['bakat_minat']['status'] ?? '') === 'Selesai')
+                                <span class="font-mono font-bold text-sm text-purple-400">{{ $activeSiswa['bakat_minat']['nilai'] }}%</span>
+                            @elseif(($activeSiswa['bakat_minat']['status'] ?? '') === 'Sedang Diobservasi')
+                                <span class="text-[11px] text-amber-400 font-semibold animate-pulse">Sedang Berlangsung</span>
+                            @else
+                                <span class="text-[11px] text-muted-foreground">Belum Diuji</span>
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Kelompok Pribadi Sosial -->
@@ -1323,13 +1342,15 @@
                                 <div class="text-[10px] text-muted-foreground">Angket, Wawancara, Observasi BK</div>
                             </div>
                         </div>
-                        @if(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Selesai')
-                            <span class="font-mono font-bold text-sm text-amber-400">{{ $activeSiswa['pribadi_sosial']['nilai'] }}%</span>
-                        @elseif(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Sedang Diobservasi')
-                            <span class="text-[11px] text-amber-400 font-semibold animate-pulse">Sedang Berlangsung</span>
-                        @else
-                            <span class="text-[11px] text-muted-foreground">Belum Diuji</span>
-                        @endif
+                        <div id="rekap-score-pribadi_sosial">
+                            @if(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Selesai')
+                                <span class="font-mono font-bold text-sm text-amber-400">{{ $activeSiswa['pribadi_sosial']['nilai'] }}%</span>
+                            @elseif(($activeSiswa['pribadi_sosial']['status'] ?? '') === 'Sedang Diobservasi')
+                                <span class="text-[11px] text-amber-400 font-semibold animate-pulse">Sedang Berlangsung</span>
+                            @else
+                                <span class="text-[11px] text-muted-foreground">Belum Diuji</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
 
@@ -1651,11 +1672,102 @@
                     if (data.success) {
                         showNotificationToast(data.message, 'success');
                         
-                        // Update Score Badges on Screen
+                        // Kembalikan scroll ke posisi paling atas secara halus
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                        // 1. Update Score Badges on Screen
                         const headerScore = document.getElementById('header-live-score');
                         if (headerScore) headerScore.textContent = data.nilai + '%';
                         const bottomScore = document.getElementById('bottom-score-badge');
                         if (bottomScore) bottomScore.textContent = data.nilai + '%';
+
+                        // 2. Update Active Carousel Student Card
+                        const currentSiswaNo = payload.siswa_no;
+                        const carouselStatus = document.getElementById('carousel-status-' + currentSiswaNo);
+                        if (carouselStatus) {
+                            if (data.status === 'Selesai') {
+                                carouselStatus.innerHTML = `
+                                    <span class="text-emerald-400 font-semibold flex items-center gap-1">
+                                        <svg class="h-3 w-3 text-emerald-400 shrink-0 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Sudah Dinilai: ${data.nilai}%</span>
+                                    </span>
+                                `;
+                            } else {
+                                carouselStatus.innerHTML = `
+                                    <span class="text-amber-400 font-semibold flex items-center gap-1">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                                        <span>Di Ruang Ini</span>
+                                    </span>
+                                `;
+                            }
+                        }
+
+                        const carouselBadge = document.getElementById('carousel-badge-' + currentSiswaNo);
+                        if (carouselBadge) {
+                            if (data.is_lengkap) {
+                                carouselBadge.className = 'shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300';
+                                carouselBadge.textContent = '4/4 Lengkap';
+                            } else {
+                                carouselBadge.className = 'shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300';
+                                carouselBadge.textContent = `${data.selesai_count}/4 Kelompok`;
+                            }
+                        }
+
+                        // 3. Update 4-Station Matrix Header & Progress Bar
+                        const matrixText = document.getElementById('matrix-progress-text');
+                        if (matrixText) {
+                            matrixText.textContent = `${data.selesai_count}/4 Kelompok Terpenuhi`;
+                            if (data.is_lengkap) {
+                                matrixText.className = 'text-[11px] font-mono text-emerald-400 font-bold';
+                            } else {
+                                matrixText.className = 'text-[11px] font-mono text-amber-400';
+                            }
+                        }
+                        const matrixBar = document.getElementById('matrix-progress-bar');
+                        if (matrixBar) {
+                            matrixBar.style.width = `${(data.selesai_count / 4) * 100}%`;
+                        }
+                        const matrixRemaining = document.getElementById('matrix-remaining-text');
+                        if (matrixRemaining) {
+                            if (data.is_lengkap) {
+                                matrixRemaining.innerHTML = '<span class="text-emerald-400 font-semibold">✓ Seluruh Observasi Terpenuhi</span>';
+                            } else {
+                                matrixRemaining.innerHTML = `<span class="text-amber-400">Tersisa ${4 - data.selesai_count} kelompok lagi</span>`;
+                            }
+                        }
+
+                        // 4. Update Active Mini Station Card
+                        const stationKey = payload.kelompok_key;
+                        const miniScore = document.getElementById('mini-station-score-' + stationKey);
+                        const miniStatus = document.getElementById('mini-station-status-' + stationKey);
+                        if (miniScore) {
+                            if (data.status === 'Selesai') {
+                                miniScore.className = 'text-emerald-600 dark:text-emerald-400 font-bold font-mono';
+                                miniScore.textContent = data.nilai + '%';
+                            } else {
+                                miniScore.className = 'text-amber-600 dark:text-amber-400 text-[10px] animate-pulse font-medium';
+                                miniScore.textContent = 'Sedang Uji';
+                            }
+                        }
+                        if (miniStatus) {
+                            if (data.status === 'Selesai') {
+                                miniStatus.className = 'text-emerald-600 dark:text-emerald-400 font-medium';
+                                miniStatus.textContent = '✓ Selesai';
+                            }
+                        }
+
+                        // 5. Update Rekap Modal
+                        const rekapScore = document.getElementById('rekap-score-' + stationKey);
+                        if (rekapScore) {
+                            if (data.status === 'Selesai') {
+                                rekapScore.innerHTML = `<span class="font-mono font-bold text-sm text-emerald-400">${data.nilai}%</span>`;
+                            } else {
+                                rekapScore.innerHTML = `<span class="text-[11px] text-amber-400 font-semibold animate-pulse">Sedang Berlangsung</span>`;
+                            }
+                        }
+
+                        if (window.refreshLucideIcons) window.refreshLucideIcons();
+                        if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
 
                         // If student completed all 4 stations, show completion celebration
                         if (data.is_lengkap) {
@@ -1674,14 +1786,15 @@
                 .finally(() => {
                     if (btnDesktop) {
                         btnDesktop.disabled = false;
-                        btnDesktop.innerHTML = '<i data-lucide="check-circle-2" class="h-4 w-4"></i><span>Simpan Nilai {{ $activeGuru["kelompok_short"] }}</span>';
+                        btnDesktop.innerHTML = '<svg class="h-4 w-4 shrink-0 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Simpan Nilai {{ $activeGuru["kelompok_short"] }}</span>';
                     }
                     if (btnDraft) btnDraft.disabled = false;
                     if (btnMobile) {
                         btnMobile.disabled = false;
-                        btnMobile.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>Simpan Nilai</span>';
+                        btnMobile.innerHTML = '<svg class="h-4 w-4 shrink-0 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Simpan Nilai</span>';
                     }
-                    if (window.lucide) window.lucide.createIcons();
+                    if (window.refreshLucideIcons) window.refreshLucideIcons();
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
                 });
             }
 

@@ -291,10 +291,10 @@
                                         @endif
                                     </td>
                                     <td class="p-4 text-center">
-                                        <button type="button" onclick="alert('Membuka Laporan Rapor Ananda {{ $student['name'] }}');" class="inline-flex h-7 items-center justify-center gap-1 rounded-md border border-border bg-card px-2.5 text-[11px] font-medium text-foreground/90 hover:bg-muted hover:text-foreground transition-colors">
+                                        <a href="{{ route('admin.rapor', ['siswa' => $student['id']]) }}" class="inline-flex h-7 items-center justify-center gap-1 rounded-md border border-border bg-card px-2.5 text-[11px] font-medium text-foreground/90 hover:bg-muted hover:text-foreground transition-colors">
                                             <i data-lucide="file-text" class="h-3 w-3"></i>
                                             <span>Rapor</span>
-                                        </button>
+                                        </a>
                                     </td>
                                 </tr>
                             @empty

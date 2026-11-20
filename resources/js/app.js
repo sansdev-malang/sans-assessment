@@ -17,7 +17,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Expose helper to refresh icons on any dynamic tab/dom change
+// Expose helper and window.lucide to refresh icons on any dynamic tab/dom change
+window.lucide = {
+    createIcons: function (opts) {
+        try {
+            createIcons(opts || { icons });
+        } catch (e) {
+            console.warn(e);
+        }
+    }
+};
+
 window.refreshLucideIcons = function () {
     try {
         createIcons({ icons });
