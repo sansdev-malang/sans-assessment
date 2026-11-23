@@ -125,10 +125,10 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button type="button" onclick="alert('Mengekspor data observasi {{ $data['unit_title'] }} ke CSV...');" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground/90 hover:bg-muted hover:text-foreground transition-colors">
+                    <a href="{{ route('admin.dashboard.export', ['jenjang' => $currentJenjang ?? 'sd']) }}" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground/90 hover:bg-muted hover:text-foreground transition-colors" title="Export Rekap Hasil Observasi {{ $data['unit_title'] }} ke CSV">
                         <i data-lucide="file-spreadsheet" class="h-3.5 w-3.5 text-muted-foreground"></i>
                         <span>Export CSV</span>
-                    </button>
+                    </a>
                     <button type="button" onclick="alert('Menerbitkan SK Pengumuman Penerimaan {{ $data['unit_title'] }}...');" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-zinc-100 px-3 text-xs font-semibold text-zinc-900 shadow hover:bg-zinc-200 transition-colors">
                         <i data-lucide="award" class="h-3.5 w-3.5 text-zinc-900"></i>
                         <span>Terbitkan SK</span>
@@ -239,8 +239,10 @@
                     <div class="flex items-center gap-2">
                         <div class="relative">
                             <input 
+                                id="searchSiswaInput"
                                 type="text" 
-                                placeholder="Cari nama ananda..." 
+                                placeholder="Cari nama atau no. pendaftaran..." 
+                                oninput="filterSiswaTable(this.value)"
                                 class="h-8 rounded-md border border-border bg-muted/40 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"
                             />
                             <i data-lucide="search" class="h-3.5 w-3.5 absolute left-2.5 top-2.5 text-muted-foreground"></i>
@@ -320,6 +322,18 @@
         <footer class="border-t border-border py-4 px-6 text-center text-xs text-muted-foreground">
             SAANS Assessment &bull; Sekolah Alam Anak Saleh &bull; Dashboard Rekapitulasi Observasi SPMB
         </footer>
+
+        <script>
+            function filterSiswaTable(query) {
+                const term = query.toLowerCase().trim();
+                const rows = document.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    if (row.querySelector('td[colspan]')) return;
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(term) ? '' : 'none';
+                });
+            }
+        </script>
 
     </body>
 </html>

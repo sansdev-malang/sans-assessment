@@ -15,6 +15,7 @@ Route::post('/observasi/lepas', [SPMBController::class, 'lepasSiswa'])->name('gu
 
 // Dashboard Observasi untuk Admin SPMB
 Route::get('/admin/dashboard', [SPMBController::class, 'dashboard'])->name('admin.dashboard');
+Route::get('/admin/dashboard/export', [SPMBController::class, 'dashboardExport'])->name('admin.dashboard.export');
 Route::get('/admin/rapor/{siswa}', [SPMBController::class, 'rapor'])->name('admin.rapor');
 Route::get('/admin/guru', [SPMBController::class, 'guruList'])->name('admin.guru');
 Route::post('/admin/guru/store', [SPMBController::class, 'guruStore'])->name('admin.guru.store');

@@ -1623,6 +1623,189 @@ class SPMBController extends Controller
     }
 
     /**
+     * Export Rekap Hasil Observasi Dashboard ke CSV.
+     */
+    public function dashboardExport(Request $request): Response
+    {
+        $requestedJenjang = $request->query('jenjang');
+        $user = session('auth_user', []);
+        $jenjang = in_array($requestedJenjang, ['sd', 'smp', 'tk'])
+            ? $requestedJenjang
+            : ($user['jenjang'] ?? 'sd');
+
+        $filename = "rekap-hasil-observasi-{$jenjang}-".date('Ymd_His').'.csv';
+        $targetCount = ($jenjang === 'smp') ? 4 : 3;
+
+        $siswas = CalonSiswa::with(['asesmenKelompoks.guruPengamat'])
+            ->where('jenjang', $jenjang)
+            ->orderBy('id')
+            ->get();
+
+        $output = fopen('php://temp', 'r+');
+        // Prepend UTF-8 BOM agar terbaca sempurna di Microsoft Excel & spreadsheet lainnya
+        fwrite($output, "\xEF\xBB\xBF");
+
+        if ($jenjang === 'sd') {
+            $headers = [
+                'No. Pendaftaran',
+                'Nama Calon Siswa',
+                'Jenjang',
+                'Kelas Target',
+                'Asal Sekolah',
+                'Status Observasi',
+                'Skor Kesiapan (%)',
+                'Status Rekomendasi',
+                'Sentra Ubudiyah (Skor)',
+                'Sentra Ubudiyah (Kategori)',
+                'Sentra Ubudiyah (Guru Pengamat)',
+                'Sentra Persiapan (Skor)',
+                'Sentra Persiapan (Kategori)',
+                'Sentra Persiapan (Guru Pengamat)',
+                'Sentra Eksplorasi Diri (Skor)',
+                'Sentra Eksplorasi Diri (Kategori)',
+                'Sentra Eksplorasi Diri (Guru Pengamat)',
+                'Karakter Unggulan / Catatan Observasi',
+                'Nama Orang Tua / Wali',
+                'No. Kontak',
+            ];
+        } elseif ($jenjang === 'smp') {
+            $headers = [
+                'No. Pendaftaran',
+                'Nama Calon Siswa',
+                'Jenjang',
+                'Kelas Target',
+                'Asal Sekolah',
+                'Status Observasi',
+                'Skor Kesiapan (%)',
+                'Status Rekomendasi',
+                'Kelompok Keagamaan (Skor)',
+                'Kelompok Keagamaan (Kategori)',
+                'Kelompok Keagamaan (Guru Pengamat)',
+                'Kelompok Akademik (Skor)',
+                'Kelompok Akademik (Kategori)',
+                'Kelompok Akademik (Guru Pengamat)',
+                'Kelompok Bakat & Minat (Skor)',
+                'Kelompok Bakat & Minat (Kategori)',
+                'Kelompok Bakat & Minat (Guru Pengamat)',
+                'Kelompok Pribadi & Sosial (Skor)',
+                'Kelompok Pribadi & Sosial (Kategori)',
+                'Kelompok Pribadi & Sosial (Guru Pengamat)',
+                'Karakter Unggulan / Catatan Observasi',
+                'Nama Orang Tua / Wali',
+                'No. Kontak',
+            ];
+        } else {
+            $headers = [
+                'No. Pendaftaran',
+                'Nama Calon Siswa',
+                'Jenjang',
+                'Kelas Target',
+                'Asal Sekolah',
+                'Status Observasi',
+                'Skor Kesiapan (%)',
+                'Status Rekomendasi',
+                'Karakter Unggulan / Catatan Observasi',
+                'Nama Orang Tua / Wali',
+                'No. Kontak',
+            ];
+        }
+
+        fputcsv($output, $headers);
+
+        foreach ($siswas as $s) {
+            $selesai = $s->asesmenKelompoks->where('status', 'Selesai')->count();
+            $statusObservasi = $selesai >= $targetCount ? 'Selesai Observasi' : ($selesai > 0 ? 'Dalam Proses' : 'Menunggu');
+            $skorAkhir = $s->nilai_akhir_terpadu !== null ? number_format($s->nilai_akhir_terpadu, 1).'%' : '—';
+            $rekomendasi = $s->status_rekomendasi ?? 'Dalam Proses';
+
+            if ($jenjang === 'sd') {
+                $ubudiyah = $s->asesmenKelompoks->firstWhere('kelompok_key', 'ubudiyah');
+                $persiapan = $s->asesmenKelompoks->firstWhere('kelompok_key', 'persiapan');
+                $eksplorasi = $s->asesmenKelompoks->firstWhere('kelompok_key', 'eksplorasi');
+
+                $row = [
+                    $s->no_pendaftaran,
+                    $s->nama,
+                    strtoupper($s->jenjang),
+                    $s->kelas_target ?? '-',
+                    $s->asal_sekolah ?? '-',
+                    $statusObservasi,
+                    $skorAkhir,
+                    $rekomendasi,
+                    $ubudiyah && $ubudiyah->nilai !== null ? number_format($ubudiyah->nilai, 1) : '—',
+                    $ubudiyah?->kategori ?? ($ubudiyah?->status === 'Selesai' ? 'Tercapai' : ($ubudiyah?->status ?? 'Belum Diuji')),
+                    $ubudiyah?->guruPengamat?->nama ?? '—',
+                    $persiapan && $persiapan->nilai !== null ? number_format($persiapan->nilai, 1) : '—',
+                    $persiapan?->kategori ?? ($persiapan?->status === 'Selesai' ? 'Tercapai' : ($persiapan?->status ?? 'Belum Diuji')),
+                    $persiapan?->guruPengamat?->nama ?? '—',
+                    $eksplorasi && $eksplorasi->nilai !== null ? number_format($eksplorasi->nilai, 1) : '—',
+                    $eksplorasi?->kategori ?? ($eksplorasi?->status === 'Selesai' ? 'Tercapai' : ($eksplorasi?->status ?? 'Belum Diuji')),
+                    $eksplorasi?->guruPengamat?->nama ?? '—',
+                    $s->catatan_umum ?? '-',
+                    $s->wali ?? '-',
+                    $s->kontak ?? '-',
+                ];
+            } elseif ($jenjang === 'smp') {
+                $keagamaan = $s->asesmenKelompoks->firstWhere('kelompok_key', 'keagamaan');
+                $akademik = $s->asesmenKelompoks->firstWhere('kelompok_key', 'akademik');
+                $bakatMinat = $s->asesmenKelompoks->firstWhere('kelompok_key', 'bakat_minat');
+                $pribadiSosial = $s->asesmenKelompoks->firstWhere('kelompok_key', 'pribadi_sosial');
+
+                $row = [
+                    $s->no_pendaftaran,
+                    $s->nama,
+                    strtoupper($s->jenjang),
+                    $s->kelas_target ?? '-',
+                    $s->asal_sekolah ?? '-',
+                    $statusObservasi,
+                    $skorAkhir,
+                    $rekomendasi,
+                    $keagamaan && $keagamaan->nilai !== null ? number_format($keagamaan->nilai, 1) : '—',
+                    $keagamaan?->kategori ?? ($keagamaan?->status === 'Selesai' ? 'Tercapai' : ($keagamaan?->status ?? 'Belum Diuji')),
+                    $keagamaan?->guruPengamat?->nama ?? '—',
+                    $akademik && $akademik->nilai !== null ? number_format($akademik->nilai, 1) : '—',
+                    $akademik?->kategori ?? ($akademik?->status === 'Selesai' ? 'Tercapai' : ($akademik?->status ?? 'Belum Diuji')),
+                    $akademik?->guruPengamat?->nama ?? '—',
+                    $bakatMinat && $bakatMinat->nilai !== null ? number_format($bakatMinat->nilai, 1) : '—',
+                    $bakatMinat?->kategori ?? ($bakatMinat?->status === 'Selesai' ? 'Tercapai' : ($bakatMinat?->status ?? 'Belum Diuji')),
+                    $bakatMinat?->guruPengamat?->nama ?? '—',
+                    $pribadiSosial && $pribadiSosial->nilai !== null ? number_format($pribadiSosial->nilai, 1) : '—',
+                    $pribadiSosial?->kategori ?? ($pribadiSosial?->status === 'Selesai' ? 'Tercapai' : ($pribadiSosial?->status ?? 'Belum Diuji')),
+                    $pribadiSosial?->guruPengamat?->nama ?? '—',
+                    $s->catatan_umum ?? '-',
+                    $s->wali ?? '-',
+                    $s->kontak ?? '-',
+                ];
+            } else {
+                $row = [
+                    $s->no_pendaftaran,
+                    $s->nama,
+                    strtoupper($s->jenjang),
+                    $s->kelas_target ?? '-',
+                    $s->asal_sekolah ?? '-',
+                    $statusObservasi,
+                    $skorAkhir,
+                    $rekomendasi,
+                    $s->catatan_umum ?? '-',
+                    $s->wali ?? '-',
+                    $s->kontak ?? '-',
+                ];
+            }
+
+            fputcsv($output, $row);
+        }
+
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
      * Export Calon Siswa ke CSV.
      */
     public function siswaExport(Request $request): Response
@@ -1636,6 +1819,8 @@ class SPMBController extends Controller
             ->get();
 
         $output = fopen('php://temp', 'r+');
+        // Prepend UTF-8 BOM
+        fwrite($output, "\xEF\xBB\xBF");
         fputcsv($output, ['no_pendaftaran', 'nama', 'jenjang', 'usia', 'kelas_target', 'asal_sekolah', 'wali', 'kontak', 'mulai_dari', 'posisi_sekarang', 'status_rekomendasi', 'nilai_akhir_terpadu', 'catatan_umum']);
 
         foreach ($siswas as $s) {
