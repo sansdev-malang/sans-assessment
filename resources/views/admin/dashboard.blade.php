@@ -108,6 +108,24 @@
         <!-- Main Content Shell -->
         <main class="max-w-7xl w-full mx-auto px-4 lg:px-6 py-8 flex-1 space-y-6">
             
+            <!-- Flash Status / Error Messages (Three.js 3D Alert Enabled) -->
+            @if (session('status'))
+                <div data-three-alert="success" class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300 flex items-center justify-between shadow-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium">{{ session('status') }}</span>
+                    </div>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-emerald-400 hover:text-emerald-200 text-xs cursor-pointer font-bold">&times;</button>
+                </div>
+            @endif
+            @if (session('error'))
+                <div data-three-alert="error" class="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300 flex items-center justify-between shadow-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium">{{ session('error') }}</span>
+                    </div>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-200 text-xs cursor-pointer font-bold">&times;</button>
+                </div>
+            @endif
+
             <!-- Page Header Bar with Unit Switcher -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
                 <div>
@@ -129,10 +147,6 @@
                         <i data-lucide="file-spreadsheet" class="h-3.5 w-3.5 text-muted-foreground"></i>
                         <span>Export CSV</span>
                     </a>
-                    <button type="button" onclick="alert('Menerbitkan SK Pengumuman Penerimaan {{ $data['unit_title'] }}...');" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-zinc-100 px-3 text-xs font-semibold text-zinc-900 shadow hover:bg-zinc-200 transition-colors">
-                        <i data-lucide="award" class="h-3.5 w-3.5 text-zinc-900"></i>
-                        <span>Terbitkan SK</span>
-                    </button>
                 </div>
             </div>
 

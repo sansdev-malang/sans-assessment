@@ -77,9 +77,8 @@
 
             <!-- Flash Notification -->
             @if (session('status'))
-                <div class="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between shadow-sm">
+                <div data-three-alert="success" class="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="check-circle-2" class="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
                         <span class="font-medium">{{ session('status') }}</span>
                     </div>
                     <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-200 text-xs cursor-pointer font-bold">&times;</button>
@@ -489,7 +488,7 @@
                 ];
                 $meta = $sentrasMeta[$curSentraKey] ?? $sentrasMeta['ubudiyah'];
 
-                $indikatorMap = [
+                $indikatorMap = !empty($indikatorMap) ? $indikatorMap : [
                     'ubudiyah' => [
                         ['id'=>'SD-UBUD-01','pos_id'=>'sd-ubud-1','pos'=>'1.1 Praktek Wudhu dan Sholat','nama'=>'Niat dan Gerakan dalam Berwudhu','bobot'=>3.5,'rubrik'=>[1=>'Belum menguasai urutan wudhu, perlu bimbingan penuh.',2=>'Menguasai sebagian urutan wudhu dengan sedikit panduan.',3=>'Melakukan urutan wudhu mandiri dengan tertib.',4=>'Praktik wudhu sangat baik, tertib, dan sesuai sunnah.']],
                         ['id'=>'SD-UBUD-02','pos_id'=>'sd-ubud-1','pos'=>'1.1 Praktek Wudhu dan Sholat','nama'=>'Niat dan Gerakan Sholat','bobot'=>3.5,'rubrik'=>[1=>'Gerakan sholat belum tertib, banyak gerakan di luar sholat.',2=>'Gerakan sholat cukup baik dengan beberapa arahan.',3=>'Gerakan sholat tertib dan tuma\'ninah cukup baik.',4=>'Gerakan sholat sangat tertib, tuma\'ninah terjaga sempurna.']],

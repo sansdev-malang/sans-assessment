@@ -88,18 +88,16 @@
 
             <!-- Flash Status / Error Messages -->
             @if (session('status'))
-                <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300 flex items-center justify-between shadow-xs">
+                <div data-three-alert="success" class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300 flex items-center justify-between shadow-xs">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="check-circle-2" class="h-4 w-4 shrink-0 text-emerald-400"></i>
                         <span class="font-medium">{{ session('status') }}</span>
                     </div>
                     <button type="button" onclick="this.parentElement.remove()" class="text-emerald-400 hover:text-emerald-200 text-xs cursor-pointer font-bold">&times;</button>
                 </div>
             @endif
             @if (session('error'))
-                <div class="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300 flex items-center justify-between shadow-xs">
+                <div data-three-alert="error" class="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300 flex items-center justify-between shadow-xs">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="alert-circle" class="h-4 w-4 shrink-0 text-rose-400"></i>
                         <span class="font-medium">{{ session('error') }}</span>
                     </div>
                     <button type="button" onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-200 text-xs cursor-pointer font-bold">&times;</button>

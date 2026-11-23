@@ -100,16 +100,14 @@
 
                     <!-- Flash Notification: Success / Status -->
                     @if (session('status'))
-                        <div class="rounded-md border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                            <i data-lucide="check" class="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"></i>
+                        <div data-three-alert="success" class="rounded-md border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
                             <span class="font-medium">{{ session('status') }}</span>
                         </div>
                     @endif
 
                     <!-- Flash Notification: Error -->
                     @if (session('error'))
-                        <div class="rounded-md border border-red-200 dark:border-red-800/80 bg-red-50 dark:bg-red-950/40 p-3 text-xs text-red-800 dark:text-red-300 flex items-center gap-2">
-                            <i data-lucide="alert-circle" class="h-3.5 w-3.5 shrink-0 text-red-600 dark:text-red-400"></i>
+                        <div data-three-alert="error" class="rounded-md border border-red-200 dark:border-red-800/80 bg-red-50 dark:bg-red-950/40 p-3 text-xs text-red-800 dark:text-red-300 flex items-center gap-2">
                             <span class="font-medium">{{ session('error') }}</span>
                         </div>
                     @endif

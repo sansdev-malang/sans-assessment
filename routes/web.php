@@ -34,6 +34,9 @@ Route::post('/admin/siswa/import', [SPMBController::class, 'siswaImport'])->name
 Route::get('/admin/siswa/export', [SPMBController::class, 'siswaExport'])->name('admin.siswa.export');
 
 Route::get('/admin/indikator', [SPMBController::class, 'indikatorList'])->name('admin.indikator');
+Route::post('/admin/indikator/store', [SPMBController::class, 'indikatorStore'])->name('admin.indikator.store');
+Route::post('/admin/indikator/update', [SPMBController::class, 'indikatorUpdate'])->name('admin.indikator.update');
+Route::post('/admin/indikator/delete', [SPMBController::class, 'indikatorDelete'])->name('admin.indikator.delete');
 
 // Logout
 Route::match(['get', 'post'], '/logout', [SPMBController::class, 'logout'])->name('logout');

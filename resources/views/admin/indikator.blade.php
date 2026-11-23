@@ -100,10 +100,42 @@
                         </span>
                     </div>
                     <p class="text-xs text-muted-foreground mt-0.5">
-                        Acuan rubrik, panduan penilaian, dan bobot tiap aspek asesmen SPMB — hanya untuk referensi
+                        Kelola instrumen observasi, panduan rubrik penilaian skala 1–4, dan bobot tiap aspek asesmen SPMB
                     </p>
                 </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openTambahIndikatorModal()" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors cursor-pointer">
+                        <i data-lucide="plus" class="h-3.5 w-3.5"></i>
+                        <span>Tambah Instrumen</span>
+                    </button>
+                </div>
             </div>
+
+            @if(session('status'))
+                <div data-three-alert="success" class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-400 flex items-center gap-2">
+                    <span>{{ session('status') }}</span>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div data-three-alert="error" class="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400 flex items-center gap-2">
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400 space-y-1">
+                    <div class="font-semibold flex items-center gap-1.5">
+                        <i data-lucide="alert-triangle" class="h-4 w-4"></i>
+                        <span>Terdapat kesalahan pengisian formulir:</span>
+                    </div>
+                    <ul class="list-disc list-inside space-y-0.5 pl-1">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <!-- Summary Cards -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -916,10 +948,24 @@
                                                                 <i data-lucide="percent" class="h-3 w-3 text-muted-foreground"></i>
                                                                 {{ $ind['bobot'] }}%
                                                             </span>
-                                                            <span class="inline-flex items-center gap-1 rounded-md border border-emerald-800/80 bg-emerald-950/60 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
-                                                                <i data-lucide="circle-dot" class="h-3 w-3"></i>
-                                                                Aktif
-                                                            </span>
+                                                            @if(($ind['status'] ?? 'Aktif') === 'Aktif')
+                                                                <span class="inline-flex items-center gap-1 rounded-md border border-emerald-800/80 bg-emerald-950/60 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+                                                                    <i data-lucide="circle-dot" class="h-3 w-3"></i>
+                                                                    Aktif
+                                                                </span>
+                                                            @else
+                                                                <span class="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                                                                    <i data-lucide="pencil" class="h-3 w-3"></i>
+                                                                    {{ $ind['status'] }}
+                                                                </span>
+                                                            @endif
+                                                            <button type="button" onclick="openEditIndikatorModal({{ json_encode($ind) }})" class="inline-flex h-7 items-center justify-center gap-1 rounded-md border border-border bg-card px-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors cursor-pointer" title="Edit Instrumen & Rubrik">
+                                                                <i data-lucide="pencil" class="h-3 w-3 text-muted-foreground"></i>
+                                                                <span class="hidden sm:inline">Edit</span>
+                                                            </button>
+                                                            <button type="button" onclick="confirmDeleteIndikator({{ json_encode($ind) }})" class="inline-flex h-7 items-center justify-center gap-1 rounded-md border border-border bg-card px-2 text-[11px] font-medium text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors cursor-pointer" title="Hapus Instrumen">
+                                                                <i data-lucide="trash-2" class="h-3 w-3"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
 
@@ -982,7 +1028,7 @@
                                                     <i data-lucide="percent" class="h-3 w-3 text-muted-foreground"></i>
                                                     {{ $ind['bobot'] }}
                                                 </span>
-                                                @if($ind['status'] === 'Aktif')
+                                                @if(($ind['status'] ?? 'Aktif') === 'Aktif')
                                                     <span class="inline-flex items-center gap-1 rounded-md border border-emerald-800/80 bg-emerald-950/60 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
                                                         <i data-lucide="circle-dot" class="h-3 w-3"></i>
                                                         Aktif
@@ -990,9 +1036,16 @@
                                                 @else
                                                     <span class="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                                                         <i data-lucide="pencil" class="h-3 w-3"></i>
-                                                        Draft
+                                                        {{ $ind['status'] }}
                                                     </span>
                                                 @endif
+                                                <button type="button" onclick="openEditIndikatorModal({{ json_encode($ind) }})" class="inline-flex h-7 items-center justify-center gap-1 rounded-md border border-border bg-card px-2 text-[11px] font-medium text-foreground hover:bg-muted transition-colors cursor-pointer" title="Edit Instrumen & Rubrik">
+                                                    <i data-lucide="pencil" class="h-3 w-3 text-muted-foreground"></i>
+                                                    <span class="hidden sm:inline">Edit</span>
+                                                </button>
+                                                <button type="button" onclick="confirmDeleteIndikator({{ json_encode($ind) }})" class="inline-flex h-7 items-center justify-center gap-1 rounded-md border border-border bg-card px-2 text-[11px] font-medium text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors cursor-pointer" title="Hapus Instrumen">
+                                                    <i data-lucide="trash-2" class="h-3 w-3"></i>
+                                                </button>
                                             </div>
                                         </div>
 
@@ -1042,6 +1095,292 @@
             </div>
 
         </main>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL TAMBAH INSTRUMEN & RUBRIK                                           -->
+        <!-- ========================================================================= -->
+        <div id="modal-tambah-indikator" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="w-full max-w-2xl rounded-xl border border-border bg-card text-foreground shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] flex flex-col">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
+                            <i data-lucide="plus-circle" class="h-4 w-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-foreground">Tambah Instrumen &amp; Rubrik Baru</h3>
+                            <p class="text-[11px] text-muted-foreground">Unit: {{ strtoupper($jenjang ?? 'sd') }} — Tambahkan aspek observasi dan rubrik skala 1–4</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeTambahIndikatorModal()" class="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                </div>
+
+                <form action="{{ route('admin.indikator.store') }}" method="POST" class="p-5 space-y-4 text-xs overflow-y-auto flex-1">
+                    @csrf
+                    <input type="hidden" name="jenjang" value="{{ $jenjang ?? 'sd' }}">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Aspek / Sentra <span class="text-rose-500">*</span></label>
+                            <input list="aspek-list-tambah" name="aspek" id="tambah-indikator-aspek" required placeholder="Pilih atau ketik aspek..." class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                            <datalist id="aspek-list-tambah">
+                                @foreach($grouped->keys() as $a)
+                                    <option value="{{ $a }}"></option>
+                                @endforeach
+                            </datalist>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Sub-Aspek / Pos</label>
+                            <input type="text" name="pos_nama" id="tambah-indikator-pos" placeholder="Contoh: 1.1 Praktek Wudhu atau Pos 1" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Kode Instrumen</label>
+                            <input type="text" name="kode" id="tambah-indikator-kode" placeholder="Otomatis jika kosong" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground font-mono focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Bobot Penilaian (%)</label>
+                            <input type="number" step="0.1" name="bobot" id="tambah-indikator-bobot" value="2.5" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground font-mono focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Status</label>
+                            <select name="status" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Draft">Draft</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-medium text-foreground">Nama Instrumen / Indikator <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nama" id="tambah-indikator-nama" required placeholder="Contoh: Niat dan Gerakan Berwudhu" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-medium text-foreground">Deskripsi / Panduan Pengamatan</label>
+                        <textarea name="deskripsi" id="tambah-indikator-deskripsi" rows="2" placeholder="Jelaskan fokus amatan guru saat mengobservasi instrumen ini..." class="flex w-full rounded-md border border-border bg-muted/40 p-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"></textarea>
+                    </div>
+
+                    <!-- Rubrik Penilaian Skala 1-4 -->
+                    <div class="pt-2 border-t border-border space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                                <i data-lucide="scale" class="h-3.5 w-3.5 text-indigo-400"></i>
+                                Rubrik Skoring Skala 1–4
+                            </span>
+                            <span class="text-[11px] text-muted-foreground">Kriteria capaian setiap skor</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div class="p-2.5 rounded-lg border border-red-900/40 bg-red-950/20 space-y-1">
+                                <label class="text-[11px] font-bold text-red-300 flex items-center gap-1">
+                                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-red-900/60 text-[10px]">1</span>
+                                    Skor 1 (Perlu Bimbingan)
+                                </label>
+                                <textarea name="rubrik_1" rows="2" placeholder="Kriteria ketika anak belum mampu / butuh bimbingan penuh..." class="w-full rounded border border-border bg-card p-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-red-400"></textarea>
+                            </div>
+                            <div class="p-2.5 rounded-lg border border-amber-900/40 bg-amber-950/20 space-y-1">
+                                <label class="text-[11px] font-bold text-amber-300 flex items-center gap-1">
+                                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-amber-900/60 text-[10px]">2</span>
+                                    Skor 2 (Berkembang)
+                                </label>
+                                <textarea name="rubrik_2" rows="2" placeholder="Kriteria ketika anak berkembang dengan bantuan/arahan berkala..." class="w-full rounded border border-border bg-card p-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-amber-400"></textarea>
+                            </div>
+                            <div class="p-2.5 rounded-lg border border-indigo-900/40 bg-indigo-950/20 space-y-1">
+                                <label class="text-[11px] font-bold text-indigo-300 flex items-center gap-1">
+                                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-900/60 text-[10px]">3</span>
+                                    Skor 3 (Baik / Mandiri)
+                                </label>
+                                <textarea name="rubrik_3" rows="2" placeholder="Kriteria ketika anak mampu mandiri dengan sedikit dorongan..." class="w-full rounded border border-border bg-card p-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-indigo-400"></textarea>
+                            </div>
+                            <div class="p-2.5 rounded-lg border border-emerald-900/40 bg-emerald-950/20 space-y-1">
+                                <label class="text-[11px] font-bold text-emerald-300 flex items-center gap-1">
+                                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-900/60 text-[10px]">4</span>
+                                    Skor 4 (Sangat Baik / Mahir)
+                                </label>
+                                <textarea name="rubrik_4" rows="2" placeholder="Kriteria ketika anak mandiri penuh, akurat, dan konsisten..." class="w-full rounded border border-border bg-card p-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-emerald-400"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-border flex items-center justify-end gap-2">
+                        <button type="button" onclick="closeTambahIndikatorModal()" class="inline-flex h-8 items-center justify-center rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer">
+                            Batal
+                        </button>
+                        <button type="submit" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 text-xs font-semibold shadow-xs hover:bg-primary/90 transition-colors cursor-pointer">
+                            <i data-lucide="check" class="h-3.5 w-3.5"></i>
+                            <span>Simpan Instrumen &amp; Rubrik</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL EDIT INSTRUMEN & RUBRIK                                             -->
+        <!-- ========================================================================= -->
+        <div id="modal-edit-indikator" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="w-full max-w-2xl rounded-xl border border-border bg-card text-foreground shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] flex flex-col">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                            <i data-lucide="pencil" class="h-4 w-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-foreground">Edit Instrumen &amp; Rubrik Penilaian</h3>
+                            <p class="text-[11px] text-muted-foreground">Sesuaikan redaksi instrumen, bobot, atau deskripsi capaian rubrik</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeEditIndikatorModal()" class="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                </div>
+
+                <form action="{{ route('admin.indikator.update') }}" method="POST" class="p-5 space-y-4 text-xs overflow-y-auto flex-1">
+                    @csrf
+                    <input type="hidden" name="id" id="edit-indikator-id">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Aspek / Sentra <span class="text-rose-500">*</span></label>
+                            <input list="aspek-list-edit" name="aspek" id="edit-indikator-aspek" required class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                            <datalist id="aspek-list-edit">
+                                @foreach($grouped->keys() as $a)
+                                    <option value="{{ $a }}"></option>
+                                @endforeach
+                            </datalist>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Sub-Aspek / Pos</label>
+                            <input type="text" name="pos_nama" id="edit-indikator-pos" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Kode Instrumen</label>
+                            <input type="text" name="kode" id="edit-indikator-kode" required class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground font-mono focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Bobot Penilaian (%)</label>
+                            <input type="number" step="0.1" name="bobot" id="edit-indikator-bobot" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground font-mono focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="font-medium text-foreground">Status</label>
+                            <select name="status" id="edit-indikator-status" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Draft">Draft</option>
+                                <option value="Nonaktif">Nonaktif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-medium text-foreground">Nama Instrumen / Indikator <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nama" id="edit-indikator-nama" required class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="font-medium text-foreground">Deskripsi / Panduan Pengamatan</label>
+                        <textarea name="deskripsi" id="edit-indikator-deskripsi" rows="2" class="flex w-full rounded-md border border-border bg-muted/40 p-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400"></textarea>
+                    </div>
+
+                    <!-- Rubrik Penilaian Skala 1-4 -->
+                    <div class="pt-2 border-t border-border space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                                <i data-lucide="scale" class="h-3.5 w-3.5 text-indigo-400"></i>
+                                Rubrik Skoring Skala 1–4
+                            </span>
+                            <span class="text-[11px] text-muted-foreground">Kriteria capaian setiap skor</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div class="p-2.5 rounded-lg border border-red-900/40 bg-red-950/20 space-y-1">
+                                <label class="text-[11px] font-bold text-red-300 flex items-center gap-1">
+                                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-red-900/60 text-[10px]">1</span>
+                                    Skor 1 (Perlu Bimbingan)
+                                </label>
+                                <textarea name="rubrik_1" id="edit-indikator-rubrik-1" rows="2" class="w-full rounded border border-border bg-card p-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-red-400"></textarea>
+                            </div>
+                            <div class="p-2.5 rounded-lg border border-amber-900/40 bg-amber-950/20 space-y-1">
+                                <label class="text-[11px] font-bold text-amber-300 flex items-center gap-1">
+                                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-amber-900/60 text-[10px]">2</span>
+                                    Skor 2 (Berkembang)
+                                </label>
+                                <textarea name="rubrik_2" id="edit-indikator-rubrik-2" rows="2" class="w-full rounded border border-border bg-card p-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-amber-400"></textarea>
+                            </div>
+                            <div class="p-2.5 rounded-lg border border-indigo-900/40 bg-indigo-950/20 space-y-1">
+                                <label class="text-[11px] font-bold text-indigo-300 flex items-center gap-1">
+                                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-900/60 text-[10px]">3</span>
+                                    Skor 3 (Baik / Mandiri)
+                                </label>
+                                <textarea name="rubrik_3" id="edit-indikator-rubrik-3" rows="2" class="w-full rounded border border-border bg-card p-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-indigo-400"></textarea>
+                            </div>
+                            <div class="p-2.5 rounded-lg border border-emerald-900/40 bg-emerald-950/20 space-y-1">
+                                <label class="text-[11px] font-bold text-emerald-300 flex items-center gap-1">
+                                    <span class="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-900/60 text-[10px]">4</span>
+                                    Skor 4 (Sangat Baik / Mahir)
+                                </label>
+                                <textarea name="rubrik_4" id="edit-indikator-rubrik-4" rows="2" class="w-full rounded border border-border bg-card p-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-emerald-400"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-border flex items-center justify-end gap-2">
+                        <button type="button" onclick="closeEditIndikatorModal()" class="inline-flex h-8 items-center justify-center rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer">
+                            Batal
+                        </button>
+                        <button type="submit" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-3 text-xs font-semibold shadow-xs transition-colors cursor-pointer">
+                            <i data-lucide="check" class="h-3.5 w-3.5"></i>
+                            <span>Simpan Perubahan</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL HAPUS INSTRUMEN INDIKATOR                                           -->
+        <!-- ========================================================================= -->
+        <div id="modal-delete-indikator" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="w-full max-w-sm rounded-xl border border-border bg-card text-foreground shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                <div class="p-4 border-b border-border flex items-center gap-2.5 text-rose-400">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                        <i data-lucide="alert-triangle" class="h-4 w-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-foreground">Hapus Instrumen</h3>
+                        <p class="text-[11px] text-muted-foreground">Konfirmasi penghapusan indikator</p>
+                    </div>
+                </div>
+
+                <form action="{{ route('admin.indikator.delete') }}" method="POST" class="p-4 space-y-3 text-xs">
+                    @csrf
+                    <input type="hidden" name="id" id="delete-indikator-id">
+
+                    <p class="text-muted-foreground leading-relaxed">
+                        Apakah Anda yakin ingin menghapus instrumen <strong class="text-foreground" id="delete-indikator-nama">-</strong> (<span class="font-mono text-muted-foreground" id="delete-indikator-kode">-</span>)?
+                    </p>
+                    <p class="text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-md p-2">
+                        Perhatian: Instrumen dan rubrik terkait akan dihapus dari acuan observasi unit ini.
+                    </p>
+
+                    <div class="pt-2 border-t border-border flex items-center justify-end gap-2">
+                        <button type="button" onclick="closeDeleteIndikatorModal()" class="inline-flex h-8 items-center justify-center rounded-md border border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer">
+                            Batal
+                        </button>
+                        <button type="submit" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-rose-600 hover:bg-rose-500 text-white px-3 text-xs font-semibold shadow-xs transition-colors cursor-pointer">
+                            <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                            <span>Ya, Hapus Instrumen</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <footer class="border-t border-border py-4 px-6 text-center text-xs text-muted-foreground">
             SAANS Assessment &bull; Sekolah Alam Anak Saleh &bull; Manajemen Instrumen Observasi SPMB
@@ -1178,6 +1517,61 @@
                 }
                 if (rekEl) rekEl.textContent = info.rekomendasi;
             }
+
+            // ── Modal Tambah Indikator ─────────────────────────────────────
+            function openTambahIndikatorModal() {
+                document.getElementById('modal-tambah-indikator')?.classList.remove('hidden');
+                if (window.refreshLucideIcons) window.refreshLucideIcons();
+            }
+            function closeTambahIndikatorModal() {
+                document.getElementById('modal-tambah-indikator')?.classList.add('hidden');
+            }
+
+            // ── Modal Edit Indikator ───────────────────────────────────────
+            function openEditIndikatorModal(ind) {
+                document.getElementById('edit-indikator-id').value = ind.db_id || '';
+                document.getElementById('edit-indikator-kode').value = ind.id || '';
+                document.getElementById('edit-indikator-aspek').value = ind.aspek || '';
+                document.getElementById('edit-indikator-pos').value = ind.pos || ind.aspek || '';
+                document.getElementById('edit-indikator-nama').value = ind.nama || '';
+                document.getElementById('edit-indikator-bobot').value = ind.bobot ?? 0;
+                document.getElementById('edit-indikator-status').value = ind.status || 'Aktif';
+                document.getElementById('edit-indikator-deskripsi').value = ind.deskripsi || '';
+
+                const rubrik = ind.rubrik || {};
+                document.getElementById('edit-indikator-rubrik-1').value = rubrik[1] || '';
+                document.getElementById('edit-indikator-rubrik-2').value = rubrik[2] || '';
+                document.getElementById('edit-indikator-rubrik-3').value = rubrik[3] || '';
+                document.getElementById('edit-indikator-rubrik-4').value = rubrik[4] || '';
+
+                document.getElementById('modal-edit-indikator')?.classList.remove('hidden');
+                if (window.refreshLucideIcons) window.refreshLucideIcons();
+            }
+            function closeEditIndikatorModal() {
+                document.getElementById('modal-edit-indikator')?.classList.add('hidden');
+            }
+
+            // ── Modal Delete Indikator ─────────────────────────────────────
+            function confirmDeleteIndikator(ind) {
+                document.getElementById('delete-indikator-id').value = ind.db_id || '';
+                document.getElementById('delete-indikator-nama').textContent = ind.nama || '-';
+                document.getElementById('delete-indikator-kode').textContent = ind.id || '-';
+
+                document.getElementById('modal-delete-indikator')?.classList.remove('hidden');
+                if (window.refreshLucideIcons) window.refreshLucideIcons();
+            }
+            function closeDeleteIndikatorModal() {
+                document.getElementById('modal-delete-indikator')?.classList.add('hidden');
+            }
+
+            // Keyboard Escape Listener
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeTambahIndikatorModal();
+                    closeEditIndikatorModal();
+                    closeDeleteIndikatorModal();
+                }
+            });
         </script>
 
     </body>

@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\AsesmenKelompok;
 use App\Models\CalonSiswa;
 use App\Models\GuruPengamat;
+use App\Models\IndikatorPenilaian;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class SPMBController extends Controller
@@ -343,7 +345,12 @@ class SPMBController extends Controller
             $nextSiswa = $unlockedSiswa[$nextIndex] ?? $activeSiswa;
         }
 
-        return view('guru.observasi-sd', compact('user', 'allGuruSD', 'activeGuru', 'siswaSD', 'activeSiswa', 'nextSiswa'));
+        $dbIndikators = $this->getIndikatorData('sd');
+        $indikatorMap = collect($dbIndikators)->groupBy('kelompok_key')->map(function ($items) {
+            return $items->values()->toArray();
+        })->toArray();
+
+        return view('guru.observasi-sd', compact('user', 'allGuruSD', 'activeGuru', 'siswaSD', 'activeSiswa', 'nextSiswa', 'indikatorMap'));
     }
 
     /**
@@ -2035,11 +2042,257 @@ class SPMBController extends Controller
     }
 
     /**
-     * Definisi indikator yang dipakai pada halaman manajemen indikator dan rapor.
+     * Simpan instrumen indikator baru beserta rubrik.
+     */
+    public function indikatorStore(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'jenjang' => 'required|in:sd,smp,tk',
+            'aspek' => 'required|string|max:255',
+            'pos_nama' => 'nullable|string|max:255',
+            'kode' => 'nullable|string|max:50|unique:indikator_penilaians,kode',
+            'deskripsi' => 'nullable|string',
+            'bobot' => 'nullable|numeric|min:0|max:100',
+            'status' => 'nullable|in:Aktif,Draft,Nonaktif',
+            'rubrik_1' => 'nullable|string',
+            'rubrik_2' => 'nullable|string',
+            'rubrik_3' => 'nullable|string',
+            'rubrik_4' => 'nullable|string',
+        ]);
+
+        $jenjang = $request->input('jenjang', 'sd');
+        $aspek = trim($request->input('aspek'));
+        $posNama = trim($request->input('pos_nama') ?: $aspek);
+        $kelompokKey = $this->resolveKelompokKeyFromAspek($jenjang, $aspek);
+
+        $kode = trim($request->input('kode') ?: '');
+        if (empty($kode)) {
+            $count = IndikatorPenilaian::where('jenjang', $jenjang)->count() + 1;
+            $kode = strtoupper($jenjang).'-IND-'.str_pad((string) $count, 2, '0', STR_PAD_LEFT);
+            while (IndikatorPenilaian::where('kode', $kode)->exists()) {
+                $count++;
+                $kode = strtoupper($jenjang).'-IND-'.str_pad((string) $count, 2, '0', STR_PAD_LEFT);
+            }
+        }
+
+        $rubrik = [
+            1 => trim($request->input('rubrik_1') ?: 'Perlu bimbingan intensif'),
+            2 => trim($request->input('rubrik_2') ?: 'Berkembang dengan arahan'),
+            3 => trim($request->input('rubrik_3') ?: 'Mampu mandiri dengan baik'),
+            4 => trim($request->input('rubrik_4') ?: 'Sangat baik dan konsisten'),
+        ];
+
+        $urutan = (int) (IndikatorPenilaian::where('jenjang', $jenjang)->max('urutan') ?? 0) + 1;
+
+        IndikatorPenilaian::create([
+            'kode' => $kode,
+            'jenjang' => $jenjang,
+            'kelompok_key' => $kelompokKey,
+            'aspek' => $aspek,
+            'pos_nama' => $posNama,
+            'nama' => trim($request->input('nama')),
+            'deskripsi' => $request->input('deskripsi'),
+            'bobot' => $request->input('bobot', 0),
+            'status' => $request->input('status', 'Aktif'),
+            'rubrik' => $rubrik,
+            'urutan' => $urutan,
+        ]);
+
+        return redirect()->route('admin.indikator', ['jenjang' => $jenjang])
+            ->with('status', "Alhamdulillah! Instrumen '{$request->input('nama')}' ({$kode}) berhasil ditambahkan.");
+    }
+
+    /**
+     * Update instrumen indikator dan rubrik penilaian.
+     */
+    public function indikatorUpdate(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'id' => 'required|exists:indikator_penilaians,id',
+            'nama' => 'required|string|max:255',
+            'aspek' => 'required|string|max:255',
+            'pos_nama' => 'nullable|string|max:255',
+            'kode' => 'required|string|max:50',
+            'deskripsi' => 'nullable|string',
+            'bobot' => 'nullable|numeric|min:0|max:100',
+            'status' => 'nullable|in:Aktif,Draft,Nonaktif',
+            'rubrik_1' => 'nullable|string',
+            'rubrik_2' => 'nullable|string',
+            'rubrik_3' => 'nullable|string',
+            'rubrik_4' => 'nullable|string',
+        ]);
+
+        $ind = IndikatorPenilaian::findOrFail($request->input('id'));
+        $aspek = trim($request->input('aspek'));
+        $posNama = trim($request->input('pos_nama') ?: $ind->pos_nama);
+        $kelompokKey = $this->resolveKelompokKeyFromAspek($ind->jenjang, $aspek);
+
+        $existingRubrik = is_array($ind->rubrik) ? $ind->rubrik : (json_decode($ind->rubrik, true) ?? []);
+        $rubrik = [
+            1 => $request->filled('rubrik_1') ? trim($request->input('rubrik_1')) : ($existingRubrik[1] ?? 'Perlu Bimbingan'),
+            2 => $request->filled('rubrik_2') ? trim($request->input('rubrik_2')) : ($existingRubrik[2] ?? 'Berkembang'),
+            3 => $request->filled('rubrik_3') ? trim($request->input('rubrik_3')) : ($existingRubrik[3] ?? 'Baik'),
+            4 => $request->filled('rubrik_4') ? trim($request->input('rubrik_4')) : ($existingRubrik[4] ?? 'Sangat Baik'),
+        ];
+
+        $ind->update([
+            'kode' => trim($request->input('kode')),
+            'nama' => trim($request->input('nama')),
+            'aspek' => $aspek,
+            'kelompok_key' => $kelompokKey,
+            'pos_nama' => $posNama,
+            'deskripsi' => $request->input('deskripsi'),
+            'bobot' => $request->input('bobot', $ind->bobot),
+            'status' => $request->input('status', 'Aktif'),
+            'rubrik' => $rubrik,
+        ]);
+
+        return redirect()->route('admin.indikator', ['jenjang' => $ind->jenjang])
+            ->with('status', "Alhamdulillah! Instrumen & rubrik '{$ind->nama}' ({$ind->kode}) berhasil diperbarui.");
+    }
+
+    /**
+     * Hapus instrumen indikator.
+     */
+    public function indikatorDelete(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'id' => 'required|exists:indikator_penilaians,id',
+        ]);
+
+        $ind = IndikatorPenilaian::findOrFail($request->input('id'));
+        $jenjang = $ind->jenjang;
+        $nama = $ind->nama;
+        $kode = $ind->kode;
+        $ind->delete();
+
+        return redirect()->route('admin.indikator', ['jenjang' => $jenjang])
+            ->with('status', "Instrumen '{$nama}' ({$kode}) berhasil dihapus.");
+    }
+
+    /**
+     * Resolve kelompok_key dari nama aspek.
+     */
+    private function resolveKelompokKeyFromAspek(string $jenjang, string $aspek): string
+    {
+        $lower = strtolower($aspek);
+        if ($jenjang === 'sd') {
+            if (str_contains($lower, 'ubudiyah')) {
+                return 'ubudiyah';
+            }
+            if (str_contains($lower, 'persiapan')) {
+                return 'persiapan';
+            }
+            if (str_contains($lower, 'eksplorasi')) {
+                return 'eksplorasi';
+            }
+
+            return 'ubudiyah';
+        }
+
+        if ($jenjang === 'smp') {
+            if (str_contains($lower, 'keagamaan')) {
+                return 'keagamaan';
+            }
+            if (str_contains($lower, 'akademik')) {
+                return 'akademik';
+            }
+            if (str_contains($lower, 'bakat') || str_contains($lower, 'minat')) {
+                return 'bakat_minat';
+            }
+            if (str_contains($lower, 'pribadi') || str_contains($lower, 'sosial')) {
+                return 'pribadi_sosial';
+            }
+
+            return 'keagamaan';
+        }
+
+        return Str::slug($aspek, '_');
+    }
+
+    /**
+     * Pastikan master indikator awal terisi di database jika tabel masih kosong.
+     */
+    private function ensureDefaultIndikatorExists(): void
+    {
+        if (IndikatorPenilaian::count() > 0) {
+            return;
+        }
+
+        foreach (['sd', 'smp', 'tk'] as $j) {
+            $dataset = $this->getDefaultIndikatorDataset($j);
+            foreach ($dataset as $idx => $item) {
+                $aspek = $item['aspek'] ?? $item['pos'] ?? 'Umum';
+                $kelompokKey = $this->resolveKelompokKeyFromAspek($j, $aspek);
+
+                IndikatorPenilaian::create([
+                    'kode' => $item['id'] ?? (strtoupper($j).'-IND-'.str_pad((string) ($idx + 1), 2, '0', STR_PAD_LEFT)),
+                    'jenjang' => $j,
+                    'kelompok_key' => $kelompokKey,
+                    'aspek' => $aspek,
+                    'pos_nama' => $item['pos'] ?? $aspek,
+                    'pos_id' => $item['pos_id'] ?? null,
+                    'nama' => $item['nama'] ?? '-',
+                    'deskripsi' => $item['deskripsi'] ?? null,
+                    'bobot' => $item['bobot'] ?? 0,
+                    'status' => $item['status'] ?? 'Aktif',
+                    'tipe' => $item['tipe'] ?? null,
+                    'rubrik' => $item['rubrik'] ?? null,
+                    'urutan' => $idx + 1,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Mengambil data indikator dari database (dengan fallback otomatis).
      *
      * @return array<int, array<string, mixed>>
      */
     private function getIndikatorData(string $jenjang): array
+    {
+        $this->ensureDefaultIndikatorExists();
+
+        $records = IndikatorPenilaian::where('jenjang', $jenjang)
+            ->orderBy('urutan')
+            ->orderBy('id')
+            ->get();
+
+        if ($records->isEmpty()) {
+            return $this->getDefaultIndikatorDataset($jenjang);
+        }
+
+        return $records->map(function ($ind) {
+            $rubrik = $ind->rubrik;
+            if (is_string($rubrik)) {
+                $rubrik = json_decode($rubrik, true) ?? [];
+            }
+
+            return [
+                'db_id' => $ind->id,
+                'id' => $ind->kode,
+                'aspek' => $ind->aspek ?: $ind->pos_nama,
+                'kelompok_key' => $ind->kelompok_key,
+                'pos' => $ind->pos_nama,
+                'pos_id' => $ind->pos_id,
+                'nama' => $ind->nama,
+                'deskripsi' => $ind->deskripsi,
+                'bobot' => (float) $ind->bobot,
+                'status' => $ind->status,
+                'tipe' => $ind->tipe,
+                'rubrik' => $rubrik ?: [1 => 'Perlu bimbingan', 2 => 'Berkembang', 3 => 'Baik', 4 => 'Sangat baik'],
+                'urutan' => $ind->urutan,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Definisi dataset indikator default awal (sebagai acuan inisialisasi master data).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function getDefaultIndikatorDataset(string $jenjang): array
     {
         $allIndikator = [
             'tk' => [
