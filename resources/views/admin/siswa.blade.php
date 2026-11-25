@@ -104,6 +104,16 @@
                     <button type="button" onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-200 text-xs cursor-pointer font-bold">&times;</button>
                 </div>
             @endif
+            @if ($errors->any())
+                <div data-three-alert="error" class="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300 flex items-center justify-between shadow-xs">
+                    <div class="flex flex-col gap-1">
+                        @foreach ($errors->all() as $err)
+                            <span class="font-medium">{{ $err }}</span>
+                        @endforeach
+                    </div>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-200 text-xs cursor-pointer font-bold">&times;</button>
+                </div>
+            @endif
 
             <!-- Page Header with Jenjang Switcher & Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
@@ -751,7 +761,14 @@
 
                 <form action="{{ route('admin.siswa.import') }}" method="POST" enctype="multipart/form-data" class="p-4 space-y-3.5 text-xs">
                     @csrf
-                    <input type="hidden" name="jenjang" value="{{ $jenjang ?? 'sd' }}">
+                    <div class="space-y-1.5">
+                        <label class="font-medium text-foreground">Unit / Jenjang Calon Siswa:</label>
+                        <select name="jenjang" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 cursor-pointer">
+                            <option value="auto">Deteksi Otomatis dari File CSV (Direkomendasikan)</option>
+                            <option value="sd" {{ ($jenjang ?? 'sd') === 'sd' ? 'selected' : '' }}>SD (Sekolah Dasar)</option>
+                            <option value="smp" {{ ($jenjang ?? 'sd') === 'smp' ? 'selected' : '' }}>SMP (Sekolah Menengah Pertama)</option>
+                        </select>
+                    </div>
 
                     <div class="rounded-lg border border-border bg-muted/30 p-3 space-y-1.5 text-[11px]">
                         <div class="font-semibold text-foreground flex items-center justify-between">

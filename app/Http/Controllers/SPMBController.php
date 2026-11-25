@@ -310,39 +310,19 @@ class SPMBController extends Controller
             if ($requestedNo) {
                 $activeSiswa = collect($siswaSD)->firstWhere('no', $requestedNo) ?? ($siswaSD[0] ?? []);
             } else {
-                // Prioritas murid aktif default:
-                // 1. Yang sudah diklaim guru ini
-                // 2. Yang masih tersedia (belum diklaim siapapun di sentra ini)
-                // 3. Fallback murid pertama
-                $activeSiswa = collect($siswaSD)->first(function ($s) use ($mySentraKey, $activeGuru) {
-                    $nip = $s[$mySentraKey]['guru_nip'] ?? null;
-
-                    return $nip === $activeGuru['nip'];
-                }) ?? collect($siswaSD)->first(function ($s) use ($mySentraKey) {
-                    return empty($s[$mySentraKey]['guru_nip']);
-                }) ?? ($siswaSD[0] ?? []);
+                $activeSiswa = $siswaSD[0] ?? [];
             }
 
-            // Navigasi ke murid berikutnya (yang tidak terkunci oleh co-pengamat jika ada)
-            $unlockedSiswa = collect($siswaSD)->filter(function ($s) use ($mySentraKey, $activeGuru) {
-                $nip = $s[$mySentraKey]['guru_nip'] ?? null;
-
-                return empty($nip) || $nip === $activeGuru['nip'];
-            })->values()->toArray();
-
-            if (empty($unlockedSiswa)) {
-                $unlockedSiswa = $siswaSD;
-            }
-
+            // Navigasi ke murid berikutnya
             $currentIndex = 0;
-            foreach ($unlockedSiswa as $idx => $s) {
+            foreach ($siswaSD as $idx => $s) {
                 if ($s['no'] === ($activeSiswa['no'] ?? '')) {
                     $currentIndex = $idx;
                     break;
                 }
             }
-            $nextIndex = ($currentIndex + 1) % max(1, count($unlockedSiswa));
-            $nextSiswa = $unlockedSiswa[$nextIndex] ?? $activeSiswa;
+            $nextIndex = ($currentIndex + 1) % max(1, count($siswaSD));
+            $nextSiswa = $siswaSD[$nextIndex] ?? $activeSiswa;
         }
 
         $dbIndikators = $this->getIndikatorData('sd');
@@ -755,21 +735,6 @@ class SPMBController extends Controller
             ]);
         }
 
-        // Cek jika siswa sudah diklaim / diobservasi oleh rekan co-pengamat lain
-        if ($siswa && $guru && isset($guru->id)) {
-            $existingAsesmen = AsesmenKelompok::where('calon_siswa_id', $siswa->id)
-                ->where('kelompok_key', $kelompokKey)
-                ->first();
-            if ($existingAsesmen && $existingAsesmen->guru_pengamat_id && $existingAsesmen->guru_pengamat_id != $guru->id) {
-                $otherGuru = GuruPengamat::find($existingAsesmen->guru_pengamat_id);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Maaf, siswa ini sedang/sudah diobservasi oleh rekan Co-Pengamat: '.($otherGuru->nama ?? 'Guru Lain').'. Anda tidak dapat mengubah penilaian ini.',
-                ], 422);
-            }
-        }
-
         // Simpan / Perbarui Asesmen ke Database
         AsesmenKelompok::updateOrCreate(
             [
@@ -783,7 +748,7 @@ class SPMBController extends Controller
                 'nilai' => $nilai,
                 'status' => $status,
                 'kategori' => $kategori,
-                'catatan' => $catatan,
+                'catatan_anecdotal' => $catatan,
                 'detail_nilai' => $detailNilai,
             ]
         );
@@ -824,112 +789,24 @@ class SPMBController extends Controller
     }
 
     /**
-     * Klaim Calon Siswa oleh Guru Pengamat Aktif (Mencegah observasi ganda oleh co-pengamat).
+     * Klaim Calon Siswa (Kompatibilitas).
      */
     public function klaimSiswa(Request $request): JsonResponse
     {
-        $request->validate([
-            'siswa_no' => 'required|string',
-            'kelompok_key' => 'required|string',
-        ]);
-
-        $siswaNo = $request->input('siswa_no');
-        $kelompokKey = $request->input('kelompok_key');
-        $userNip = session('auth_user.nip');
-
-        $guru = GuruPengamat::where('nip', $userNip)->first();
-        $siswa = CalonSiswa::where('no_pendaftaran', $siswaNo)->first();
-        if (! $siswa) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data calon siswa dengan nomor pendaftaran '.$siswaNo.' tidak ditemukan di sistem.',
-            ], 404);
-        }
-
-        if ($siswa && $guru) {
-            $asesmen = AsesmenKelompok::firstOrNew([
-                'calon_siswa_id' => $siswa->id,
-                'kelompok_key' => $kelompokKey,
-            ]);
-
-            // Cek jika sudah diklaim oleh guru co-pengamat lain
-            if ($asesmen->exists && $asesmen->guru_pengamat_id && $asesmen->guru_pengamat_id != $guru->id) {
-                $otherGuru = GuruPengamat::find($asesmen->guru_pengamat_id);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Siswa ini sedang/sudah diobservasi oleh rekan Co-Pengamat: '.($otherGuru->nama ?? 'Guru Lain').'.',
-                ], 422);
-            }
-
-            $asesmen->guru_pengamat_id = $guru->id;
-            if (! $asesmen->status || $asesmen->status === 'Belum Diuji') {
-                $asesmen->status = 'Sedang Diobservasi';
-            }
-            $asesmen->save();
-
-            $siswa->update([
-                'posisi_sekarang' => 'Sedang di '.($guru->kelompok_short ?? $guru->ruang),
-            ]);
-        }
-
         return response()->json([
             'success' => true,
-            'message' => 'Alhamdulillah, siswa berhasil Anda klaim untuk diobservasi.',
+            'message' => 'Siswa siap diobservasi langsung.',
         ]);
     }
 
     /**
-     * Lepas Siswa kembali ke antrean bersama di Sentra ini.
+     * Lepas Siswa kembali ke antrean bersama di Sentra ini (Kompatibilitas).
      */
     public function lepasSiswa(Request $request): JsonResponse
     {
-        $request->validate([
-            'siswa_no' => 'required|string',
-            'kelompok_key' => 'required|string',
-        ]);
-
-        $siswaNo = $request->input('siswa_no');
-        $kelompokKey = $request->input('kelompok_key');
-        $userNip = session('auth_user.nip');
-
-        $guru = GuruPengamat::where('nip', $userNip)->first();
-        $siswa = CalonSiswa::where('no_pendaftaran', $siswaNo)->first();
-        if (! $siswa) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data calon siswa dengan nomor pendaftaran '.$siswaNo.' tidak ditemukan di sistem.',
-            ], 404);
-        }
-
-        if ($siswa && $guru) {
-            $asesmen = AsesmenKelompok::where('calon_siswa_id', $siswa->id)
-                ->where('kelompok_key', $kelompokKey)
-                ->where('guru_pengamat_id', $guru->id)
-                ->first();
-
-            if ($asesmen) {
-                // Hanya bisa lepas jika belum bernilai final 'Selesai'
-                if ($asesmen->status !== 'Selesai') {
-                    $asesmen->guru_pengamat_id = null;
-                    $asesmen->status = 'Belum Diuji';
-                    $asesmen->save();
-
-                    $siswa->update([
-                        'posisi_sekarang' => 'Menunggu Antrean Sentra',
-                    ]);
-                } else {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Siswa sudah berstatus Selesai dinilai dan tidak dapat dilepas.',
-                    ], 422);
-                }
-            }
-        }
-
         return response()->json([
             'success' => true,
-            'message' => 'Siswa berhasil dilepas kembali ke antrean bersama.',
+            'message' => 'Siswa siap diobservasi.',
         ]);
     }
 
@@ -1584,10 +1461,12 @@ class SPMBController extends Controller
     {
         $request->validate([
             'file_siswa' => 'required|file',
-            'jenjang' => 'nullable|string|in:sd,smp,tk',
+            'jenjang' => 'nullable|string|in:auto,sd,smp,tk',
         ]);
 
-        $defaultJenjang = $request->input('jenjang', 'sd');
+        $inputJenjang = $request->input('jenjang');
+        $defaultJenjang = ($inputJenjang && $inputJenjang !== 'auto') ? $inputJenjang : null;
+
         $rows = $this->parseCsvFile($request->file('file_siswa'));
 
         if (empty($rows)) {
@@ -1595,29 +1474,97 @@ class SPMBController extends Controller
         }
 
         $imported = 0;
+        $lastImportedJenjang = null;
+
         foreach ($rows as $row) {
-            $no = $row['no_pendaftaran'] ?? ($row['no_daftar'] ?? ($row['no'] ?? null));
-            $nama = $row['nama'] ?? ($row['nama_calon_siswa'] ?? ($row['name'] ?? null));
-            $jenjang = strtolower($row['jenjang'] ?? $defaultJenjang);
+            // Pemetaan fleksibel nomor pendaftaran
+            $no = $row['no_pendaftaran']
+                ?? ($row['no_daftar']
+                ?? ($row['nomor_pendaftaran']
+                ?? ($row['nomor_daftar']
+                ?? ($row['no_peserta']
+                ?? ($row['no_reg']
+                ?? ($row['no'] ?? null))))));
+
+            // Pemetaan fleksibel nama calon siswa
+            $nama = $row['nama']
+                ?? ($row['nama_calon_siswa']
+                ?? ($row['nama_siswa']
+                ?? ($row['nama_lengkap']
+                ?? ($row['name']
+                ?? ($row['siswa'] ?? null)))));
 
             if (! $no || ! $nama) {
                 continue;
             }
+
+            // Pemetaan jenjang (prioritas: baris CSV, lalu input form, lalu default 'sd')
+            $rawJenjang = strtolower(trim((string) ($row['jenjang'] ?? ($row['unit'] ?? ($row['tingkat'] ?? '')))));
+            $jenjang = in_array($rawJenjang, ['sd', 'smp', 'tk']) ? $rawJenjang : ($defaultJenjang ?: 'sd');
+            $lastImportedJenjang = $jenjang;
+
+            // Pemetaan kontak dengan normalisasi leading zero (Excel sering memangkas 0 di depan)
+            $kontak = $row['kontak']
+                ?? ($row['no_kontak']
+                ?? ($row['telepon']
+                ?? ($row['no_telepon']
+                ?? ($row['no_hp']
+                ?? ($row['hp']
+                ?? ($row['wa']
+                ?? ($row['no_wa']
+                ?? ($row['whatsapp'] ?? null))))))));
+
+            if ($kontak !== null && $kontak !== '') {
+                $kontak = (string) $kontak;
+                if (preg_match('/^8[0-9]{8,12}$/', $kontak)) {
+                    $kontak = '0'.$kontak;
+                }
+            }
+
+            // Pemetaan usia & kelas target
+            $usia = $row['usia'] ?? ($row['umur'] ?? ($jenjang === 'sd' ? '6 Thn 0 Bln' : '12 Thn 0 Bln'));
+            $kelasTarget = $row['kelas_target']
+                ?? ($row['kelas']
+                ?? ($row['kelas_dituju']
+                ?? ($row['target_kelas']
+                ?? ($jenjang === 'sd' ? 'Kelas 1' : 'Kelas 7'))));
+
+            $asalSekolah = $row['asal_sekolah']
+                ?? ($row['sekolah_asal']
+                ?? ($row['asal_tk']
+                ?? ($row['asal_sd'] ?? null)));
+
+            $wali = $row['wali']
+                ?? ($row['nama_wali']
+                ?? ($row['orang_tua']
+                ?? ($row['nama_orang_tua']
+                ?? ($row['orangtua']
+                ?? ($row['wali_murid'] ?? null)))));
+
+            $mulaiDari = $row['mulai_dari']
+                ?? ($row['pos_mulai']
+                ?? ($row['sentra_mulai']
+                ?? ($row['kelompok_mulai']
+                ?? ($jenjang === 'sd' ? 'Sentra Ubudiyah' : 'Kelompok Keagamaan'))));
+
+            $posisiSekarang = $row['posisi_sekarang'] ?? 'Sedang Menunggu Giliran';
+            $statusRekomendasi = $row['status_rekomendasi'] ?? ($row['rekomendasi'] ?? ($row['status'] ?? 'Dalam Proses'));
+            $catatanUmum = $row['catatan_umum'] ?? ($row['catatan_khusus'] ?? ($row['catatan'] ?? ($row['keterangan'] ?? null)));
 
             $siswa = CalonSiswa::updateOrCreate(
                 ['no_pendaftaran' => $no],
                 [
                     'nama' => $nama,
                     'jenjang' => $jenjang,
-                    'usia' => $row['usia'] ?? ($jenjang === 'sd' ? '6 Thn 0 Bln' : '12 Thn 0 Bln'),
-                    'kelas_target' => $row['kelas_target'] ?? ($row['kelas_dituju'] ?? ($jenjang === 'sd' ? 'Kelas 1' : 'Kelas 7')),
-                    'asal_sekolah' => $row['asal_sekolah'] ?? null,
-                    'wali' => $row['wali'] ?? ($row['nama_wali'] ?? null),
-                    'kontak' => $row['kontak'] ?? ($row['no_kontak'] ?? null),
-                    'mulai_dari' => $row['mulai_dari'] ?? ($jenjang === 'sd' ? 'Sentra Ubudiyah' : 'Kelompok Keagamaan'),
-                    'posisi_sekarang' => $row['posisi_sekarang'] ?? 'Sedang Menunggu Giliran',
-                    'status_rekomendasi' => $row['status_rekomendasi'] ?? 'Dalam Proses',
-                    'catatan_umum' => $row['catatan_umum'] ?? ($row['catatan_khusus'] ?? null),
+                    'usia' => $usia,
+                    'kelas_target' => $kelasTarget,
+                    'asal_sekolah' => $asalSekolah,
+                    'wali' => $wali,
+                    'kontak' => $kontak,
+                    'mulai_dari' => $mulaiDari,
+                    'posisi_sekarang' => $posisiSekarang,
+                    'status_rekomendasi' => $statusRekomendasi,
+                    'catatan_umum' => $catatanUmum,
                 ]
             );
 
@@ -1625,8 +1572,23 @@ class SPMBController extends Controller
             $imported++;
         }
 
-        return redirect()->route('admin.siswa', ['jenjang' => $defaultJenjang])
-            ->with('status', "Alhamdulillah! Berhasil mengimpor {$imported} data calon siswa baru.");
+        if ($imported === 0) {
+            return back()->with('error', 'Gagal mengimpor calon siswa. Pastikan file CSV memuat kolom "no_pendaftaran" dan "nama".');
+        }
+
+        $targetJenjang = $lastImportedJenjang ?: ($defaultJenjang ?: 'sd');
+
+        // Sinkronkan session unit aktif dengan data siswa yang diimpor
+        $user = session('auth_user', []);
+        if (is_array($user)) {
+            $user['jenjang'] = $targetJenjang;
+            $user['role_label'] = 'Admin SPMB '.strtoupper($targetJenjang);
+            $user['unit'] = $targetJenjang === 'sd' ? 'SD Alam Anak Saleh' : ($targetJenjang === 'smp' ? 'SMP Alam Anak Saleh' : 'TK Anak Saleh');
+            session(['auth_user' => $user]);
+        }
+
+        return redirect()->route('admin.siswa', ['jenjang' => $targetJenjang])
+            ->with('status', "Alhamdulillah! Berhasil mengimpor {$imported} data calon siswa baru pada unit ".strtoupper($targetJenjang).'.');
     }
 
     /**
@@ -1958,37 +1920,64 @@ class SPMBController extends Controller
     }
 
     /**
-     * Helper: Parse CSV File secara fleksibel (koma dan titik-koma).
+     * Helper: Parse CSV File secara fleksibel (koma, titik-koma, tab, BOM, quote multiline).
      */
     private function parseCsvFile($file): array
     {
-        $content = file_get_contents($file->getRealPath());
-        if ($content === false) {
+        $path = is_string($file) ? $file : $file->getRealPath();
+        $content = file_get_contents($path);
+        if ($content === false || trim($content) === '') {
             return [];
         }
 
-        // Hapus UTF-8 BOM
-        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
-        $lines = preg_split('/\r\n|\r|\n/', trim($content));
-        if (empty($lines)) {
-            return [];
+        // Handle UTF-16 BOM jika diexport dari Excel
+        if (str_starts_with($content, "\xFF\xFE")) {
+            $content = mb_convert_encoding(substr($content, 2), 'UTF-8', 'UTF-16LE');
+        } elseif (str_starts_with($content, "\xFE\xFF")) {
+            $content = mb_convert_encoding(substr($content, 2), 'UTF-8', 'UTF-16BE');
+        } elseif (str_starts_with($content, "\xEF\xBB\xBF")) {
+            // Hapus UTF-8 BOM
+            $content = substr($content, 3);
         }
 
-        $firstLine = $lines[0];
-        $delimiter = (substr_count($firstLine, ';') > substr_count($firstLine, ',')) ? ';' : ',';
+        // Pastikan encoding UTF-8 valid
+        if (! mb_check_encoding($content, 'UTF-8')) {
+            $content = mb_convert_encoding($content, 'UTF-8', 'ISO-8859-1');
+        }
+
+        // Ambil baris pertama untuk deteksi delimiter
+        $firstLine = strtok($content, "\r\n");
+        if ($firstLine === false) {
+            $firstLine = $content;
+        }
+
+        $commaCount = substr_count($firstLine, ',');
+        $semicolonCount = substr_count($firstLine, ';');
+        $tabCount = substr_count($firstLine, "\t");
+
+        $delimiter = ',';
+        if ($semicolonCount > $commaCount && $semicolonCount > $tabCount) {
+            $delimiter = ';';
+        } elseif ($tabCount > $commaCount && $tabCount > $semicolonCount) {
+            $delimiter = "\t";
+        }
+
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, $content);
+        rewind($stream);
 
         $data = [];
         $header = null;
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line === '') {
+
+        while (($row = fgetcsv($stream, 0, $delimiter)) !== false) {
+            // Lewati baris kosong
+            if ($row === [null] || empty(array_filter($row, fn ($val) => trim((string) $val) !== ''))) {
                 continue;
             }
 
-            $row = str_getcsv($line, $delimiter);
             if (! $header) {
                 $header = array_map(function ($h) {
-                    $clean = strtolower(trim($h));
+                    $clean = strtolower(trim((string) $h));
                     $clean = preg_replace('/[^a-z0-9_]/', '_', $clean);
 
                     return trim($clean, '_');
@@ -1997,14 +1986,13 @@ class SPMBController extends Controller
                 continue;
             }
 
-            if (count($row) === count($header)) {
-                $data[] = array_combine($header, array_map('trim', $row));
-            } elseif (count($row) > 1) {
-                $padded = array_pad(array_map('trim', $row), count($header), '');
-                $sliced = array_slice($padded, 0, count($header));
-                $data[] = array_combine($header, $sliced);
-            }
+            $trimmedRow = array_map(fn ($v) => trim((string) $v), $row);
+            $padded = array_pad($trimmedRow, count($header), '');
+            $sliced = array_slice($padded, 0, count($header));
+            $data[] = array_combine($header, $sliced);
         }
+
+        fclose($stream);
 
         return $data;
     }

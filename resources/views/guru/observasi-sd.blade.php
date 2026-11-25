@@ -106,9 +106,6 @@
                                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                 <span>Ruang Aktif</span>
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full border border-border bg-muted/60 text-muted-foreground font-medium">
-                                Sistem 2 Co-Pengamat (Klaim &amp; Kunci Otomatis)
-                            </span>
                         </div>
                         <p class="text-[11px] text-muted-foreground mt-0.5">
                             Pengamat Aktif: <strong class="text-foreground">{{ $activeGuru['name'] }}</strong> ({{ $activeGuru['nip'] }}) &bull; {{ $activeGuru['pos_desc'] }}
@@ -117,10 +114,6 @@
                 </div>
 
                 <div class="flex items-center gap-2 self-start sm:self-auto text-[11px] flex-wrap">
-                    <span class="px-2.5 py-1 rounded-md bg-muted text-foreground/90 font-mono text-[10px] flex items-center gap-1.5 border border-border">
-                        <i data-lucide="shield-check" class="h-3 w-3 text-emerald-400"></i>
-                        <span>Locking Aktif</span>
-                    </span>
 
                     <!-- {{-- Quick Switch Co-Pengamat di Sentra Ini (Memudahkan pengujian & rotasi guru) --}}
                     @if(isset($sentraGurus) && $sentraGurus->count() > 1)
@@ -141,114 +134,163 @@
                 </div>
             </div>
 
-            <!-- 2. DAFTAR CALON SISWA (Dengan Status Klaim & Kunci) -->
-            <div class="rounded-xl border border-border bg-card p-2.5 sm:p-3 space-y-2">
-                <div class="flex items-center justify-between text-xs px-1">
-                    <span class="font-semibold text-foreground flex items-center gap-1.5">
-                        <i data-lucide="users" class="h-3.5 w-3.5 text-muted-foreground"></i>
-                        <span>Daftar Calon Murid di Ruang Ini:</span>
-                    </span>
-                    <div class="flex items-center gap-3 text-[10px] text-muted-foreground">
-                        <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-400"></span> Siswa Anda</span>
-                        <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-amber-400"></span> Terkunci Co-Pengamat</span>
-                        <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-zinc-400"></span> Belum Diklaim</span>
+            <!-- 2. DAFTAR CALON SISWA — Tombol Pilih Siswa + Modal -->
+            @php
+                $sentraKeyForList = $activeGuru['kelompok_key'] ?? 'ubudiyah';
+                $totalSiswa = count($siswaSD);
+                $sudahDinilaiCount = collect($siswaSD)->filter(fn($s) => !empty($s[$sentraKeyForList]['nilai']))->count();
+            @endphp
+
+            <div class="rounded-xl border border-border bg-card p-2.5 sm:p-3">
+                <div class="flex items-center justify-between gap-3">
+                    <!-- Info Siswa Aktif -->
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <i data-lucide="users" class="h-4 w-4 text-muted-foreground shrink-0"></i>
+                        <div class="min-w-0">
+                            @if(!empty($activeSiswa))
+                                <div class="text-xs font-semibold text-foreground truncate">{{ $activeSiswa['name'] }}</div>
+                                <div class="text-[10px] font-mono text-muted-foreground">{{ $activeSiswa['no'] }} &bull; Sedang dinilai</div>
+                            @else
+                                <div class="text-xs font-semibold text-foreground">Pilih Siswa</div>
+                                <div class="text-[10px] text-muted-foreground">Belum ada siswa dipilih</div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Tombol + Progress -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <div class="hidden sm:flex flex-col items-end text-[10px] text-muted-foreground">
+                            <span class="font-mono text-emerald-400 font-semibold">{{ $sudahDinilaiCount }}/{{ $totalSiswa }}</span>
+                            <span>dinilai</span>
+                        </div>
+                        <button
+                            type="button"
+                            onclick="openSiswaModal()"
+                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-muted hover:bg-muted/80 text-foreground text-xs font-medium transition-colors cursor-pointer"
+                        >
+                            <i data-lucide="list" class="h-3.5 w-3.5"></i>
+                            <span>Pilih Siswa</span>
+                            <span class="hidden sm:inline text-muted-foreground">({{ $totalSiswa }})</span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="flex gap-2 overflow-x-auto pb-1.5 pt-0.5 scrollbar-thin scrollbar-thumb-muted-foreground/20 snap-x" id="siswa-scroll-list">
-                    @forelse($siswaSD as $s)
-                        @php
-                            $isActive = ($s['no'] === ($activeSiswa['no'] ?? ''));
-                            $isDone   = $s['is_lengkap'] ?? false;
-                            $sentraKey = $activeGuru['kelompok_key'] ?? 'ubudiyah';
-                            $myScoreData = $s[$sentraKey] ?? [];
+                <!-- Progress bar mini -->
+                @if($totalSiswa > 0)
+                <div class="mt-2.5 h-1 bg-muted rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500 rounded-full transition-all" style="width: {{ round($sudahDinilaiCount / $totalSiswa * 100) }}%"></div>
+                </div>
+                @endif
+            </div>
 
-                            $pengamatNip = $myScoreData['guru_nip'] ?? null;
-                            $pengamatNama = $myScoreData['guru_nama'] ?? null;
-                            
-                            $sIsMine = (!empty($pengamatNip) && $pengamatNip === $activeGuru['nip']);
-                            $sIsLocked = (!empty($pengamatNip) && $pengamatNip !== $activeGuru['nip']);
-                            $sIsAvailable = empty($pengamatNip);
+            <!-- Modal Pilih Siswa -->
+            <div
+                id="siswa-modal"
+                class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="siswa-modal-title"
+            >
+                <!-- Backdrop -->
+                <div
+                    id="siswa-modal-backdrop"
+                    class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                    onclick="closeSiswaModal()"
+                ></div>
 
-                            $sudahDinilai = !empty($myScoreData['nilai']);
-                            $nilaiRuang = $sudahDinilai ? number_format($myScoreData['nilai'], 1).'%' : null;
-                        @endphp
+                <!-- Panel -->
+                <div
+                    id="siswa-modal-panel"
+                    class="relative w-full sm:max-w-lg bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[70vh] overflow-hidden"
+                >
+                    <!-- Header -->
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="users" class="h-4 w-4 text-muted-foreground"></i>
+                            <span id="siswa-modal-title" class="text-sm font-semibold text-foreground">Pilih Siswa</span>
+                            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground">{{ $totalSiswa }}</span>
+                        </div>
+                        <button
+                            type="button"
+                            onclick="closeSiswaModal()"
+                            class="inline-flex items-center justify-center h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                            aria-label="Tutup"
+                        >
+                            <i data-lucide="x" class="h-4 w-4"></i>
+                        </button>
+                    </div>
 
-                        @if($sIsLocked)
-                            {{-- Siswa Terkunci oleh Co-Pengamat --}}
-                            <div 
-                                class="shrink-0 w-60 sm:w-64 p-3 rounded-xl border border-border/60 bg-muted/30 opacity-60 cursor-not-allowed select-none relative snap-start"
-                                title="Siswa ini sedang diobservasi oleh rekan: {{ $pengamatNama }}"
+                    <!-- Search -->
+                    <div class="px-4 py-2.5 border-b border-border shrink-0">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none"></i>
+                            <input
+                                type="text"
+                                id="siswa-search"
+                                placeholder="Cari nama atau nomor pendaftaran..."
+                                oninput="filterSiswaList(this.value)"
+                                class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors"
+                                autocomplete="off"
                             >
-                                <div class="flex items-start justify-between gap-1 mb-1.5">
-                                    <div>
-                                        <div class="font-semibold text-xs text-foreground truncate max-w-[130px] flex items-center gap-1">
-                                            <i data-lucide="lock" class="h-3 w-3 text-amber-400 shrink-0"></i>
-                                            <span>{{ $s['name'] }}</span>
-                                        </div>
-                                        <div class="font-mono text-[10px] text-muted-foreground">{{ $s['no'] }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Siswa Scrollable -->
+                    <div class="overflow-y-auto flex-1" id="siswa-modal-list">
+                        @forelse($siswaSD as $s)
+                            @php
+                                $isActive = ($s['no'] === ($activeSiswa['no'] ?? ''));
+                                $myScoreData = $s[$sentraKeyForList] ?? [];
+                                $sudahDinilai = !empty($myScoreData['nilai']);
+                                $nilaiRuang = $sudahDinilai ? number_format($myScoreData['nilai'], 1).'%' : null;
+                            @endphp
+                            <a
+                                href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $s['no']]) }}"
+                                class="siswa-item flex items-center justify-between gap-3 px-4 py-3 border-b border-border/60 hover:bg-muted/50 transition-colors {{ $isActive ? 'bg-primary/5' : '' }}"
+                                data-name="{{ strtolower($s['name']) }}"
+                                data-no="{{ strtolower($s['no']) }}"
+                            >
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <!-- Avatar initials -->
+                                    <div class="h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 {{ $isActive ? 'bg-primary text-primary-foreground' : ($sudahDinilai ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-muted text-muted-foreground border border-border') }}">
+                                        {{ substr($s['name'], 0, 2) }}
                                     </div>
-                                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
-                                        Terkunci
-                                    </span>
+                                    <div class="min-w-0">
+                                        <div class="text-xs font-semibold text-foreground truncate leading-tight">{{ $s['name'] }}</div>
+                                        <div class="text-[10px] font-mono text-muted-foreground">{{ $s['no'] }}</div>
+                                    </div>
                                 </div>
 
-                                <div class="border-t border-border/50 pt-1.5 mt-1 text-[11px] space-y-0.5">
-                                    <div class="text-[10px] text-amber-400/90 font-medium truncate flex items-center gap-1">
-                                        <i data-lucide="user-x" class="h-3 w-3 shrink-0"></i>
-                                        <span>Diuji: {{ $pengamatNama ? explode(',', $pengamatNama)[0] : 'Co-Pengamat' }}</span>
-                                    </div>
-                                    <div class="text-[9px] text-muted-foreground">
-                                        Tidak dapat dipilih guru lain
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            {{-- Siswa Tersedia atau Milik Saya --}}
-                            <a 
-                                href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $s['no']]) }}" 
-                                class="shrink-0 w-60 sm:w-64 p-3 rounded-xl border text-left transition-all snap-start block {{ $isActive ? 'border-primary ring-2 ring-primary/40 bg-card shadow-md' : ($sIsMine ? 'border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/10' : 'border-dashed border-border bg-card/60 hover:bg-muted/40 hover:border-zinc-400') }}"
-                            >
-                                <div class="flex items-start justify-between gap-1 mb-1.5">
-                                    <div>
-                                        <div class="font-semibold text-xs text-foreground truncate max-w-[140px] sm:max-w-[150px]">{{ $s['name'] }}</div>
-                                        <div class="font-mono text-[10px] text-muted-foreground">{{ $s['no'] }}</div>
-                                    </div>
-                                    @if($sIsMine)
-                                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                                            Siswa Anda
-                                        </span>
-                                    @else
-                                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border font-medium">
-                                            + Tersedia
-                                        </span>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    @if($isActive)
+                                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-bold">Aktif</span>
                                     @endif
-                                </div>
-
-                                <div id="sd-carousel-status-{{ $s['no'] }}" class="border-t border-border/70 pt-1.5 mt-1 text-[11px] space-y-0.5">
-                                    <div class="flex items-center gap-1 font-mono font-medium {{ $sudahDinilai ? 'text-emerald-400 font-semibold' : 'text-muted-foreground' }}">
-                                        @if($sudahDinilai)
-                                            <i data-lucide="check" class="h-3 w-3 text-emerald-400"></i>
-                                            <span>Sudah Dinilai: {{ $nilaiRuang }}</span>
-                                        @elseif($sIsMine)
-                                            <i data-lucide="pencil" class="h-3 w-3 text-emerald-400"></i>
-                                            <span class="text-emerald-400">Sedang Anda Observasi</span>
-                                        @else
-                                            <i data-lucide="plus-circle" class="h-3 w-3 text-muted-foreground"></i>
-                                            <span>Klik untuk ambil siswa ini</span>
-                                        @endif
-                                    </div>
-                                    <div class="text-[10px] text-muted-foreground truncate">
-                                        Mulai: {{ $s['mulai_dari'] ?? 'Sentra Ubudiyah' }}
-                                    </div>
+                                    @if($sudahDinilai)
+                                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">{{ $nilaiRuang }}</span>
+                                    @else
+                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">Belum</span>
+                                    @endif
+                                    <i data-lucide="chevron-right" class="h-3.5 w-3.5 text-muted-foreground"></i>
                                 </div>
                             </a>
-                        @endif
-                    @empty
-                        <div class="w-full py-4 px-3 text-center text-xs text-muted-foreground bg-muted/20 rounded-lg border border-dashed border-border">
-                            Belum ada calon siswa terdaftar. Silakan tambahkan atau import siswa di menu Admin Siswa.
+                        @empty
+                            <div class="py-10 text-center text-xs text-muted-foreground">
+                                Belum ada calon siswa terdaftar.
+                            </div>
+                        @endforelse
+
+                        <!-- Empty state saat search tidak ketemu -->
+                        <div id="siswa-empty-state" class="hidden py-10 text-center text-xs text-muted-foreground">
+                            <i data-lucide="search-x" class="h-6 w-6 mx-auto mb-2 opacity-40"></i>
+                            <p>Siswa tidak ditemukan.</p>
                         </div>
-                    @endforelse
+                    </div>
+
+                    <!-- Footer legend -->
+                    <div class="px-4 py-2 border-t border-border shrink-0 flex items-center gap-4 text-[10px] text-muted-foreground bg-muted/20">
+                        <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-400"></span> Sudah Dinilai ({{ $sudahDinilaiCount }})</span>
+                        <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-zinc-500"></span> Belum Dinilai ({{ $totalSiswa - $sudahDinilaiCount }})</span>
+                    </div>
                 </div>
             </div>
 
@@ -258,72 +300,14 @@
                 $curSentraKey = $activeGuru['kelompok_key'] ?? 'ubudiyah';
                 $curSentraData = $activeSiswa[$curSentraKey] ?? [];
                 $curScore = !empty($curSentraData['nilai']) ? number_format($curSentraData['nilai'], 1).'%' : null;
-
-                $currentPengamatNip = $curSentraData['guru_nip'] ?? null;
                 $currentPengamatNama = $curSentraData['guru_nama'] ?? null;
-
-                $isActiveLockedByOther = (!empty($currentPengamatNip) && $currentPengamatNip !== $activeGuru['nip']);
-                $isActiveMine = (!empty($currentPengamatNip) && $currentPengamatNip === $activeGuru['nip']);
-                $isActiveAvailable = empty($currentPengamatNip);
+                $sudahDinilai = !empty($curSentraData['nilai']);
             @endphp
-
-            <!-- Banner Notifikasi Kunci Siswa jika diobservasi guru lain -->
-            @if($isActiveLockedByOther)
-                <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:p-4 flex items-start gap-3 text-xs text-amber-200">
-                    <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400 shrink-0 mt-0.5">
-                        <i data-lucide="lock" class="h-4 w-4"></i>
-                    </div>
-                    <div class="flex-1 space-y-1">
-                        <h4 class="font-bold text-amber-300">Calon Siswa Terkunci (Sedang Diobservasi Co-Pengamat)</h4>
-                        <p class="text-[11px] text-amber-200/80 leading-relaxed">
-                            Ananda <strong>{{ $activeSiswa['name'] }}</strong> sedang / sudah diobservasi oleh rekan guru: 
-                            <strong class="text-white">{{ $currentPengamatNama }}</strong>.
-                            Untuk mencegah penilaian ganda, Anda hanya dapat melihat data nilai secara <em>read-only</em>.
-                        </p>
-                    </div>
-                </div>
-            @elseif($isActiveAvailable)
-                <div class="rounded-xl border border-border bg-card p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <div class="flex items-center gap-2.5">
-                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-muted text-muted-foreground shrink-0">
-                            <i data-lucide="user-plus" class="h-4 w-4"></i>
-                        </div>
-                        <div>
-                            <span class="font-semibold text-foreground">Siswa ini belum memiliki pengamat di Sentra ini</span>
-                            <p class="text-[11px] text-muted-foreground">Klaim siswa ini untuk mulai menguji dan mengunci siswa agar tidak diobservasi rekan lain.</p>
-                        </div>
-                    </div>
-                    <button 
-                        type="button" 
-                        onclick="klaimSiswaAktif('{{ $activeSiswa['no'] }}')" 
-                        class="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-3.5 text-xs font-semibold shadow-xs hover:bg-primary/90 transition-colors cursor-pointer self-start sm:self-center shrink-0"
-                    >
-                        <i data-lucide="user-check" class="h-3.5 w-3.5"></i>
-                        <span>Klaim Siswa Ini</span>
-                    </button>
-                </div>
-            @else
-                <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs">
-                    <div class="flex items-center gap-2 text-emerald-300">
-                        <i data-lucide="check-circle-2" class="h-4 w-4 text-emerald-400"></i>
-                        <span>Siswa ini sedang dalam penugasan observasi Anda (Terkunci untuk rekan lain).</span>
-                    </div>
-                    @if(($curSentraData['status'] ?? '') !== 'Selesai')
-                        <button 
-                            type="button" 
-                            onclick="lepasSiswaAktif('{{ $activeSiswa['no'] }}')" 
-                            class="text-[11px] font-medium text-emerald-400 hover:text-emerald-200 underline cursor-pointer"
-                        >
-                            Lepas ke Antrean
-                        </button>
-                    @endif
-                </div>
-            @endif
 
             <div class="rounded-xl border border-border bg-card p-3 sm:p-5 space-y-4 shadow-sm">
                 
                 <!-- Student Header -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-border">
                     <div class="flex items-start gap-3">
                         <div class="h-12 w-12 rounded-xl bg-muted border border-border flex items-center justify-center text-sm font-bold text-foreground shrink-0 shadow-inner">
                             {{ substr($activeSiswa['name'] ?? 'S', 0, 2) }}
@@ -363,119 +347,7 @@
                     </div>
                 </div>
 
-                <!-- 3-SENTRA ROTATION MATRIX (Status Kelengkapan 3 Sentra) -->
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="font-semibold text-foreground flex items-center gap-1.5">
-                            <i data-lucide="check-square" class="h-3.5 w-3.5 text-emerald-400"></i>
-                            <span>Status Kelengkapan 3 Sentra (Wajib Terpenuhi Semua):</span>
-                        </span>
-                        <span id="sd-matrix-progress-text" class="text-[11px] font-mono {{ ($activeSiswa['is_lengkap'] ?? false) ? 'text-emerald-400 font-bold' : 'text-amber-400' }}">
-                            {{ $activeSiswa['selesai_count'] ?? 0 }}/3 Sentra Terpenuhi
-                        </span>
-                    </div>
-
-                    <!-- 3 Sentra Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                        
-                        <!-- 1. Sentra Ubudiyah -->
-                        @php
-                            $ubud = $activeSiswa['ubudiyah'] ?? [];
-                            $isUbudActive = ($curSentraKey === 'ubudiyah');
-                            $ubudDone = ($ubud['status'] ?? '') === 'Selesai';
-                        @endphp
-                        <div class="p-2.5 rounded-lg border {{ $isUbudActive ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 ring-1 ring-emerald-500/30' : 'border-border bg-card' }}">
-                            <div class="flex items-center justify-between text-[11px] mb-1">
-                                <span class="font-semibold text-foreground">1. Sentra Ubudiyah</span>
-                                <span id="sd-mini-score-ubudiyah" class="font-mono font-bold text-emerald-400">
-                                    {{ !empty($ubud['nilai']) ? number_format($ubud['nilai'], 1).'%' : '—' }}
-                                </span>
-                            </div>
-                            <div class="flex items-center justify-between text-[10px] text-muted-foreground">
-                                <span>Pos 1.1–1.3</span>
-                                <span id="sd-mini-status-ubudiyah" class="{{ $ubudDone ? 'text-emerald-400 font-medium' : 'text-muted-foreground' }}">
-                                    {{ $ubudDone ? '✓ Selesai' : ($ubud['status'] ?? 'Belum Diuji') }}
-                                </span>
-                            </div>
-                            @if(!empty($ubud['guru_nama']))
-                                <div class="text-[9px] text-muted-foreground pt-1 truncate border-t border-border/40 mt-1">
-                                    Pengamat: {{ explode(',', $ubud['guru_nama'])[0] }}
-                                </div>
-                            @endif
-                        </div>
-
-                        <!-- 2. Sentra Persiapan -->
-                        @php
-                            $pers = $activeSiswa['persiapan'] ?? [];
-                            $isPersActive = ($curSentraKey === 'persiapan');
-                            $persDone = ($pers['status'] ?? '') === 'Selesai';
-                        @endphp
-                        <div class="p-2.5 rounded-lg border {{ $isPersActive ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30 ring-1 ring-indigo-500/30' : 'border-border bg-card' }}">
-                            <div class="flex items-center justify-between text-[11px] mb-1">
-                                <span class="font-semibold text-foreground">2. Sentra Persiapan</span>
-                                <span id="sd-mini-score-persiapan" class="font-mono font-bold text-indigo-400">
-                                    {{ !empty($pers['nilai']) ? number_format($pers['nilai'], 1).'%' : '—' }}
-                                </span>
-                            </div>
-                            <div class="flex items-center justify-between text-[10px] text-muted-foreground">
-                                <span>Pos 2.1–2.4</span>
-                                <span id="sd-mini-status-persiapan" class="{{ $persDone ? 'text-indigo-400 font-medium' : 'text-muted-foreground' }}">
-                                    {{ $persDone ? '✓ Selesai' : ($pers['status'] ?? 'Belum Diuji') }}
-                                </span>
-                            </div>
-                            @if(!empty($pers['guru_nama']))
-                                <div class="text-[9px] text-muted-foreground pt-1 truncate border-t border-border/40 mt-1">
-                                    Pengamat: {{ explode(',', $pers['guru_nama'])[0] }}
-                                </div>
-                            @endif
-                        </div>
-
-                        <!-- 3. Sentra Eksplorasi Diri -->
-                        @php
-                            $eks = $activeSiswa['eksplorasi'] ?? [];
-                            $isEksActive = ($curSentraKey === 'eksplorasi');
-                            $eksDone = ($eks['status'] ?? '') === 'Selesai';
-                        @endphp
-                        <div class="p-2.5 rounded-lg border {{ $isEksActive ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30 ring-1 ring-amber-500/30' : 'border-border bg-card' }}">
-                            <div class="flex items-center justify-between text-[11px] mb-1">
-                                <span class="font-semibold text-foreground">3. Sentra Eksplorasi Diri</span>
-                                <span id="sd-mini-score-eksplorasi" class="font-mono font-bold text-amber-400">
-                                    {{ !empty($eks['nilai']) ? number_format($eks['nilai'], 1).'%' : '—' }}
-                                </span>
-                            </div>
-                            <div class="flex items-center justify-between text-[10px] text-muted-foreground">
-                                <span>Pos 3.1–3.2</span>
-                                <span id="sd-mini-status-eksplorasi" class="{{ $eksDone ? 'text-amber-400 font-medium' : 'text-muted-foreground' }}">
-                                    {{ $eksDone ? '✓ Selesai' : ($eks['status'] ?? 'Belum Diuji') }}
-                                </span>
-                            </div>
-                            @if(!empty($eks['guru_nama']))
-                                <div class="text-[9px] text-muted-foreground pt-1 truncate border-t border-border/40 mt-1">
-                                    Pengamat: {{ explode(',', $eks['guru_nama'])[0] }}
-                                </div>
-                            @endif
-                        </div>
-
-                    </div>
-
-                    <!-- Progress bar -->
-                    @php
-                        $doneCount = $activeSiswa['selesai_count'] ?? 0;
-                        $progressPercent = min(100, round(($doneCount / 3) * 100));
-                    @endphp
-                    <div class="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: {{ $progressPercent }}%"></div>
-                    </div>
-
-                    <div class="flex items-center justify-between text-[10px] text-muted-foreground pt-0.5">
-                        <span>Mulai pertama dari: <strong class="text-foreground">{{ $activeSiswa['mulai_dari'] ?? 'Sentra Ubudiyah' }}</strong></span>
-                        @if(($activeSiswa['is_lengkap'] ?? false))
-                            <span class="text-emerald-400 font-semibold">✓ Seluruh Observasi Terpenuhi</span>
-                        @else
-                            <span class="text-amber-400">Siswa berotasi mandiri antar 3 sentra</span>
-                        @endif
-                    </div>
-                </div>
+                
 
             </div>
 
@@ -545,7 +417,7 @@
                 <input type="hidden" name="siswa_no" value="{{ $activeSiswa['no'] }}">
                 <input type="hidden" name="kelompok_key" value="{{ $curSentraKey }}">
 
-                <div class="rounded-xl border border-border bg-card shadow-sm overflow-hidden {{ $isActiveLockedByOther ? 'opacity-70' : '' }}">
+                <div class="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
                     
                     <!-- Section Header -->
                     <div class="p-3.5 sm:p-4 border-b border-border bg-muted/30 flex items-center justify-between gap-2 flex-wrap">
@@ -556,12 +428,10 @@
                             <div>
                                 <h3 class="text-xs sm:text-sm font-bold text-foreground">Form Penilaian: {{ $meta['label'] }}</h3>
                                 <p class="text-[10px] text-muted-foreground">
-                                    @if($isActiveLockedByOther)
-                                        <span class="text-amber-400 font-semibold">Terkunci &bull; Pengamat: {{ $currentPengamatNama }}</span>
-                                    @elseif($isActiveMine)
-                                        <span class="text-emerald-400 font-semibold">Aktif &bull; Siswa ini Anda observasi</span>
+                                    @if($sudahDinilai)
+                                        <span class="text-emerald-400 font-semibold">Sudah Dinilai &bull; Nilai: {{ $curScore }}</span>
                                     @else
-                                        <span>Tersedia &bull; Belum diklaim</span>
+                                        <span>Siap Dinilai &bull; Silakan pilih skor indikator</span>
                                     @endif
                                 </p>
                             </div>
@@ -575,7 +445,7 @@
                     </div>
 
                     <!-- Indikator Container -->
-                    <fieldset {{ $isActiveLockedByOther ? 'disabled' : '' }} class="p-3 sm:p-5 space-y-6">
+                    <fieldset class="p-3 sm:p-5 space-y-6">
                         @foreach($myIndikatorByPos as $posId => $posItems)
                             @php $posLabel = $posItems->first()['pos'] ?? $posId; @endphp
                             <div class="space-y-3">
@@ -619,11 +489,10 @@
                                                     @endphp
                                                     <button 
                                                         type="button" 
-                                                        {{ $isActiveLockedByOther ? 'disabled' : '' }}
                                                         onclick="setScore('{{ $ind['id'] }}', {{ $val }}, this)" 
                                                         data-id="{{ $ind['id'] }}" 
                                                         data-score="{{ $val }}"
-                                                        class="score-btn h-10 rounded-lg border text-xs font-bold transition-all cursor-pointer flex items-center justify-center {{ $isSelected ? $activeClass : 'border-border bg-card text-foreground hover:bg-muted active:scale-95' }} {{ $isActiveLockedByOther ? 'opacity-60 cursor-not-allowed' : '' }}"
+                                                        class="score-btn h-10 rounded-lg border text-xs font-bold transition-all cursor-pointer flex items-center justify-center {{ $isSelected ? $activeClass : 'border-border bg-card text-foreground hover:bg-muted active:scale-95' }}"
                                                     >
                                                         {{ $val }}
                                                     </button>
@@ -657,9 +526,8 @@
                                 id="input-catatan" 
                                 name="catatan" 
                                 rows="3" 
-                                {{ $isActiveLockedByOther ? 'disabled' : '' }}
                                 placeholder="Tuliskan catatan khusus terkait karakter, kemandirian, hambatan, atau keistimewaan ananda selama observasi..." 
-                                class="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary resize-y {{ $isActiveLockedByOther ? 'opacity-60 cursor-not-allowed' : '' }}"
+                                class="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary resize-y"
                             >{{ $curSentraData['catatan'] ?? '' }}</textarea>
                         </div>
                     </fieldset>
@@ -686,25 +554,14 @@
                                 </a>
                             @endif
 
-                            @if($isActiveLockedByOther)
-                                <button 
-                                    type="button" 
-                                    disabled
-                                    class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-muted text-muted-foreground px-4 text-xs font-medium border border-border cursor-not-allowed opacity-70"
-                                >
-                                    <i data-lucide="lock" class="h-4 w-4"></i>
-                                    <span>Terkunci (Co-Pengamat)</span>
-                                </button>
-                            @else
-                                <button 
-                                    type="submit" 
-                                    id="btn-save-desktop" 
-                                    class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-4 text-xs font-bold shadow transition-colors cursor-pointer"
-                                >
-                                    <i data-lucide="check" class="h-4 w-4"></i>
-                                    <span>Simpan Nilai</span>
-                                </button>
-                            @endif
+                            <button 
+                                type="submit" 
+                                id="btn-save-desktop" 
+                                class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-4 text-xs font-bold shadow transition-colors cursor-pointer"
+                            >
+                                <i data-lucide="check" class="h-4 w-4"></i>
+                                <span>Simpan Nilai</span>
+                            </button>
                         </div>
                     </div>
 
@@ -757,26 +614,15 @@
                         </a>
                     @endif
 
-                    @if($isActiveLockedByOther ?? false)
-                        <button 
-                            type="button" 
-                            disabled 
-                            class="inline-flex h-9 items-center justify-center gap-1.5 px-3 rounded-lg bg-muted text-muted-foreground text-xs font-medium border border-border opacity-70 cursor-not-allowed"
-                        >
-                            <i data-lucide="lock" class="h-3.5 w-3.5"></i>
-                            <span>Terkunci</span>
-                        </button>
-                    @else
                         <button 
                             type="button" 
                             onclick="document.getElementById('form-observasi-sd')?.requestSubmit()" 
-                            id="btn-save-mobile"
+                            id="btn-save-mobile" 
                             class="inline-flex h-9 items-center justify-center gap-1.5 px-3.5 rounded-lg bg-emerald-600 text-white text-xs font-bold shadow active:scale-95 transition-transform cursor-pointer"
                         >
                             <i data-lucide="check" class="h-4 w-4"></i>
                             <span>Simpan Nilai</span>
                         </button>
-                    @endif
                 </div>
             </div>
         </div>
@@ -885,7 +731,6 @@
             const rubrikData = @json($indikatorMap ?? []);
             const myKey      = @json($curSentraKey ?? 'ubudiyah');
             const myColor    = @json($meta['color'] ?? 'emerald');
-            const isLocked   = @json($isActiveLockedByOther ?? false);
             
             const activeColorClass = {
                 'indigo': 'bg-indigo-600 text-white border-indigo-600 shadow-sm ring-2 ring-indigo-500/30',
@@ -903,8 +748,6 @@
             @endif
 
             function setScore(indId, val, btn) {
-                if (isLocked) return;
-
                 scores[indId] = val;
 
                 // Update Button Visuals
@@ -956,74 +799,8 @@
                 }
             }
 
-            // Klaim Siswa Aktif
-            async function klaimSiswaAktif(no = null) {
-                const siswaNo = no || document.querySelector('input[name="siswa_no"]')?.value || @json($activeSiswa['no'] ?? '');
-                if (!siswaNo) return;
-
-                try {
-                    const res = await fetch('{{ route("guru.observasi.klaim") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        },
-                        body: JSON.stringify({
-                            siswa_no: siswaNo,
-                            kelompok_key: myKey,
-                        }),
-                    });
-
-                    const data = await res.json();
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        alert(data.message || 'Gagal mengklaim siswa.');
-                    }
-                } catch (e) {
-                    alert('Gagal mengklaim: ' + e.message);
-                }
-            }
-
-            // Lepas Siswa Aktif
-            async function lepasSiswaAktif(no = null) {
-                if (!confirm('Apakah Anda yakin ingin melepas siswa ini kembali ke antrean bersama?')) {
-                    return;
-                }
-
-                const siswaNo = no || document.querySelector('input[name="siswa_no"]')?.value || @json($activeSiswa['no'] ?? '');
-                if (!siswaNo) return;
-
-                try {
-                    const res = await fetch('{{ route("guru.observasi.lepas") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        },
-                        body: JSON.stringify({
-                            siswa_no: siswaNo,
-                            kelompok_key: myKey,
-                        }),
-                    });
-
-                    const data = await res.json();
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        alert(data.message || 'Gagal melepas siswa.');
-                    }
-                } catch (e) {
-                    alert('Gagal melepas: ' + e.message);
-                }
-            }
-
             async function submitObservasiSD(e) {
                 e.preventDefault();
-                if (isLocked) {
-                    alert('Siswa ini terkunci oleh rekan guru co-pengamat.');
-                    return;
-                }
 
                 const form = e.target;
                 const siswaNo = form.querySelector('[name="siswa_no"]')?.value;
@@ -1077,18 +854,22 @@
                         if (btnDesktop) { btnDesktop.innerHTML = '<svg class="h-4 w-4 inline mr-1 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>✓ Tersimpan</span>'; btnDesktop.disabled = false; }
                         if (btnMobile) { btnMobile.innerHTML = '<svg class="h-4 w-4 inline mr-1 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>✓ Tersimpan</span>'; btnMobile.disabled = false; }
 
-                        // 1. Update Carousel Card Status
-                        const carouselStatus = document.getElementById('sd-carousel-status-' + siswaNo);
-                        if (carouselStatus) {
-                            carouselStatus.innerHTML = `
-                                <div class="flex items-center gap-1 font-mono font-medium text-emerald-400 font-semibold">
-                                    <svg class="h-3 w-3 text-emerald-400 shrink-0 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                    <span>Sudah Dinilai: ${data.nilai}%</span>
-                                </div>
-                                <div class="text-[10px] text-muted-foreground truncate">
-                                    Status: Selesai
-                                </div>
-                            `;
+                        // 1. Update status item di modal siswa
+                        const modalItem = document.querySelector(`#siswa-modal-list a[data-no="${siswaNo.toLowerCase()}"]`);
+                        if (modalItem) {
+                            const badgeEl = modalItem.querySelector('span[class*="Belum"]') || modalItem.querySelector('span:last-of-type');
+                            // Ganti badge "Belum" dengan nilai baru
+                            const scoreSpan = document.createElement('span');
+                            scoreSpan.className = 'text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold';
+                            scoreSpan.textContent = data.nilai + '%';
+                            if (badgeEl) badgeEl.replaceWith(scoreSpan);
+
+                            // Update avatar warna
+                            const avatar = modalItem.querySelector('.h-8.w-8');
+                            if (avatar) {
+                                avatar.classList.remove('bg-muted', 'text-muted-foreground', 'border-border');
+                                avatar.classList.add('bg-emerald-500/15', 'text-emerald-400', 'border-emerald-500/30');
+                            }
                         }
 
                         // 2. Update Live Score in Header
@@ -1139,9 +920,81 @@
                 }
             }
 
-            // Keyboard Escape
+            // ── Modal Pilih Siswa ──────────────────────────────────────────
+            function openSiswaModal() {
+                const modal = document.getElementById('siswa-modal');
+                const panel = document.getElementById('siswa-modal-panel');
+                if (!modal) return;
+
+                // Reset search
+                const searchEl = document.getElementById('siswa-search');
+                if (searchEl) { searchEl.value = ''; filterSiswaList(''); }
+
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+
+                // Animate in
+                requestAnimationFrame(() => {
+                    if (panel) {
+                        panel.style.transition = 'transform 0.25s cubic-bezier(0.32,0.72,0,1), opacity 0.2s';
+                        panel.style.transform   = 'translateY(0)';
+                        panel.style.opacity     = '1';
+                    }
+                });
+
+                if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+                setTimeout(() => searchEl?.focus(), 100);
+            }
+
+            function closeSiswaModal() {
+                const modal = document.getElementById('siswa-modal');
+                const panel = document.getElementById('siswa-modal-panel');
+                if (!modal) return;
+
+                if (panel) {
+                    panel.style.transition = 'transform 0.2s cubic-bezier(0.32,0.72,0,1), opacity 0.15s';
+                    panel.style.transform  = 'translateY(40px)';
+                    panel.style.opacity    = '0';
+                }
+
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = '';
+                    if (panel) { panel.style.transform = ''; panel.style.opacity = ''; }
+                }, 200);
+            }
+
+            function filterSiswaList(query) {
+                const q = query.toLowerCase().trim();
+                const items = document.querySelectorAll('#siswa-modal-list .siswa-item');
+                let visibleCount = 0;
+
+                items.forEach(item => {
+                    const name = item.dataset.name || '';
+                    const no   = item.dataset.no   || '';
+                    const match = !q || name.includes(q) || no.includes(q);
+                    item.style.display = match ? '' : 'none';
+                    if (match) visibleCount++;
+                });
+
+                const emptyState = document.getElementById('siswa-empty-state');
+                if (emptyState) emptyState.classList.toggle('hidden', visibleCount > 0);
+            }
+
+            // Initialize modal panel starting position for animation
+            (function () {
+                const panel = document.getElementById('siswa-modal-panel');
+                if (panel) { panel.style.transform = 'translateY(40px)'; panel.style.opacity = '0'; }
+            })();
+
+            // Keyboard Escape — tutup modal siswa atau rekap
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
+                    const siswaModal = document.getElementById('siswa-modal');
+                    if (siswaModal && !siswaModal.classList.contains('hidden')) {
+                        closeSiswaModal();
+                        return;
+                    }
                     document.getElementById('modal-rekap-backdrop')?.classList.add('hidden');
                 }
             });

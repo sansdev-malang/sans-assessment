@@ -691,7 +691,7 @@
                             <input type="text" name="nip" required placeholder="Contoh: GSD-2026-08" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs font-mono text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
                         </div>
                         <div class="space-y-1">
-                            <label class="font-medium text-foreground">Email Institusi</label>
+                            <label class="font-medium text-foreground">Email</label>
                             <input type="email" name="email" required placeholder="guru@anaksaleh.sch.id" class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
                         </div>
                     </div>
@@ -768,7 +768,7 @@
                             <input type="text" name="nip" id="edit-guru-nip" required class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs font-mono text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
                         </div>
                         <div class="space-y-1">
-                            <label class="font-medium text-foreground">Email Institusi</label>
+                            <label class="font-medium text-foreground">Email</label>
                             <input type="email" name="email" id="edit-guru-email" required class="flex h-8 w-full rounded-md border border-border bg-muted/40 px-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400" />
                         </div>
                     </div>
