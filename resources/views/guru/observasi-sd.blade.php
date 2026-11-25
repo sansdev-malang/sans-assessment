@@ -134,25 +134,36 @@
                 </div>
             </div>
 
-            <!-- 2. DAFTAR CALON SISWA — Tombol Pilih Siswa + Modal -->
+            <!-- 2. DAFTAR CALON SISWA — Tombol Pilih Siswa + Tab Sesi + Modal -->
             @php
                 $sentraKeyForList = $activeGuru['kelompok_key'] ?? 'ubudiyah';
                 $totalSiswa = count($siswaSD);
                 $sudahDinilaiCount = collect($siswaSD)->filter(fn($s) => !empty($s[$sentraKeyForList]['nilai']))->count();
+
+                $siswaByNo = collect($siswaSD)->keyBy('no');
+                $rawSesi = array_filter(array_map('trim', explode(',', (string) request()->query('sesi', ''))));
+                $sesiNos = collect($rawSesi)->filter(fn($no) => $siswaByNo->has($no))->unique()->values()->toArray();
+                if (!empty($activeSiswa['no']) && !in_array($activeSiswa['no'], $sesiNos, true)) {
+                    if (empty($sesiNos)) {
+                        $sesiNos = [$activeSiswa['no']];
+                    } else {
+                        array_unshift($sesiNos, $activeSiswa['no']);
+                    }
+                }
             @endphp
 
-            <div class="rounded-xl border border-border bg-card p-2.5 sm:p-3">
+            <div class="rounded-xl border border-border bg-card p-2.5 sm:p-3 space-y-2.5">
                 <div class="flex items-center justify-between gap-3">
                     <!-- Info Siswa Aktif -->
                     <div class="flex items-center gap-2.5 min-w-0">
                         <i data-lucide="users" class="h-4 w-4 text-muted-foreground shrink-0"></i>
                         <div class="min-w-0">
                             @if(!empty($activeSiswa))
-                                <div class="text-xs font-semibold text-foreground truncate">{{ $activeSiswa['name'] }}</div>
-                                <div class="text-[10px] font-mono text-muted-foreground">{{ $activeSiswa['no'] }} &bull; Sedang dinilai</div>
+                                <div id="top-bar-siswa-name" class="text-xs font-semibold text-foreground truncate">{{ $activeSiswa['name'] }}</div>
+                                <div id="top-bar-siswa-no" class="text-[10px] font-mono text-muted-foreground">{{ $activeSiswa['no'] }} &bull; Sedang dinilai</div>
                             @else
-                                <div class="text-xs font-semibold text-foreground">Pilih Siswa</div>
-                                <div class="text-[10px] text-muted-foreground">Belum ada siswa dipilih</div>
+                                <div id="top-bar-siswa-name" class="text-xs font-semibold text-foreground">Pilih Siswa</div>
+                                <div id="top-bar-siswa-no" class="text-[10px] text-muted-foreground">Bisa pilih 1 atau beberapa siswa sekaligus</div>
                             @endif
                         </div>
                     </div>
@@ -168,16 +179,32 @@
                             onclick="openSiswaModal()"
                             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-muted hover:bg-muted/80 text-foreground text-xs font-medium transition-colors cursor-pointer"
                         >
-                            <i data-lucide="list" class="h-3.5 w-3.5"></i>
+                            <i data-lucide="list-checks" class="h-3.5 w-3.5"></i>
                             <span>Pilih Siswa</span>
                             <span class="hidden sm:inline text-muted-foreground">({{ $totalSiswa }})</span>
                         </button>
                     </div>
                 </div>
 
+                <!-- Tab Bar Sesi Multi-Siswa (tampil saat memilih > 1 siswa) -->
+                <div id="sesi-tabs-wrapper" class="{{ count($sesiNos) > 1 ? '' : 'hidden' }} pt-2 border-t border-border/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div id="sesi-tabs-list" class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                        {{-- Rendered/hydrated by JS --}}
+                    </div>
+                    <button
+                        type="button"
+                        id="btn-save-all-sesi"
+                        onclick="saveAllSesi()"
+                        class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold shadow-xs transition-colors cursor-pointer shrink-0"
+                    >
+                        <i data-lucide="save-all" class="h-3.5 w-3.5"></i>
+                        <span>Simpan Semua</span>
+                    </button>
+                </div>
+
                 <!-- Progress bar mini -->
                 @if($totalSiswa > 0)
-                <div class="mt-2.5 h-1 bg-muted rounded-full overflow-hidden">
+                <div class="h-1 bg-muted rounded-full overflow-hidden">
                     <div class="h-full bg-emerald-500 rounded-full transition-all" style="width: {{ round($sudahDinilaiCount / $totalSiswa * 100) }}%"></div>
                 </div>
                 @endif
@@ -201,7 +228,7 @@
                 <!-- Panel -->
                 <div
                     id="siswa-modal-panel"
-                    class="relative w-full sm:max-w-lg bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[70vh] overflow-hidden"
+                    class="relative w-full sm:max-w-lg bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[75vh] overflow-hidden"
                 >
                     <!-- Header -->
                     <div class="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
@@ -220,8 +247,8 @@
                         </button>
                     </div>
 
-                    <!-- Search -->
-                    <div class="px-4 py-2.5 border-b border-border shrink-0">
+                    <!-- Search + Hint -->
+                    <div class="px-4 py-2.5 border-b border-border shrink-0 space-y-1.5">
                         <div class="relative">
                             <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none"></i>
                             <input
@@ -233,46 +260,69 @@
                                 autocomplete="off"
                             >
                         </div>
+                        <p class="text-[10px] text-muted-foreground">
+                            Klik nama untuk menilai 1 siswa, atau centang kotak di kiri untuk menilai beberapa siswa bersamaan.
+                        </p>
                     </div>
 
                     <!-- Daftar Siswa Scrollable -->
                     <div class="overflow-y-auto flex-1" id="siswa-modal-list">
-                        @forelse($siswaSD as $s)
+                        @php
+                            $sortedSiswaSD = collect($siswaSD)->sortBy(function ($item) use ($sentraKeyForList) {
+                                return !empty($item[$sentraKeyForList]['nilai']) ? 1 : 0;
+                            })->values();
+                        @endphp
+                        @forelse($sortedSiswaSD as $s)
                             @php
                                 $isActive = ($s['no'] === ($activeSiswa['no'] ?? ''));
+                                $isInSesi = in_array($s['no'], $sesiNos, true);
                                 $myScoreData = $s[$sentraKeyForList] ?? [];
                                 $sudahDinilai = !empty($myScoreData['nilai']);
                                 $nilaiRuang = $sudahDinilai ? number_format($myScoreData['nilai'], 1).'%' : null;
                             @endphp
-                            <a
-                                href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $s['no']]) }}"
-                                class="siswa-item flex items-center justify-between gap-3 px-4 py-3 border-b border-border/60 hover:bg-muted/50 transition-colors {{ $isActive ? 'bg-primary/5' : '' }}"
+                            <div
+                                class="siswa-item flex items-center gap-2.5 px-4 py-2.5 border-b border-border/60 hover:bg-muted/50 transition-colors {{ $isActive ? 'bg-primary/5' : '' }}"
                                 data-name="{{ strtolower($s['name']) }}"
                                 data-no="{{ strtolower($s['no']) }}"
                             >
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <!-- Avatar initials -->
-                                    <div class="h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 {{ $isActive ? 'bg-primary text-primary-foreground' : ($sudahDinilai ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-muted text-muted-foreground border border-border') }}">
-                                        {{ substr($s['name'], 0, 2) }}
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="text-xs font-semibold text-foreground truncate leading-tight">{{ $s['name'] }}</div>
-                                        <div class="text-[10px] font-mono text-muted-foreground">{{ $s['no'] }}</div>
-                                    </div>
-                                </div>
+                                <label class="flex items-center justify-center p-1 cursor-pointer shrink-0" title="Tambahkan ke sesi kelompok">
+                                    <input
+                                        type="checkbox"
+                                        class="siswa-checkbox h-4 w-4 rounded border-border accent-emerald-600 cursor-pointer"
+                                        value="{{ $s['no'] }}"
+                                        {{ $isInSesi && count($sesiNos) > 1 ? 'checked' : '' }}
+                                        onchange="onSiswaCheckboxChange()"
+                                    >
+                                </label>
 
-                                <div class="flex items-center gap-2 shrink-0">
-                                    @if($isActive)
-                                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-bold">Aktif</span>
-                                    @endif
-                                    @if($sudahDinilai)
-                                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">{{ $nilaiRuang }}</span>
-                                    @else
-                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">Belum</span>
-                                    @endif
-                                    <i data-lucide="chevron-right" class="h-3.5 w-3.5 text-muted-foreground"></i>
-                                </div>
-                            </a>
+                                <a
+                                    href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $s['no']]) }}"
+                                    class="flex-1 flex items-center justify-between gap-3 min-w-0 py-0.5"
+                                >
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <!-- Avatar initials -->
+                                        <div class="h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 {{ $isActive ? 'bg-primary text-primary-foreground' : ($sudahDinilai ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-muted text-muted-foreground border border-border') }}">
+                                            {{ substr($s['name'], 0, 2) }}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-xs font-semibold text-foreground truncate leading-tight">{{ $s['name'] }}</div>
+                                            <div class="text-[10px] font-mono text-muted-foreground">{{ $s['no'] }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        @if($isActive)
+                                            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-bold">Aktif</span>
+                                        @endif
+                                        @if($sudahDinilai)
+                                            <span class="siswa-modal-badge text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">{{ $nilaiRuang }}</span>
+                                        @else
+                                            <span class="siswa-modal-badge text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">Belum</span>
+                                        @endif
+                                        <i data-lucide="chevron-right" class="h-3.5 w-3.5 text-muted-foreground"></i>
+                                    </div>
+                                </a>
+                            </div>
                         @empty
                             <div class="py-10 text-center text-xs text-muted-foreground">
                                 Belum ada calon siswa terdaftar.
@@ -286,10 +336,26 @@
                         </div>
                     </div>
 
-                    <!-- Footer legend -->
-                    <div class="px-4 py-2 border-t border-border shrink-0 flex items-center gap-4 text-[10px] text-muted-foreground bg-muted/20">
-                        <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-400"></span> Sudah Dinilai ({{ $sudahDinilaiCount }})</span>
-                        <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-zinc-500"></span> Belum Dinilai ({{ $totalSiswa - $sudahDinilaiCount }})</span>
+                    <!-- Footer: Legend + Multi-select action -->
+                    <div class="px-4 py-2.5 border-t border-border shrink-0 flex items-center justify-between gap-2 bg-muted/20">
+                        <div id="siswa-legend" class="flex items-center gap-3 text-[10px] text-muted-foreground">
+                            <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-400"></span> Sudah ({{ $sudahDinilaiCount }})</span>
+                            <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-zinc-500"></span> Belum ({{ $totalSiswa - $sudahDinilaiCount }})</span>
+                        </div>
+                        <div id="siswa-multi-actions" class="hidden flex items-center gap-2 ml-auto">
+                            <button type="button" onclick="resetSiswaSelection()" class="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 cursor-pointer">
+                                Reset
+                            </button>
+                            <button
+                                type="button"
+                                id="btn-start-multi-sesi"
+                                onclick="startMultiSesi()"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                            >
+                                <i data-lucide="play" class="h-3 w-3"></i>
+                                <span id="btn-start-multi-label">Mulai Nilai</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -309,17 +375,17 @@
                 <!-- Student Header -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-border">
                     <div class="flex items-start gap-3">
-                        <div class="h-12 w-12 rounded-xl bg-muted border border-border flex items-center justify-center text-sm font-bold text-foreground shrink-0 shadow-inner">
+                        <div id="active-siswa-avatar" class="h-12 w-12 rounded-xl bg-muted border border-border flex items-center justify-center text-sm font-bold text-foreground shrink-0 shadow-inner">
                             {{ substr($activeSiswa['name'] ?? 'S', 0, 2) }}
                         </div>
                         <div class="space-y-0.5">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <h2 class="text-sm sm:text-base font-bold text-foreground">{{ $activeSiswa['name'] }}</h2>
-                                <span class="font-mono text-[10px] px-2 py-0.5 rounded border border-border bg-muted text-muted-foreground font-semibold">
+                                <h2 id="active-siswa-name" class="text-sm sm:text-base font-bold text-foreground">{{ $activeSiswa['name'] }}</h2>
+                                <span id="active-siswa-no" class="font-mono text-[10px] px-2 py-0.5 rounded border border-border bg-muted text-muted-foreground font-semibold">
                                     {{ $activeSiswa['no'] }}
                                 </span>
                             </div>
-                            <p class="text-xs text-muted-foreground">
+                            <p id="active-siswa-meta" class="text-xs text-muted-foreground">
                                 Target: <strong class="text-foreground">{{ $activeSiswa['kelas_target'] ?? 'Kelas 1' }}</strong>
                                 &bull; Asal: {{ $activeSiswa['asal_sekolah'] ?? 'SD Alam Anak Saleh' }}
                                 &bull; Wali: {{ $activeSiswa['wali'] ?? '-' }}
@@ -427,7 +493,7 @@
                             </div>
                             <div>
                                 <h3 class="text-xs sm:text-sm font-bold text-foreground">Form Penilaian: {{ $meta['label'] }}</h3>
-                                <p class="text-[10px] text-muted-foreground">
+                                <p id="form-status-subtitle" class="text-[10px] text-muted-foreground">
                                     @if($sudahDinilai)
                                         <span class="text-emerald-400 font-semibold">Sudah Dinilai &bull; Nilai: {{ $curScore }}</span>
                                     @else
@@ -544,15 +610,15 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            @if(!empty($nextSiswa) && ($nextSiswa['no'] ?? '') !== ($activeSiswa['no'] ?? ''))
-                                <a 
-                                    href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $nextSiswa['no']]) }}" 
-                                    class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-muted transition-colors"
-                                >
-                                    <i data-lucide="arrow-right-left" class="h-3.5 w-3.5 text-muted-foreground"></i>
-                                    <span>Siswa Lain</span>
-                                </a>
-                            @endif
+                            <button
+                                type="button"
+                                onclick="switchToNextSesiSiswa()"
+                                class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer"
+                                title="Berpindah ke siswa lain yang sudah dipilih"
+                            >
+                                <i data-lucide="arrow-right-left" class="h-3.5 w-3.5 text-muted-foreground"></i>
+                                <span>Siswa Lain</span>
+                            </button>
 
                             <button 
                                 type="submit" 
@@ -568,23 +634,47 @@
                 </div>
             </form>
             @else
-                <div class="rounded-xl border border-border bg-card p-8 text-center space-y-3">
-                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                        <i data-lucide="users" class="h-6 w-6"></i>
+                @if(empty($siswaSD))
+                    <div class="rounded-xl border border-border bg-card p-8 text-center space-y-3">
+                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                            <i data-lucide="users" class="h-6 w-6"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-sm font-semibold text-foreground">Belum Ada Calon Siswa</h3>
+                            <p class="text-xs text-muted-foreground max-w-sm mx-auto">
+                                Saat ini belum ada calon siswa terdaftar untuk jenjang SD. Silakan tambahkan atau import data siswa melalui menu Admin Siswa.
+                            </p>
+                        </div>
+                        @if(($user['role'] ?? '') === 'admin')
+                            <a href="{{ route('admin.siswa', ['jenjang' => 'sd']) }}" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors">
+                                <i data-lucide="plus" class="h-3.5 w-3.5"></i>
+                                <span>Buka Admin Siswa SD</span>
+                            </a>
+                        @endif
                     </div>
-                    <div class="space-y-1">
-                        <h3 class="text-sm font-semibold text-foreground">Belum Ada Calon Siswa</h3>
-                        <p class="text-xs text-muted-foreground max-w-sm mx-auto">
-                            Saat ini belum ada calon siswa terdaftar untuk jenjang SD. Silakan tambahkan atau import data siswa melalui menu Admin Siswa.
-                        </p>
+                @else
+                    <div class="rounded-xl border border-dashed border-border bg-card p-8 sm:p-10 text-center space-y-4">
+                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            <i data-lucide="user-search" class="h-6 w-6"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-sm sm:text-base font-semibold text-foreground">Pilih Calon Siswa Terlebih Dahulu</h3>
+                            <p class="text-xs text-muted-foreground max-w-md mx-auto">
+                                Form penilaian akan muncul setelah Anda memilih calon siswa yang akan diobservasi di ruang <strong class="text-foreground">{{ $activeGuru['kelompok_short'] ?? 'ini' }}</strong>.
+                            </p>
+                        </div>
+                        <div>
+                            <button
+                                type="button"
+                                onclick="openSiswaModal()"
+                                class="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer"
+                            >
+                                <i data-lucide="search" class="h-3.5 w-3.5"></i>
+                                <span>Pilih Siswa ({{ count($siswaSD) }})</span>
+                            </button>
+                        </div>
                     </div>
-                    @if(($user['role'] ?? '') === 'admin')
-                        <a href="{{ route('admin.siswa', ['jenjang' => 'sd']) }}" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors">
-                            <i data-lucide="plus" class="h-3.5 w-3.5"></i>
-                            <span>Buka Admin Siswa SD</span>
-                        </a>
-                    @endif
-                </div>
+                @endif
             @endif
 
         </main>
@@ -603,16 +693,15 @@
 
                 <!-- Right Action Buttons -->
                 <div class="flex items-center gap-1.5">
-                    @if(!empty($nextSiswa) && ($nextSiswa['no'] ?? '') !== ($activeSiswa['no'] ?? ''))
-                        <a 
-                            href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $nextSiswa['no']]) }}" 
-                            class="inline-flex h-9 items-center justify-center px-2.5 rounded-lg border border-border bg-card text-foreground/90 text-[11px] font-medium"
-                            title="Pilih Siswa Lain"
-                        >
-                            <i data-lucide="arrow-right-left" class="h-3.5 w-3.5 mr-1 text-muted-foreground"></i>
-                            <span>Siswa Lain</span>
-                        </a>
-                    @endif
+                    <button
+                        type="button"
+                        onclick="switchToNextSesiSiswa()"
+                        class="inline-flex h-9 items-center justify-center px-2.5 rounded-lg border border-border bg-card text-foreground/90 text-[11px] font-medium cursor-pointer"
+                        title="Berpindah ke siswa lain yang sudah dipilih"
+                    >
+                        <i data-lucide="arrow-right-left" class="h-3.5 w-3.5 mr-1 text-muted-foreground"></i>
+                        <span>Siswa Lain</span>
+                    </button>
 
                         <button 
                             type="button" 
@@ -638,7 +727,7 @@
                         </div>
                         <div>
                             <h3 class="text-sm font-bold text-foreground">Rekap Nilai Terpadu Siswa Baru SD</h3>
-                            <p class="text-[11px] text-muted-foreground">{{ $activeSiswa['name'] ?? '-' }} ({{ $activeSiswa['no'] ?? '-' }})</p>
+                            <p id="sd-rekap-siswa-info" class="text-[11px] text-muted-foreground">{{ $activeSiswa['name'] ?? '-' }} ({{ $activeSiswa['no'] ?? '-' }})</p>
                         </div>
                     </div>
                     <button type="button" onclick="toggleRekapModal()" class="h-7 w-7 rounded-md border border-border bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center text-xs cursor-pointer font-bold">&times;</button>
@@ -727,25 +816,93 @@
         </footer>
 
         <!-- Javascript Logic -->
+        @php
+            $jsSentraKey = $curSentraKey ?? ($activeGuru['kelompok_key'] ?? 'ubudiyah');
+            $siswaDataMapPhp = collect($siswaSD ?? [])->mapWithKeys(function ($s) use ($jsSentraKey) {
+                return [
+                    $s['no'] => [
+                        'no' => $s['no'],
+                        'name' => $s['name'],
+                        'kelas_target' => $s['kelas_target'] ?? 'Kelas 1',
+                        'asal_sekolah' => $s['asal_sekolah'] ?? 'SD Alam Anak Saleh',
+                        'wali' => $s['wali'] ?? '-',
+                        'nilai_akhir_terpadu' => $s['nilai_akhir_terpadu'] ?? null,
+                        'sentra' => [
+                            'nilai' => $s[$jsSentraKey]['nilai'] ?? null,
+                            'catatan' => $s[$jsSentraKey]['catatan'] ?? '',
+                            'detail' => $s[$jsSentraKey]['detail'] ?? [],
+                        ],
+                        'ubudiyah' => ['nilai' => $s['ubudiyah']['nilai'] ?? null],
+                        'persiapan' => ['nilai' => $s['persiapan']['nilai'] ?? null],
+                        'eksplorasi' => ['nilai' => $s['eksplorasi']['nilai'] ?? null],
+                    ],
+                ];
+            })->toArray();
+        @endphp
         <script>
-            const rubrikData = @json($indikatorMap ?? []);
-            const myKey      = @json($curSentraKey ?? 'ubudiyah');
-            const myColor    = @json($meta['color'] ?? 'emerald');
-            
+            const rubrikData      = @json($indikatorMap ?? []);
+            const myKey           = @json($jsSentraKey);
+            const myColor         = @json($meta['color'] ?? 'emerald');
+            const guruNip         = @json($activeGuru['nip'] ?? '');
+            const observasiUrl    = @json(route('guru.observasi'));
+            const siswaDataMap    = @json($siswaDataMapPhp);
+            let   sesiNos         = @json(array_values($sesiNos ?? []));
+            let   currentSiswaNo  = @json($activeSiswa['no'] ?? '');
+
             const activeColorClass = {
                 'indigo': 'bg-indigo-600 text-white border-indigo-600 shadow-sm ring-2 ring-indigo-500/30',
                 'amber':  'bg-amber-600 text-white border-amber-600 shadow-sm ring-2 ring-amber-500/30',
                 'emerald':'bg-emerald-600 text-white border-emerald-600 shadow-sm ring-2 ring-emerald-500/30',
             }[myColor] || 'bg-emerald-600 text-white border-emerald-600 shadow-sm ring-2 ring-emerald-500/30';
 
-            const scores = {};
+            const defaultBtnClass = 'score-btn h-10 rounded-lg border text-xs font-bold transition-all cursor-pointer flex items-center justify-center border-border bg-card text-foreground hover:bg-muted active:scale-95';
+            const draftStorageKey = `saans_sd_drafts_${guruNip}_${myKey}`;
 
-            // Pre-populate saved scores
-            @if(!empty($curSentraData['detail']))
-                @foreach($curSentraData['detail'] as $indId => $savedVal)
-                    scores['{{ $indId }}'] = {{ (int)$savedVal }};
-                @endforeach
-            @endif
+            let scores = {};
+            let sessionDrafts = {};
+
+            try {
+                const stored = localStorage.getItem(draftStorageKey);
+                if (stored) sessionDrafts = JSON.parse(stored) || {};
+            } catch (e) { sessionDrafts = {}; }
+
+            function persistDrafts() {
+                try { localStorage.setItem(draftStorageKey, JSON.stringify(sessionDrafts)); } catch (e) {}
+            }
+
+            function getEffectiveState(no) {
+                const draft = sessionDrafts[no];
+                const saved = siswaDataMap[no]?.sentra || {};
+                const baseDetail = (saved.detail && !Array.isArray(saved.detail)) ? { ...saved.detail } : {};
+                return {
+                    scores: draft?.scores ? { ...draft.scores } : baseDetail,
+                    catatan: draft?.catatan !== undefined ? draft.catatan : (saved.catatan || ''),
+                };
+            }
+
+            // Pre-populate active student's scores
+            if (currentSiswaNo) {
+                const initState = getEffectiveState(currentSiswaNo);
+                scores = initState.scores;
+                const catEl = document.getElementById('input-catatan');
+                if (catEl && sessionDrafts[currentSiswaNo]?.catatan !== undefined) {
+                    catEl.value = initState.catatan;
+                }
+            }
+
+            function syncCurrentToDraft() {
+                if (!currentSiswaNo) return;
+                const catEl = document.getElementById('input-catatan');
+                sessionDrafts[currentSiswaNo] = {
+                    scores: { ...scores },
+                    catatan: catEl ? catEl.value : '',
+                };
+                persistDrafts();
+            }
+
+            document.getElementById('input-catatan')?.addEventListener('input', () => {
+                syncCurrentToDraft();
+            });
 
             function setScore(indId, val, btn) {
                 scores[indId] = val;
@@ -753,7 +910,7 @@
                 // Update Button Visuals
                 const group = btn.closest('[data-indikator]');
                 group.querySelectorAll('.score-btn').forEach(b => {
-                    b.className = 'score-btn h-10 rounded-lg border text-xs font-bold transition-all cursor-pointer flex items-center justify-center border-border bg-card text-foreground hover:bg-muted active:scale-95';
+                    b.className = defaultBtnClass;
                 });
                 btn.className = `score-btn h-10 rounded-lg border text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${activeColorClass}`;
 
@@ -769,11 +926,17 @@
                     hintEl.textContent = ind?.rubrik?.[val] ?? '';
                 }
 
+                syncCurrentToDraft();
                 updateLiveScore();
+                renderSesiTabs();
             }
 
             function updateLiveScore() {
                 const inds = rubrikData[myKey] || [];
+                const hLive = document.getElementById('header-score-live');
+                const bDesktop = document.getElementById('bottom-score-desktop');
+                const bMobile = document.getElementById('bottom-score-badge');
+
                 if (inds.length === 0) return;
 
                 let totalBobot = 0;
@@ -790,13 +953,299 @@
 
                 if (terisi > 0 && totalBobot > 0) {
                     const persen = (totalSkor / totalBobot * 100).toFixed(1) + '%';
-                    const hLive = document.getElementById('header-score-live');
-                    const bDesktop = document.getElementById('bottom-score-desktop');
-                    const bMobile = document.getElementById('bottom-score-badge');
                     if (hLive) hLive.textContent = persen;
                     if (bDesktop) bDesktop.textContent = persen;
                     if (bMobile) bMobile.textContent = persen;
+                } else {
+                    const savedNilai = siswaDataMap[currentSiswaNo]?.sentra?.nilai;
+                    const fallback = savedNilai ? Number(savedNilai).toFixed(1) + '%' : '—';
+                    if (hLive) hLive.textContent = fallback;
+                    if (bDesktop) bDesktop.textContent = fallback;
+                    if (bMobile) bMobile.textContent = fallback;
                 }
+            }
+
+            // ── Tab Bar Sesi Multi-Siswa ──────────────────────────────────
+            function renderSesiTabs() {
+                const wrapper = document.getElementById('sesi-tabs-wrapper');
+                const listEl  = document.getElementById('sesi-tabs-list');
+                if (!wrapper || !listEl) return;
+
+                if (sesiNos.length <= 1) {
+                    wrapper.classList.add('hidden');
+                    return;
+                }
+
+                wrapper.classList.remove('hidden');
+                const inds = rubrikData[myKey] || [];
+                const totalInd = inds.length;
+
+                listEl.innerHTML = '';
+                sesiNos.forEach(no => {
+                    const s = siswaDataMap[no];
+                    if (!s) return;
+
+                    const isActive = (no === currentSiswaNo);
+                    const state = isActive ? { scores } : getEffectiveState(no);
+                    const filledCount = inds.filter(i => state.scores[i.id]).length;
+                    const savedNilai = s.sentra?.nilai;
+
+                    let badgeText = `${filledCount}/${totalInd}`;
+                    let badgeCls  = 'bg-muted text-muted-foreground';
+                    if (savedNilai && !sessionDrafts[no]) {
+                        badgeText = `✓ ${Number(savedNilai).toFixed(0)}%`;
+                        badgeCls  = 'bg-emerald-500/15 text-emerald-400';
+                    } else if (filledCount === totalInd && totalInd > 0) {
+                        badgeText = `${filledCount}/${totalInd} Siap`;
+                        badgeCls  = 'bg-amber-500/15 text-amber-400';
+                    }
+
+                    const shortName = s.name.split(' ').slice(0, 2).join(' ');
+                    const tab = document.createElement('div');
+                    tab.className = `inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs shrink-0 transition-all cursor-pointer ${
+                        isActive
+                            ? 'border-primary bg-primary/10 text-foreground font-semibold shadow-xs'
+                            : 'border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`;
+                    tab.onclick = (e) => {
+                        if (e.target.closest('.btn-remove-tab')) return;
+                        switchSiswaTab(no);
+                    };
+
+                    tab.innerHTML = `
+                        <span class="truncate max-w-[110px]">${shortName}</span>
+                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded ${badgeCls}">${badgeText}</span>
+                        <button type="button" onclick="removeFromSesi('${no}')" class="btn-remove-tab ml-0.5 text-muted-foreground hover:text-rose-400 leading-none px-0.5 cursor-pointer" title="Keluarkan dari sesi">&times;</button>
+                    `;
+                    listEl.appendChild(tab);
+                });
+            }
+
+            function switchSiswaTab(targetNo) {
+                if (!targetNo || targetNo === currentSiswaNo || !siswaDataMap[targetNo]) return;
+
+                syncCurrentToDraft();
+                currentSiswaNo = targetNo;
+
+                // Update URL without reload
+                const url = new URL(window.location.href);
+                url.searchParams.set('siswa_no', targetNo);
+                if (sesiNos.length > 1) {
+                    url.searchParams.set('sesi', sesiNos.join(','));
+                }
+                window.history.replaceState({}, '', url.toString());
+
+                const s = siswaDataMap[targetNo];
+                const state = getEffectiveState(targetNo);
+                scores = state.scores;
+
+                // Update header & student card
+                const topName = document.getElementById('top-bar-siswa-name');
+                const topNo   = document.getElementById('top-bar-siswa-no');
+                if (topName) topName.textContent = s.name;
+                if (topNo)   topNo.textContent   = `${s.no} • Sedang dinilai`;
+
+                const avatarEl = document.getElementById('active-siswa-avatar');
+                const nameEl   = document.getElementById('active-siswa-name');
+                const noEl     = document.getElementById('active-siswa-no');
+                const metaEl   = document.getElementById('active-siswa-meta');
+                if (avatarEl) avatarEl.textContent = s.name.substring(0, 2);
+                if (nameEl)   nameEl.textContent   = s.name;
+                if (noEl)     noEl.textContent     = s.no;
+                if (metaEl)   metaEl.innerHTML     = `Target: <strong class="text-foreground">${s.kelas_target}</strong> &bull; Asal: ${s.asal_sekolah} &bull; Wali: ${s.wali}`;
+
+                // Update form hidden siswa_no & subtitle
+                const hiddenNo = document.querySelector('#form-observasi-sd input[name="siswa_no"]');
+                if (hiddenNo) hiddenNo.value = s.no;
+
+                const subtitleEl = document.getElementById('form-status-subtitle');
+                if (subtitleEl) {
+                    if (s.sentra?.nilai) {
+                        subtitleEl.innerHTML = `<span class="text-emerald-400 font-semibold">Sudah Dinilai &bull; Nilai: ${Number(s.sentra.nilai).toFixed(1)}%</span>`;
+                    } else {
+                        subtitleEl.innerHTML = `<span>Siap Dinilai &bull; Silakan pilih skor indikator</span>`;
+                    }
+                }
+
+                // Update all indicator buttons & hints
+                const inds = rubrikData[myKey] || [];
+                document.querySelectorAll('[data-indikator]').forEach(group => {
+                    const indId = group.dataset.indikator;
+                    const val   = scores[indId] ? Number(scores[indId]) : null;
+                    group.querySelectorAll('.score-btn').forEach(b => {
+                        const bVal = Number(b.dataset.score);
+                        b.className = (val && bVal === val)
+                            ? `score-btn h-10 rounded-lg border text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${activeColorClass}`
+                            : defaultBtnClass;
+                    });
+                    const badgeEl = document.getElementById('badge-score-' + indId);
+                    if (badgeEl) badgeEl.textContent = val || '-';
+
+                    const hintEl = document.getElementById('hint-' + indId);
+                    if (hintEl) {
+                        const ind = inds.find(i => i.id === indId);
+                        hintEl.textContent = val ? (ind?.rubrik?.[val] ?? '') : 'Pilih skor 1–4 untuk melihat rubrik deskripsi capaian ananda.';
+                    }
+                });
+
+                // Update catatan
+                const catEl = document.getElementById('input-catatan');
+                if (catEl) catEl.value = state.catatan || '';
+
+                // Reset save button text
+                const btnDesktop = document.getElementById('btn-save-desktop');
+                const btnMobile  = document.getElementById('btn-save-mobile');
+                if (btnDesktop) btnDesktop.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i><span>Simpan Nilai</span>';
+                if (btnMobile)  btnMobile.innerHTML  = '<i data-lucide="check" class="h-4 w-4"></i><span>Simpan Nilai</span>';
+
+                // Update Rekap Modal
+                const rekapInfo = document.getElementById('sd-rekap-siswa-info');
+                if (rekapInfo) rekapInfo.textContent = `${s.name} (${s.no})`;
+                ['ubudiyah', 'persiapan', 'eksplorasi'].forEach(k => {
+                    const el = document.getElementById('sd-rekap-score-' + k);
+                    if (el) el.textContent = s[k]?.nilai ? Number(s[k].nilai).toFixed(1) + '%' : 'Belum Lengkap';
+                });
+                const rekapAkhir = document.getElementById('sd-rekap-score-akhir');
+                if (rekapAkhir) rekapAkhir.textContent = s.nilai_akhir_terpadu ? Number(s.nilai_akhir_terpadu).toFixed(1) + '%' : 'Dalam Proses';
+
+                updateLiveScore();
+                renderSesiTabs();
+                if (window.refreshLucideIcons) window.refreshLucideIcons();
+                if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+            }
+
+            function removeFromSesi(targetNo) {
+                sesiNos = sesiNos.filter(n => n !== targetNo);
+                const url = new URL(window.location.href);
+                if (sesiNos.length > 1) {
+                    url.searchParams.set('sesi', sesiNos.join(','));
+                } else {
+                    url.searchParams.delete('sesi');
+                }
+                window.history.replaceState({}, '', url.toString());
+
+                if (targetNo === currentSiswaNo && sesiNos.length > 0) {
+                    switchSiswaTab(sesiNos[0]);
+                } else {
+                    renderSesiTabs();
+                }
+            }
+
+            function switchToNextSesiSiswa() {
+                if (sesiNos.length > 1) {
+                    const idx = sesiNos.indexOf(currentSiswaNo);
+                    const nextIdx = (idx + 1) % sesiNos.length;
+                    switchSiswaTab(sesiNos[nextIdx]);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+                openSiswaModal();
+            }
+
+            // ── Multi-Select Modal Helpers ────────────────────────────────
+            function onSiswaCheckboxChange() {
+                const checked = document.querySelectorAll('#siswa-modal-list .siswa-checkbox:checked');
+                const count = checked.length;
+                const legend = document.getElementById('siswa-legend');
+                const actions = document.getElementById('siswa-multi-actions');
+                const label = document.getElementById('btn-start-multi-label');
+
+                if (count > 0) {
+                    legend?.classList.add('hidden');
+                    actions?.classList.remove('hidden');
+                    if (label) label.textContent = `Mulai Nilai (${count} Siswa)`;
+                } else {
+                    legend?.classList.remove('hidden');
+                    actions?.classList.add('hidden');
+                }
+            }
+
+            function resetSiswaSelection() {
+                document.querySelectorAll('#siswa-modal-list .siswa-checkbox:checked').forEach(cb => {
+                    cb.checked = false;
+                });
+                onSiswaCheckboxChange();
+            }
+
+            function startMultiSesi() {
+                const checked = Array.from(document.querySelectorAll('#siswa-modal-list .siswa-checkbox:checked')).map(cb => cb.value);
+                if (checked.length === 0) return;
+
+                const url = new URL(observasiUrl, window.location.origin);
+                url.searchParams.set('guru_nip', guruNip);
+                url.searchParams.set('siswa_no', checked[0]);
+                if (checked.length > 1) {
+                    url.searchParams.set('sesi', checked.join(','));
+                }
+                window.location.href = url.toString();
+            }
+
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-950/90 backdrop-blur-md px-4 py-2.5 text-xs font-semibold text-emerald-300 shadow-2xl';
+                toast.innerHTML = `<svg class="h-4 w-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>${message}</span>`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3500);
+            }
+
+            function applySavedResultToUi(siswaNo, kelompokKey, nilai, sentraScores, catatan) {
+                if (siswaDataMap[siswaNo]) {
+                    siswaDataMap[siswaNo].sentra = {
+                        nilai: nilai,
+                        catatan: catatan,
+                        detail: { ...sentraScores },
+                    };
+                    if (siswaDataMap[siswaNo][kelompokKey]) {
+                        siswaDataMap[siswaNo][kelompokKey].nilai = nilai;
+                    }
+                }
+                delete sessionDrafts[siswaNo];
+                persistDrafts();
+
+                const modalItem = document.querySelector(`#siswa-modal-list .siswa-item[data-no="${siswaNo.toLowerCase()}"]`);
+                if (modalItem) {
+                    const badgeEl = modalItem.querySelector('.siswa-modal-badge');
+                    if (badgeEl) {
+                        badgeEl.className = 'siswa-modal-badge text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold';
+                        badgeEl.textContent = nilai + '%';
+                    }
+                    const avatar = modalItem.querySelector('.h-8.w-8');
+                    if (avatar) {
+                        avatar.classList.remove('bg-muted', 'text-muted-foreground', 'border-border');
+                        avatar.classList.add('bg-emerald-500/15', 'text-emerald-400', 'border-emerald-500/30');
+                    }
+
+                    // Pindahkan siswa yang sudah dinilai ke bagian bawah daftar
+                    const listContainer = document.getElementById('siswa-modal-list');
+                    const emptyEl = document.getElementById('siswa-empty-state');
+                    if (listContainer && emptyEl) {
+                        listContainer.insertBefore(modalItem, emptyEl);
+                    }
+                }
+            }
+
+            async function saveOneSiswa(siswaNo, kelompokKey, sentraScores, catatan) {
+                const response = await fetch('{{ route("guru.observasi.simpan") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({
+                        siswa_no: siswaNo,
+                        kelompok_key: kelompokKey,
+                        scores: sentraScores,
+                        detail_nilai: sentraScores,
+                        catatan: catatan,
+                        status: 'Selesai',
+                    }),
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.message || 'Gagal menyimpan.');
+                }
+                applySavedResultToUi(siswaNo, kelompokKey, data.nilai, sentraScores, catatan);
+                return data;
             }
 
             async function submitObservasiSD(e) {
@@ -823,86 +1272,23 @@
                 if (btnMobile) { btnMobile.disabled = true; btnMobile.innerHTML = '<i data-lucide="loader-2" class="h-4 w-4 animate-spin"></i><span>Menyimpan...</span>'; }
 
                 try {
-                    const response = await fetch('{{ route("guru.observasi.simpan") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        },
-                        body: JSON.stringify({
-                            siswa_no: siswaNo,
-                            kelompok_key: kelompokKey,
-                            scores: scores,
-                            detail_nilai: scores,
-                            catatan: catatan,
-                            status: 'Selesai',
-                        }),
-                    });
+                    const data = await saveOneSiswa(siswaNo, kelompokKey, scores, catatan);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    const namaSiswa = siswaDataMap[siswaNo]?.name || siswaNo;
+                    showToast(`Nilai ${namaSiswa} berhasil disimpan!`);
 
-                    const data = await response.json();
-                    if (data.success) {
-                        // Kembalikan scroll ke posisi paling atas secara halus
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    if (btnDesktop) { btnDesktop.innerHTML = '<svg class="h-4 w-4 inline mr-1 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>✓ Tersimpan</span>'; btnDesktop.disabled = false; }
+                    if (btnMobile) { btnMobile.innerHTML = '<svg class="h-4 w-4 inline mr-1 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>✓ Tersimpan</span>'; btnMobile.disabled = false; }
 
-                        // Tampilkan Toast Sukses
-                        const toast = document.createElement('div');
-                        toast.className = 'fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-950/90 backdrop-blur-md px-4 py-2.5 text-xs font-semibold text-emerald-300 shadow-2xl';
-                        toast.innerHTML = `<svg class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Nilai berhasil disimpan!`;
-                        document.body.appendChild(toast);
-                        setTimeout(() => toast.remove(), 3500);
+                    const headerScore = document.getElementById('header-score-live');
+                    if (headerScore) headerScore.textContent = data.nilai + '%';
 
-                        if (btnDesktop) { btnDesktop.innerHTML = '<svg class="h-4 w-4 inline mr-1 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>✓ Tersimpan</span>'; btnDesktop.disabled = false; }
-                        if (btnMobile) { btnMobile.innerHTML = '<svg class="h-4 w-4 inline mr-1 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>✓ Tersimpan</span>'; btnMobile.disabled = false; }
+                    const rekapScore = document.getElementById('sd-rekap-score-' + kelompokKey);
+                    if (rekapScore) rekapScore.textContent = data.nilai + '%';
 
-                        // 1. Update status item di modal siswa
-                        const modalItem = document.querySelector(`#siswa-modal-list a[data-no="${siswaNo.toLowerCase()}"]`);
-                        if (modalItem) {
-                            const badgeEl = modalItem.querySelector('span[class*="Belum"]') || modalItem.querySelector('span:last-of-type');
-                            // Ganti badge "Belum" dengan nilai baru
-                            const scoreSpan = document.createElement('span');
-                            scoreSpan.className = 'text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold';
-                            scoreSpan.textContent = data.nilai + '%';
-                            if (badgeEl) badgeEl.replaceWith(scoreSpan);
-
-                            // Update avatar warna
-                            const avatar = modalItem.querySelector('.h-8.w-8');
-                            if (avatar) {
-                                avatar.classList.remove('bg-muted', 'text-muted-foreground', 'border-border');
-                                avatar.classList.add('bg-emerald-500/15', 'text-emerald-400', 'border-emerald-500/30');
-                            }
-                        }
-
-                        // 2. Update Live Score in Header
-                        const headerScore = document.getElementById('header-score-live');
-                        if (headerScore) headerScore.textContent = data.nilai + '%';
-
-                        // 3. Update 3-Sentra Rotation Matrix
-                        const progressText = document.getElementById('sd-matrix-progress-text');
-                        if (progressText) {
-                            progressText.textContent = `${data.selesai_count}/3 Sentra Terpenuhi`;
-                            if (data.is_lengkap) {
-                                progressText.className = 'text-[11px] font-mono text-emerald-400 font-bold';
-                            }
-                        }
-
-                        // 4. Update Current Sentra Score & Status
-                        const miniScore = document.getElementById('sd-mini-score-' + kelompokKey);
-                        if (miniScore) miniScore.textContent = data.nilai + '%';
-                        const miniStatus = document.getElementById('sd-mini-status-' + kelompokKey);
-                        if (miniStatus) {
-                            miniStatus.textContent = '✓ Selesai';
-                            miniStatus.className = 'text-emerald-400 font-medium';
-                        }
-
-                        // 5. Update Rekap Modal
-                        const rekapScore = document.getElementById('sd-rekap-score-' + kelompokKey);
-                        if (rekapScore) rekapScore.textContent = data.nilai + '%';
-
-                        if (window.refreshLucideIcons) window.refreshLucideIcons();
-                        if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
-                    } else {
-                        throw new Error(data.message || 'Gagal menyimpan.');
-                    }
+                    renderSesiTabs();
+                    if (window.refreshLucideIcons) window.refreshLucideIcons();
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
                 } catch (err) {
                     alert('Gagal menyimpan: ' + err.message);
                     if (btnDesktop) { btnDesktop.disabled = false; btnDesktop.innerHTML = '<svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Simpan Nilai</span>'; }
@@ -910,6 +1296,56 @@
                 }
 
                 if (window.refreshLucideIcons) window.refreshLucideIcons();
+            }
+
+            async function saveAllSesi() {
+                syncCurrentToDraft();
+                const inds = rubrikData[myKey] || [];
+                const readyList = [];
+                const incompleteNames = [];
+
+                sesiNos.forEach(no => {
+                    const state = getEffectiveState(no);
+                    const filledCount = inds.filter(i => state.scores[i.id]).length;
+                    if (filledCount === inds.length && inds.length > 0) {
+                        readyList.push({ no, state });
+                    } else if (filledCount > 0) {
+                        incompleteNames.push(`${siswaDataMap[no]?.name || no} (${filledCount}/${inds.length})`);
+                    }
+                });
+
+                if (readyList.length === 0) {
+                    alert(incompleteNames.length > 0
+                        ? `Belum ada siswa yang penilaiannya lengkap:\n- ${incompleteNames.join('\n- ')}`
+                        : 'Silakan lengkapi penilaian minimal 1 siswa terlebih dahulu.');
+                    return;
+                }
+
+                const btnAll = document.getElementById('btn-save-all-sesi');
+                if (btnAll) { btnAll.disabled = true; btnAll.textContent = 'Menyimpan...'; }
+
+                try {
+                    let savedCount = 0;
+                    for (const item of readyList) {
+                        const data = await saveOneSiswa(item.no, myKey, item.state.scores, item.state.catatan);
+                        if (item.no === currentSiswaNo) {
+                            const headerScore = document.getElementById('header-score-live');
+                            if (headerScore) headerScore.textContent = data.nilai + '%';
+                        }
+                        savedCount++;
+                    }
+                    renderSesiTabs();
+                    const note = incompleteNames.length > 0 ? ` (${incompleteNames.length} siswa belum lengkap)` : '';
+                    showToast(`Alhamdulillah! ${savedCount} siswa berhasil disimpan${note}.`);
+                } catch (err) {
+                    alert('Sebagian gagal disimpan: ' + err.message);
+                } finally {
+                    if (btnAll) {
+                        btnAll.disabled = false;
+                        btnAll.innerHTML = '<i data-lucide="save-all" class="h-3.5 w-3.5"></i><span>Simpan Semua</span>';
+                        if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+                    }
+                }
             }
 
             function toggleRekapModal() {
@@ -926,9 +1362,10 @@
                 const panel = document.getElementById('siswa-modal-panel');
                 if (!modal) return;
 
-                // Reset search
+                // Reset search & sync checkbox state
                 const searchEl = document.getElementById('siswa-search');
                 if (searchEl) { searchEl.value = ''; filterSiswaList(''); }
+                onSiswaCheckboxChange();
 
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
@@ -1001,6 +1438,7 @@
 
             // Initial run
             updateLiveScore();
+            renderSesiTabs();
         </script>
 
     </body>

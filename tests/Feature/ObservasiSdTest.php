@@ -185,3 +185,60 @@ test('guru co-pengamat lain dapat menilai atau memperbarui nilai tanpa terblokir
     expect($asesmen->guru_pengamat_id)->toBe($this->guru2->id);
     expect($asesmen->catatan_anecdotal)->toBe('Diperbarui oleh Ustadz Ahmad');
 });
+
+test('guru yang baru masuk tanpa memilih siswa tidak langsung membuka form penilaian siswa pertama', function () {
+    $response = $this->withSession([
+        'auth_user' => [
+            'id' => $this->guru1->id,
+            'user_id' => $this->userGuru1->id,
+            'name' => $this->guru1->nama,
+            'nip' => $this->guru1->nip,
+            'role' => 'guru',
+            'jenjang' => 'sd',
+            'kelompok_key' => 'ubudiyah',
+        ],
+    ])->get(route('guru.observasi', [
+        'guru_nip' => $this->guru1->nip,
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertSee('Pilih Calon Siswa Terlebih Dahulu');
+    $response->assertDontSee('Form Penilaian:');
+});
+
+test('guru sd dapat membuka sesi multi-siswa dengan tab cepat melalui parameter sesi', function () {
+    $siswa2 = CalonSiswa::create([
+        'no_pendaftaran' => 'SANS-2027-TEST02',
+        'nama' => 'Ananda Uji Kedua',
+        'jenjang' => 'sd',
+        'usia' => '6 Thn 5 Bln',
+        'kelas_target' => 'Kelas 1',
+        'asal_sekolah' => 'TK Anak Saleh',
+        'wali' => 'Ayah Uji',
+        'kontak' => '081234567891',
+        'mulai_dari' => 'Sentra Ubudiyah',
+        'posisi_sekarang' => 'Sedang Menunggu Giliran',
+        'status_rekomendasi' => 'Belum Diuji',
+    ]);
+
+    $response = $this->withSession([
+        'auth_user' => [
+            'id' => $this->guru1->id,
+            'user_id' => $this->userGuru1->id,
+            'name' => $this->guru1->nama,
+            'nip' => $this->guru1->nip,
+            'role' => 'guru',
+            'jenjang' => 'sd',
+            'kelompok_key' => 'ubudiyah',
+        ],
+    ])->get(route('guru.observasi', [
+        'guru_nip' => $this->guru1->nip,
+        'siswa_no' => $this->siswa->no_pendaftaran,
+        'sesi' => $this->siswa->no_pendaftaran.','.$siswa2->no_pendaftaran,
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertSee('Ananda Uji Observasi SD');
+    $response->assertSee('Ananda Uji Kedua');
+    $response->assertSee('Simpan Semua');
+});

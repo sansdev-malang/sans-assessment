@@ -306,14 +306,10 @@ class SPMBController extends Controller
         if (empty($siswaSD)) {
             $activeSiswa = [];
             $nextSiswa = [];
-        } else {
-            if ($requestedNo) {
-                $activeSiswa = collect($siswaSD)->firstWhere('no', $requestedNo) ?? ($siswaSD[0] ?? []);
-            } else {
-                $activeSiswa = $siswaSD[0] ?? [];
-            }
+        } elseif ($requestedNo) {
+            // Guru memilih siswa tertentu via URL
+            $activeSiswa = collect($siswaSD)->firstWhere('no', $requestedNo) ?? [];
 
-            // Navigasi ke murid berikutnya
             $currentIndex = 0;
             foreach ($siswaSD as $idx => $s) {
                 if ($s['no'] === ($activeSiswa['no'] ?? '')) {
@@ -322,7 +318,11 @@ class SPMBController extends Controller
                 }
             }
             $nextIndex = ($currentIndex + 1) % max(1, count($siswaSD));
-            $nextSiswa = $siswaSD[$nextIndex] ?? $activeSiswa;
+            $nextSiswa = $siswaSD[$nextIndex] ?? [];
+        } else {
+            // Guru baru login — jangan auto-pilih siswa, tampilkan halaman sambutan
+            $activeSiswa = [];
+            $nextSiswa = [];
         }
 
         $dbIndikators = $this->getIndikatorData('sd');
@@ -482,12 +482,12 @@ class SPMBController extends Controller
         })->toArray();
 
         // Murid aktif yang dipilih
-        if (empty($siswaSMP)) {
+        $studentNo = $request->query('siswa_no');
+        if (empty($siswaSMP) || ! $studentNo) {
             $activeSiswa = [];
             $nextSiswa = [];
         } else {
-            $studentNo = $request->query('siswa_no', $siswaSMP[0]['no'] ?? '');
-            $activeSiswa = collect($siswaSMP)->firstWhere('no', $studentNo) ?? ($siswaSMP[0] ?? []);
+            $activeSiswa = collect($siswaSMP)->firstWhere('no', $studentNo) ?? [];
 
             // Murid berikutnya (untuk navigasi praktis mobile)
             $currentIndex = 0;
@@ -498,7 +498,7 @@ class SPMBController extends Controller
                 }
             }
             $nextIndex = ($currentIndex + 1) % max(1, count($siswaSMP));
-            $nextSiswa = $siswaSMP[$nextIndex] ?? $activeSiswa;
+            $nextSiswa = $siswaSMP[$nextIndex] ?? [];
         }
 
         return view('guru.observasi', compact('user', 'allGuruSMP', 'activeGuru', 'siswaSMP', 'activeSiswa', 'nextSiswa'));

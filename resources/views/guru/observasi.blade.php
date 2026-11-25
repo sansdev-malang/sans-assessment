@@ -1173,13 +1173,15 @@
                     </button>
                     
                     <div class="flex items-center gap-2">
-                        <a 
-                            href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $nextSiswa['no']]) }}" 
-                            class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-border bg-muted px-4 text-xs font-medium text-foreground hover:bg-zinc-700 transition-colors"
+                        <button
+                            type="button"
+                            onclick="openSiswaModal()"
+                            class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-border bg-muted px-4 text-xs font-medium text-foreground hover:bg-zinc-700 transition-colors cursor-pointer"
+                            title="Pindah ke Siswa Lain"
                         >
                             <i data-lucide="arrow-right-left" class="h-4 w-4 text-muted-foreground"></i>
-                            <span>Siswa Selanjutnya</span>
-                        </a>
+                            <span>Siswa Lain</span>
+                        </button>
 
                         <button type="button" onclick="saveActiveAssessment(false)" id="btn-save-desktop" class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-5 text-xs font-bold text-white shadow hover:bg-emerald-500 transition-colors">
                             <i data-lucide="check-circle-2" class="h-4 w-4"></i>
@@ -1190,23 +1192,37 @@
 
             </div>
             @else
-                <div class="rounded-xl border border-border bg-card p-8 text-center space-y-3">
-                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                        <i data-lucide="users" class="h-6 w-6"></i>
+                @if(empty($siswaSMP))
+                    <div class="rounded-xl border border-border bg-card p-8 text-center space-y-3">
+                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                            <i data-lucide="users" class="h-6 w-6"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-sm font-semibold text-foreground">Belum Ada Calon Siswa</h3>
+                            <p class="text-xs text-muted-foreground max-w-sm mx-auto">
+                                Saat ini belum ada data calon siswa untuk jenjang SMP. Silakan tambahkan atau import data siswa melalui menu Admin Siswa.
+                            </p>
+                        </div>
+                        @if(($user['role'] ?? '') === 'admin')
+                            <a href="{{ route('admin.siswa', ['jenjang' => 'smp']) }}" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors">
+                                <i data-lucide="plus" class="h-3.5 w-3.5"></i>
+                                <span>Buka Admin Siswa SMP</span>
+                            </a>
+                        @endif
                     </div>
-                    <div class="space-y-1">
-                        <h3 class="text-sm font-semibold text-foreground">Belum Ada Calon Siswa</h3>
-                        <p class="text-xs text-muted-foreground max-w-sm mx-auto">
-                            Saat ini belum ada data calon siswa untuk jenjang SMP. Silakan tambahkan atau import data siswa melalui menu Admin Siswa.
-                        </p>
+                @else
+                    <div class="rounded-xl border border-dashed border-border bg-card p-8 sm:p-10 text-center space-y-3">
+                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            <i data-lucide="user-search" class="h-6 w-6"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-sm sm:text-base font-semibold text-foreground">Pilih Calon Siswa Terlebih Dahulu</h3>
+                            <p class="text-xs text-muted-foreground max-w-md mx-auto">
+                                Silakan pilih salah satu calon siswa dari daftar di atas untuk mulai mengisi form penilaian <strong class="text-foreground">{{ $activeGuru['kelompok_short'] ?? 'observasi' }}</strong>.
+                            </p>
+                        </div>
                     </div>
-                    @if(($user['role'] ?? '') === 'admin')
-                        <a href="{{ route('admin.siswa', ['jenjang' => 'smp']) }}" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors">
-                            <i data-lucide="plus" class="h-3.5 w-3.5"></i>
-                            <span>Buka Admin Siswa SMP</span>
-                        </a>
-                    @endif
-                </div>
+                @endif
             @endif
 
         </main>
@@ -1227,14 +1243,15 @@
 
                 <!-- Right Action Buttons -->
                 <div class="flex items-center gap-1.5">
-                    <a 
-                        href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $nextSiswa['no']]) }}" 
-                        class="inline-flex h-9 items-center justify-center px-2.5 rounded-lg border border-border bg-card text-foreground/90 text-[11px] font-medium"
-                        title="Pilih Siswa Lain"
+                    <button
+                        type="button"
+                        onclick="openSiswaModal()"
+                        class="inline-flex h-9 items-center justify-center px-2.5 rounded-lg border border-border bg-card text-foreground/90 text-[11px] font-medium cursor-pointer"
+                        title="Pindah ke Siswa Lain"
                     >
                         <i data-lucide="arrow-right-left" class="h-3.5 w-3.5 mr-1 text-muted-foreground"></i>
                         <span>Siswa Lain</span>
-                    </a>
+                    </button>
 
                     <button 
                         type="button" 
@@ -1869,7 +1886,110 @@
                     }
                 }
             });
+
+            // ── Modal Pilih / Pindah Siswa SMP ─────────────────────────────
+            function openSiswaModal() {
+                const modal = document.getElementById('siswa-modal');
+                if (!modal) return;
+                const searchEl = document.getElementById('siswa-search');
+                if (searchEl) { searchEl.value = ''; filterSiswaList(''); }
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+                setTimeout(() => searchEl?.focus(), 100);
+            }
+
+            function closeSiswaModal() {
+                const modal = document.getElementById('siswa-modal');
+                if (!modal) return;
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            function filterSiswaList(query) {
+                const q = query.toLowerCase().trim();
+                const items = document.querySelectorAll('#siswa-modal-list .siswa-item');
+                let visibleCount = 0;
+                items.forEach(item => {
+                    const name = item.dataset.name || '';
+                    const no   = item.dataset.no   || '';
+                    const match = !q || name.includes(q) || no.includes(q);
+                    item.style.display = match ? '' : 'none';
+                    if (match) visibleCount++;
+                });
+                document.getElementById('siswa-empty-state')?.classList.toggle('hidden', visibleCount > 0);
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeSiswaModal();
+                }
+            });
         </script>
+
+        <!-- Modal Pilih / Pindah Siswa SMP -->
+        <div id="siswa-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden" role="dialog" aria-modal="true">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeSiswaModal()"></div>
+            <div class="relative w-full sm:max-w-lg bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[75vh] overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="users" class="h-4 w-4 text-muted-foreground"></i>
+                        <span class="text-sm font-semibold text-foreground">Pindah Siswa</span>
+                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground">{{ count($siswaSMP ?? []) }}</span>
+                    </div>
+                    <button type="button" onclick="closeSiswaModal()" class="inline-flex items-center justify-center h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                </div>
+                <div class="px-4 py-2.5 border-b border-border shrink-0">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none"></i>
+                        <input type="text" id="siswa-search" placeholder="Cari nama atau nomor pendaftaran..." oninput="filterSiswaList(this.value)" class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary" autocomplete="off">
+                    </div>
+                </div>
+                <div class="overflow-y-auto flex-1" id="siswa-modal-list">
+                    @php
+                        $kKeySort = $activeGuru['kelompok_key'] ?? 'keagamaan';
+                        $sortedSiswaSMP = collect($siswaSMP ?? [])->sortBy(function ($item) use ($kKeySort) {
+                            return (($item[$kKeySort]['status'] ?? '') === 'Selesai') ? 1 : 0;
+                        })->values();
+                    @endphp
+                    @foreach($sortedSiswaSMP as $s)
+                        @php
+                            $isAct = ($s['no'] === ($activeSiswa['no'] ?? ''));
+                            $kKeyModal = $activeGuru['kelompok_key'] ?? 'keagamaan';
+                            $kDataModal = $s[$kKeyModal] ?? [];
+                            $isDone = ($kDataModal['status'] ?? '') === 'Selesai';
+                        @endphp
+                        <a href="{{ route('guru.observasi', ['guru_nip' => $activeGuru['nip'], 'siswa_no' => $s['no']]) }}" class="siswa-item flex items-center justify-between gap-3 px-4 py-3 border-b border-border/60 hover:bg-muted/50 transition-colors {{ $isAct ? 'bg-primary/5' : '' }}" data-name="{{ strtolower($s['name']) }}" data-no="{{ strtolower($s['no']) }}">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 {{ $isAct ? 'bg-primary text-primary-foreground' : ($isDone ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-muted text-muted-foreground border border-border') }}">
+                                    {{ substr($s['name'], 0, 2) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold text-foreground truncate">{{ $s['name'] }}</div>
+                                    <div class="text-[10px] font-mono text-muted-foreground">{{ $s['no'] }}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                @if($isAct)
+                                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-bold">Aktif</span>
+                                @endif
+                                @if($isDone)
+                                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">{{ $kDataModal['nilai'] ?? '' }}%</span>
+                                @else
+                                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">Belum</span>
+                                @endif
+                                <i data-lucide="chevron-right" class="h-3.5 w-3.5 text-muted-foreground"></i>
+                            </div>
+                        </a>
+                    @endforeach
+                    <div id="siswa-empty-state" class="hidden py-10 text-center text-xs text-muted-foreground">
+                        <p>Siswa tidak ditemukan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </body>
 </html>
